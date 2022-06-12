@@ -18,3 +18,5 @@ Imports:
     tibble,
     tidyr,
     xml2
+URL: https://github.com/mattkerlogue/tidyODS
+BugReports: https://github.com/mattkerlogue/tidyODS/issues
