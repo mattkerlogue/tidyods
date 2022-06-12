@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/404.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/LICENSE-text.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/LICENSE.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/authors.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/index.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/reference/ods_sheets.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/reference/pipe.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/reference/read_ods_cells.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/reference/read_ods_sheet.html</loc>
+  </url>
+  <url>
+    <loc>https://mattkerlogue.github.io/tidyODS/reference/simple_rectify.html</loc>
+  </url>
+</urlset>
