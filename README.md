@@ -45,8 +45,11 @@ This package, like the `{readODS}` package uses the
 three likely sources of performance issues: downloading of remote files,
 unzipping the ODS file, processing rows.
 
-Performance is broadly similar to that of `{readODS}`, however
-`{tidyods}` provides console messages and progress bars to the user.
+Performance is slower than `{readODS}`, however `{tidyods}` provides
+console messages and progress bars to the user. If performance is a
+major determinant of your workflow (i.e. you have very large files), its
+likely more sensible to open the file in a spreadsheet application and
+save the file as an XLSX file and using tidyxl.
 
 ## Related projects
 
