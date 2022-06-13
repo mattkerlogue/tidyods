@@ -49,7 +49,7 @@
 
       <ul class="navbar-nav">
 <li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/mattkerlogue/tidyODS/" aria-label="github">
+  <a class="external-link nav-link" href="https://github.com/mattkerlogue/tidyods/" aria-label="github">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -65,18 +65,18 @@
 <div class="page-header"><h1 id="tidyods">tidyods<a class="anchor" aria-label="anchor" href="#tidyods"></a>
 </h1></div>
 <!-- badges: start -->
-<p><a href="https://github.com/mattkerlogue/tidyODS" class="external-link">tidyods</a> is an R package to import cells from an OpenDocument Spreadsheet (ODS) file, and provide information about the cell’s postion, value types and formulas, and provide methods to “rectify” cells back to a 2-dimensional data.frame.</p>
+<p><a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> is an R package to import cells from an OpenDocument Spreadsheet (ODS) file, and provide information about the cell’s postion, value types and formulas, and provide methods to “rectify” cells back to a 2-dimensional data.frame.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of <a href="https://github.com/mattkerlogue/tidyODS" class="external-link">tidyods</a> like so:</p>
+<p>You can install the development version of <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> like so:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mattkerlogue/tidyods"</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>The <a href="https://github.com/mattkerlogue/tidyODS" class="external-link">tidyods</a> package exports the following functions for users:</p>
+<p>The <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> package exports the following functions for users:</p>
 <ul>
 <li>
 <code>read_ods_cells(path, sheet)</code>: extract the cells from a sheet in an ODS file</li>
@@ -92,7 +92,22 @@
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
 </h2>
 <p>An ODS file is a zipped collection of XML files and associated files. This package, like the <code>{readODS}</code> package uses the <a href="https://xml2.r-lib.org" class="external-link">xml2</a> package to process this file. There are three likely sources of performance issues: downloading of remote files, unzipping the ODS file, processing rows.</p>
-<p>Performance is slower than <code>{readODS}</code>, however <a href="https://github.com/mattkerlogue/tidyODS" class="external-link">tidyods</a> provides console messages and progress bars to the user. If performance is a major determinant of your workflow (i.e. you have very large files), its likely more sensible to open the file in a spreadsheet application and save the file as an XLSX file and using tidyxl.</p>
+<p>With default settings, performance of <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> functions is slower than <code>{readODS}</code>, however <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> provides console messages and progress bars to the user.</p>
+<p>Performance can be improved by using the <code>quick</code> argument, this will extract only a simple text representation of the cell, i.e. it will not provide information on cell or value types, formulas or the underlying base value for numbers, dates or times.</p>
+<p>To test performance we will use an ODS file published by the UK Government on the <a href="https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021" class="external-link">number of civil servants by postcode</a> (5,544 rows by 11 columns). Analysis of read times indicates that using the <code>quick = TRUE</code> setting for <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> results in a read that is 10 times faster than the full cell extraction method and around 1.5 times faster than <code>{readODS}</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidyods_slow"</span> <span class="ot">=</span> tidyods<span class="sc">::</span><span class="fu">read_ods_cells</span>(test_ods, <span class="st">"Staff_in_post"</span>, <span class="at">quick =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidyods_quick"</span> <span class="ot">=</span> tidyods<span class="sc">::</span><span class="fu">read_ods_cells</span>(test_ods, <span class="st">"Staff_in_post"</span>, <span class="at">quick =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"readODS"</span> <span class="ot">=</span> readODS<span class="sc">::</span><span class="fu">read_ods</span>(test_ods, <span class="st">"Staff_in_post"</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">3</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Unit: seconds</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>         expr       min        lq      mean    median        uq       max neval</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a> tidyods_slow <span class="fl">35.483310</span> <span class="fl">35.754623</span> <span class="fl">35.862621</span> <span class="fl">36.025936</span> <span class="fl">36.052276</span> <span class="fl">36.078617</span>     <span class="dv">3</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>tidyods_quick  <span class="fl">3.247025</span>  <span class="fl">3.258350</span>  <span class="fl">3.293503</span>  <span class="fl">3.269675</span>  <span class="fl">3.316743</span>  <span class="fl">3.363811</span>     <span class="dv">3</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      readods  <span class="fl">5.114063</span>  <span class="fl">5.160641</span>  <span class="fl">5.205049</span>  <span class="fl">5.207220</span>  <span class="fl">5.250541</span>  <span class="fl">5.293863</span>     <span class="dv">3</span></span></code></pre></div>
+<p>However, if performance is a major determinant of your workflow (i.e. you have very large files), its likely more sensible to open the file in a spreadsheet application and save the file as an XLSX file and using <a href="https://github.com/nacnudus/tidyxl" class="external-link">tidyxl</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="related-projects">Related projects<a class="anchor" aria-label="anchor" href="#related-projects"></a>
@@ -108,16 +123,16 @@
 <h2 id="philosophy">Philosophy<a class="anchor" aria-label="anchor" href="#philosophy"></a>
 </h2>
 <p>The <code>{readODS}</code> package is the only package on CRAN that handles the reading of ODS files, whereas there are more than 20 packages (as at 12 June 2022) on CRAN that work with Excel files (of which <a href="https://github.com/nacnudus/tidyxl" class="external-link">tidyxl</a> is one). In some respects this is due to the wider usage of Excel files by businesses, governments, academia and other organisations to publish and share data. Various governments and international organisations are starting to mandate the use of OpenDocument Format files for publishing of their information.</p>
-<p>The initial purpose of <a href="https://github.com/mattkerlogue/tidyODS" class="external-link">tidyods</a> was to provide a second package to the R ecosystem for reading ODS files, in part prompted when encountering an error with <code>{readODS}</code> and discovering no alternative pacakge was available. For example if you run into an error when using the <a href="https://readxl.tidyverse.org" class="external-link">readxl</a> package you could use easily try the <a href="https://ycphs.github.io/openxlsx/index.html" class="external-link">openxlsx</a> or <a href="https://github.com/colearendt/xlsx" class="external-link">xlsx</a> instead.</p>
+<p>The initial purpose of <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> was to provide a second package to the R ecosystem for reading ODS files, in part prompted when encountering an error with <code>{readODS}</code> and discovering no alternative pacakge was available. For example if you run into an error when using the <a href="https://readxl.tidyverse.org" class="external-link">readxl</a> package you could use easily try the <a href="https://ycphs.github.io/openxlsx/index.html" class="external-link">openxlsx</a> or <a href="https://github.com/colearendt/xlsx" class="external-link">xlsx</a> instead.</p>
 <p>The conceptual code development lead to the creation of an output dataset similar to that produced by the <a href="https://github.com/nacnudus/tidyxl" class="external-link">tidyxl</a> package.</p>
-<p>Thus, <a href="https://github.com/mattkerlogue/tidyODS" class="external-link">tidyods</a> extracts cells from an ODS document in the same manner as <a href="https://github.com/nacnudus/tidyxl" class="external-link">tidyxl</a>, but includes functions to “rectify” the cells so as to also provide an output similar to that of <code>{readODS}</code> (and many of those that read Excel files). This is similar to the <a href="https://nacnudus.github.io/unpivotr/reference/rectify.html" class="external-link">rectify</a> function in the <a href="https://github.com/nacnudus/unpivotr" class="external-link">unpivotr</a> package.</p>
+<p>Thus, <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> extracts cells from an ODS document in the same manner as <a href="https://github.com/nacnudus/tidyxl" class="external-link">tidyxl</a>, but includes functions to “rectify” the cells so as to also provide an output similar to that of <code>{readODS}</code> (and many of those that read Excel files). This is similar to the <a href="https://nacnudus.github.io/unpivotr/reference/rectify.html" class="external-link">rectify</a> function in the <a href="https://github.com/nacnudus/unpivotr" class="external-link">unpivotr</a> package.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/mattkerlogue/tidyODS/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/mattkerlogue/tidyODS/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/mattkerlogue/tidyods/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/mattkerlogue/tidyods/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
@@ -162,7 +177,7 @@
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer>
