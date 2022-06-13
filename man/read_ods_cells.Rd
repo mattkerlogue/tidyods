@@ -4,12 +4,14 @@
 \alias{read_ods_cells}
 \title{Read cells from an ODS sheet}
 \usage{
-read_ods_cells(path, sheet)
+read_ods_cells(path, sheet, quick = FALSE)
 }
 \arguments{
 \item{path}{The ODS file}
 
 \item{sheet}{The sheet within the ODS file}
+
+\item{quick}{Whether to use the quick reading process}
 }
 \value{
 A tibble with the following information:
@@ -25,6 +27,9 @@ spreadsheet application (i.e. with text formatting applied)
 \item \verb{currency symbol}: the currency symbol for cells with a \code{value_type} of
 currency
 }
+
+If using the \code{quick} argument you only \code{row}, \code{col} and \code{cell_content} are
+returned.
 }
 \description{
 Import cells from an OpenDocument Spreadsheet (ODS) file. In the resulting
@@ -57,4 +62,10 @@ a traditional spreadsheet application (such as Microsoft Excel, Google Sheets
 or LibreOffice Calc), i.e. after applying cell formatting rules. The
 \code{base_value} column provides the cell's underlying value, i.e. without
 formatting.
+
+Processing the ODS XML is a memory intensive process, you can achieve
+significant speed enhancements by setting the \code{quick} argument to FALSE,
+this will extract only the text content of the cell. Note this also ignores
+repeated white space elements (i.e. \code{"A   B   C"} will be returned as
+\code{"A B C"}).
 }

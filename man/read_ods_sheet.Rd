@@ -4,7 +4,13 @@
 \alias{read_ods_sheet}
 \title{Read an ODS sheet to a rectangular dataset}
 \usage{
-read_ods_sheet(path, sheet, rectify = "simple", base_values = TRUE)
+read_ods_sheet(
+  path,
+  sheet,
+  rectify = "simple",
+  base_values = TRUE,
+  quick = FALSE
+)
 }
 \arguments{
 \item{path}{The ODS file}
@@ -15,6 +21,8 @@ read_ods_sheet(path, sheet, rectify = "simple", base_values = TRUE)
 
 \item{base_values}{Whether to use the base_value of a cell (TRUE, the default)
 or whether to provide the cell content as seen by a spreadsheet user.}
+
+\item{quick}{Whether to use the quick reading process}
 }
 \value{
 A tibble, presenting cells in a traditional two-dimension spreadsheet format.
@@ -30,4 +38,8 @@ When set to \code{TRUE} (the default) the \code{base_values} argument then the
 underlying cell values are used. When \code{FALSE} then cell content as seen by a
 spreadsheet application user will be shown. See \code{\link[=read_ods_cells]{read_ods_cells()}} for further
 details.
+
+Setting \code{quick - TRUE} will ignore the setting of \code{base_values}, as the quick
+process only returns cell content as seen by a spreadsheet users (but
+ignoring any repeated white space in the cell content).
 }

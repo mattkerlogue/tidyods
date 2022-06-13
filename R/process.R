@@ -122,7 +122,9 @@ get_tbl_xml <- function(ods_file, sheet_name, .rows_only = TRUE) {
 }
 
 # turn the table node into a tibble
-extract_table <- function(tbl_xml) {
+extract_table <- function(tbl_xml, quick = FALSE) {
+
+  cli::cli_progress_message("Processing rows...")
 
   # set progress bar id
   pbid <- cli::cli_progress_bar(
@@ -138,7 +140,7 @@ extract_table <- function(tbl_xml) {
     base_row = seq_along(tbl_xml),
     row_repeats = as.numeric(xml2::xml_attr(tbl_xml, "number-rows-repeated")),
     row_nodes = list(tbl_xml),
-    row_content = purrr::map(tbl_xml, extract_row, .pb_id = pbid)
+    row_content = purrr::map(tbl_xml, extract_row, quick = quick, .pb_id = pbid)
   )
 
   # if row is not repeated set repeat weight to 1
@@ -151,7 +153,6 @@ extract_table <- function(tbl_xml) {
     row_data$row_repeats[length(tbl_xml)] <- 0
   }
 
-  # create output tibble
   ods_cells <- row_data %>%
     dplyr::select(base_row, row_repeats, row_content) %>%
     tidyr::unnest(row_content) %>%
@@ -177,90 +178,110 @@ extract_table <- function(tbl_xml) {
     dplyr::mutate(row = dplyr::cur_group_id()) %>%
     dplyr::group_by(base_col, col_iteration, .add = FALSE) %>%
     dplyr::mutate(col = dplyr::cur_group_id()) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(
-      cell_type = dplyr::case_when(
-        cell_element == "covered-table-cell" ~ "merged",
-        is.na(value_type) ~ "empty",
-        TRUE ~ "cell"
-      ),
-      base_value = dplyr::case_when(
-        is.na(value_type) ~ NA_character_,
-        value_type == "boolean" ~ value_bool,
-        value_type == "currency" ~ value_numeric,
-        value_type == "date" ~ value_date,
-        value_type == "float" ~ value_numeric,
-        value_type == "percentage" ~ value_numeric,
-        value_type == "string" & !is.na(value_string) ~ value_string,
-        value_type == "string" & is.na(value_string) ~ cell_content,
-        value_type == "time" ~ value_time,
-        TRUE ~ cell_content
-      ),
-      value_numeric = as.numeric(value_numeric),
-      value_bool = as.logical(value_bool),
-    ) %>%
-    dplyr::select(
-      row, col, cell_type, value_type, cell_formula, cell_content, base_value,
-      currency_symbol = value_currency)
+    dplyr::ungroup()
+
+  # create output tibble
+  if (quick) {
+    ods_cells <- ods_cells %>%
+      dplyr::select(row, col, cell_content)
+  } else {
+    ods_cells <- ods_cells %>%
+      dplyr::mutate(
+        cell_type = dplyr::case_when(
+          cell_element == "covered-table-cell" ~ "merged",
+          is.na(value_type) ~ "empty",
+          TRUE ~ "cell"
+        ),
+        base_value = dplyr::case_when(
+          is.na(value_type) ~ NA_character_,
+          value_type == "boolean" ~ value_bool,
+          value_type == "currency" ~ value_numeric,
+          value_type == "date" ~ value_date,
+          value_type == "float" ~ value_numeric,
+          value_type == "percentage" ~ value_numeric,
+          value_type == "string" & !is.na(value_string) ~ value_string,
+          value_type == "string" & is.na(value_string) ~ cell_content,
+          value_type == "time" ~ value_time,
+          TRUE ~ cell_content
+        ),
+        value_numeric = as.numeric(value_numeric),
+        value_bool = as.logical(value_bool),
+      ) %>%
+      dplyr::select(
+        row, col, cell_type, value_type, cell_formula, cell_content, base_value,
+        currency_symbol = value_currency)
+  }
 
   return(ods_cells)
 
 }
 
 # extract cells from a row
-extract_row <- function(row_node, .pb_id = NULL) {
+extract_row <- function(row_node, quick = FALSE, .pb_id = NULL) {
 
   # get cell nodes
   cell_nodes <- xml2::xml_children(row_node)
 
   # process cells
-  row_cells <- tibble::tibble(
-    base_col = seq_along(cell_nodes),
-    cell_element = xml2::xml_name(cell_nodes),
-    cell_repeats = as.numeric(
-      xml2::xml_attr(cell_nodes, "number-columns-repeated")
-    ),
-    cell_children = xml2::xml_length(cell_nodes),
-    cell_formula = xml2::xml_attr(cell_nodes, "formula"),
-    cell_content = xml2::xml_text(cell_nodes),
-    value_type = xml2::xml_attr(cell_nodes, "value-type"),
-    value_numeric = xml2::xml_attr(cell_nodes, "value"),
-    value_bool = xml2::xml_attr(cell_nodes, "boolean-value"),
-    value_date = xml2::xml_attr(cell_nodes, "date-value"),
-    value_time = xml2::xml_attr(cell_nodes, "time-value"),
-    value_string = xml2::xml_attr(cell_nodes, "string-value"),
-    value_currency = xml2::xml_attr(cell_nodes, "currency")
-  )
-
-  # detect replicated whitespace
-  multispace_paths <- xml2::xml_path(
-    xml2::xml_find_all(
-      cell_nodes,
-      "child::*/child::text:s/ancestor::table:table-cell")
-  )
-
-  # replicate whitespace
-  if (length(multispace_paths) > 0) {
-    multispace_cells <- as.numeric(
-      gsub(".*/table:table-cell\\[(\\d+)\\]$",
-           "\\1",
-           multispace_paths)
+  if (quick) {
+    row_cells <- tibble::tibble(
+      base_col = seq_along(cell_nodes),
+      cell_content = xml2::xml_text(cell_nodes),
+      cell_repeats = as.numeric(
+        xml2::xml_attr(cell_nodes, "number-columns-repeated")
+      ),
+      cell_children = xml2::xml_length(cell_nodes)
+    )
+  } else {
+    row_cells <- tibble::tibble(
+      base_col = seq_along(cell_nodes),
+      cell_element = xml2::xml_name(cell_nodes),
+      cell_repeats = as.numeric(
+        xml2::xml_attr(cell_nodes, "number-columns-repeated")
+      ),
+      cell_children = xml2::xml_length(cell_nodes),
+      cell_formula = xml2::xml_attr(cell_nodes, "formula"),
+      cell_content = xml2::xml_text(cell_nodes),
+      value_type = xml2::xml_attr(cell_nodes, "value-type"),
+      value_numeric = xml2::xml_attr(cell_nodes, "value"),
+      value_bool = xml2::xml_attr(cell_nodes, "boolean-value"),
+      value_date = xml2::xml_attr(cell_nodes, "date-value"),
+      value_time = xml2::xml_attr(cell_nodes, "time-value"),
+      value_string = xml2::xml_attr(cell_nodes, "string-value"),
+      value_currency = xml2::xml_attr(cell_nodes, "currency")
     )
 
-    for (cell in multispace_cells) {
-      cell_contents <- xml2::xml_contents(xml2::xml_child(cell_nodes[cell]))
-      cell_text <- character()
-      for (el in cell_contents) {
-        if (xml2::xml_name(el) == "s") {
-          s_reps <- as.numeric(xml2::xml_attr(el, "c"))
-          s_reps <- ifelse(is.na(s_reps), 1, s_reps)
-          cell_text <- c(cell_text, rep(" ", s_reps))
-        } else {
-          cell_text <- c(cell_text, xml2::xml_text(el))
+    # detect replicated whitespace
+    multispace_paths <- xml2::xml_path(
+      xml2::xml_find_all(
+        cell_nodes,
+        "child::*/child::text:s/ancestor::table:table-cell")
+    )
+
+    # replicate whitespace
+    if (length(multispace_paths) > 0) {
+      multispace_cells <- as.numeric(
+        gsub(".*/table:table-cell\\[(\\d+)\\]$",
+             "\\1",
+             multispace_paths)
+      )
+
+      for (cell in multispace_cells) {
+        cell_contents <- xml2::xml_contents(xml2::xml_child(cell_nodes[cell]))
+        cell_text <- character()
+        for (el in cell_contents) {
+          if (xml2::xml_name(el) == "s") {
+            s_reps <- as.numeric(xml2::xml_attr(el, "c"))
+            s_reps <- ifelse(is.na(s_reps), 1, s_reps)
+            cell_text <- c(cell_text, rep(" ", s_reps))
+          } else {
+            cell_text <- c(cell_text, xml2::xml_text(el))
+          }
         }
+        cell_text <- paste0(cell_text, collapse = "")
+        row_cells$cell_content[cell] <- cell_text
       }
-      cell_text <- paste0(cell_text, collapse = "")
-      row_cells$cell_content[cell] <- cell_text
+
     }
 
   }

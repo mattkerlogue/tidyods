@@ -6,6 +6,7 @@
 #'
 #' @param path The ODS file
 #' @param sheet The sheet within the ODS file
+#' @param quick Whether to use the quick reading process
 #'
 #' @return
 #' A tibble with the following information:
@@ -20,6 +21,9 @@
 #' - `base_value`: the underlying value of a cell (see details)
 #' - `currency symbol`: the currency symbol for cells with a `value_type` of
 #'   currency
+#'
+#' If using the `quick` argument you only `row`, `col` and `cell_content` are
+#' returned.
 #'
 #' @details
 #' Cells are assigned a `cell_type` of "cell" when they have content, "empty"
@@ -47,8 +51,14 @@
 #' `base_value` column provides the cell's underlying value, i.e. without
 #' formatting.
 #'
+#' Processing the ODS XML is a memory intensive process, you can achieve
+#' significant speed enhancements by setting the `quick` argument to FALSE,
+#' this will extract only the text content of the cell. Note this also ignores
+#' repeated white space elements (i.e. `"A   B   C"` will be returned as
+#' `"A B C"`).
+#'
 #' @export
-read_ods_cells <- function(path, sheet) {
+read_ods_cells <- function(path, sheet, quick = FALSE) {
 
   if (missing(path)) {
     cli::cli_abort("{.arg path} is not defined")
@@ -68,7 +78,7 @@ read_ods_cells <- function(path, sheet) {
 
   tbl_xml <- get_tbl_xml(ods_file = path, sheet_name = sheet)
 
-  ods_cells <- extract_table(tbl_xml)
+  ods_cells <- extract_table(tbl_xml, quick = quick)
 
   return(ods_cells)
 
@@ -81,6 +91,7 @@ read_ods_cells <- function(path, sheet) {
 #' @param rectify The method to convert cells to two-dimensions, can only be "simple"
 #' @param base_values Whether to use the base_value of a cell (TRUE, the default)
 #'   or whether to provide the cell content as seen by a spreadsheet user.
+#' @param quick Whether to use the quick reading process
 #'
 #' @return
 #' A tibble, presenting cells in a traditional two-dimension spreadsheet format.
@@ -94,8 +105,13 @@ read_ods_cells <- function(path, sheet) {
 #' spreadsheet application user will be shown. See [read_ods_cells()] for further
 #' details.
 #'
+#' Setting `quick - TRUE` will ignore the setting of `base_values`, as the quick
+#' process only returns cell content as seen by a spreadsheet users (but
+#' ignoring any repeated white space in the cell content).
+#'
 #' @export
-read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE) {
+read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
+                           quick = FALSE) {
 
   if (missing(path)) {
     cli::cli_abort("{.arg path} is not defined")
@@ -113,10 +129,12 @@ read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE) 
     cli::cli_abort("{.arg sheet} must be a character vector of length 1")
   }
 
-  ods_cells <- read_ods_cells(path, sheet)
+  ods_cells <- read_ods_cells(path, sheet, quick = quick)
 
-  if (rectify == "simple") {
+  if (rectify == "simple" & !quick) {
     ods_sheet <- simple_rectify(ods_cells, base_values)
+  } else if (rectify == "simple" & quick) {
+    ods_sheet <- simple_rectify(ods_cells, base_values = FALSE)
   }
 
 }
