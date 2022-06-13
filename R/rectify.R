@@ -48,6 +48,11 @@ simple_rectify <- function(ods_cells, base_values = TRUE) {
     tidyr::pivot_wider(names_from = col, values_from = cell_value) %>%
     dplyr::select(-row)
 
+  # handle Excel blank final column
+  if (sum(is.na(ods_sheet[[ncol(ods_sheet)]])) == nrow(ods_sheet)) {
+    ods_sheet <- ods_sheet[, 1:(ncol(ods_sheet) - 1)]
+  }
+
   return(ods_sheet)
 
 }
