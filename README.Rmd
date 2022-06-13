@@ -46,11 +46,39 @@ An ODS file is a zipped collection of XML files and associated files.
 This package, like the  `{readODS}` package uses the [xml2](https://xml2.r-lib.org) package to process this file. There are three likely sources of performance 
 issues: downloading of remote files, unzipping the ODS file, processing rows.
 
-Performance is slower than `{readODS}`, however `{tidyods}` provides console 
-messages and progress bars to the user. If performance is a major determinant of
-your workflow (i.e. you have very large files), its likely more sensible to open
-the file in a spreadsheet application and save the file as an XLSX file and using
-tidyxl.
+With default settings, performance of `{tidyods}` functions is slower than 
+`{readODS}`, however `{tidyods}` provides console messages and progress bars to
+the user.
+
+Performance can be improved by using the `quick` argument, this will extract 
+only a simple text representation of the cell, i.e. it will not provide 
+information on cell or value types, formulas or the underlying base value for
+numbers, dates or times.
+
+To test performance we will use an ODS file published by the UK Government on the
+[number of civil servants by postcode](https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021) (5,544 rows by 11 columns).
+Analysis of read times indicates that using the `quick = TRUE` setting for `read_ods_cells()` results in a read that is 10 times faster than the full cell 
+extraction method and around 1.5 times faster than `{readODS}`.
+
+```r
+microbenchmark::microbenchmark(
+  "tidyods_slow" = tidyods::read_ods_cells(test_ods, "Staff_in_post", quick = FALSE),
+  "tidyods_quick" = tidyods::read_ods_cells(test_ods, "Staff_in_post", quick = TRUE),
+  "readODS" = readODS::read_ods(test_ods, "Staff_in_post"),
+  times = 3
+)
+
+#> Unit: seconds
+         expr       min        lq      mean    median        uq       max neval
+ tidyods_slow 35.483310 35.754623 35.862621 36.025936 36.052276 36.078617     3
+tidyods_quick  3.247025  3.258350  3.293503  3.269675  3.316743  3.363811     3
+      readods  5.114063  5.160641  5.205049  5.207220  5.250541  5.293863     3
+
+```
+
+However, if performance is a major determinant of your workflow (i.e. you have
+very large files), its likely more sensible to open the file in a spreadsheet application and save the file as an XLSX file and using `{tidyxl}`.
+
 
 ## Related projects
 The `{tidyODS}` package is heavily inspired by two existing packages:
