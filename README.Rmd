@@ -44,6 +44,51 @@ The `{tidyods}` package exports the following functions for users:
 - `simple_rectify(path)`: "rectify" a set of cells into a rectangular dataset, 
   like a spreadsheet
 
+The package includes an example ODS with two sheets: `penguins` and `types`.
+
+```{r}
+library(tidyods)
+
+example_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
+
+ods_sheets(example_file)
+```
+
+The `penguins` sheet is a simple 6 rows by 4 columns sheet that stores the 
+output of the following code:
+
+```{r}
+palmerpenguins::penguins |>
+  tidyr::drop_na() |>
+  dplyr::group_by(species, female = sex == "female") |>
+  dplyr::summarise(
+    dplyr::across(c(bill_length_mm, body_mass_g), mean, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+```{r}
+penguin_sheet <- read_ods_sheet(example_file, "penguins", quick = TRUE)
+
+penguin_sheet
+```
+
+While the `types` sheet shows examples of the different ODS data types:
+```{r}
+example_cells <- read_ods_cells(example_file, "types")
+
+example_cells |> 
+  dplyr::filter(row > 1) |>
+  dplyr::group_by(col) |>
+  dplyr::glimpse()
+
+example_cells |>
+  dplyr::filter(row > 1) |>
+  dplyr::group_by(col) |>
+  dplyr::slice_head(n = 2) |>
+  dplyr::select(-cell_type)
+```
+
 ## Performance
 An ODS file is a zipped collection of XML files and associated files. 
 `{tidyods}`, like the `{readODS}` package, uses the [xml2](https://xml2.r-lib.org) 

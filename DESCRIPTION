@@ -21,3 +21,5 @@ Imports:
 URL: https://github.com/mattkerlogue/tidyods, 
     https://mattkerlogue.github.io/tidyods/
 BugReports: https://github.com/mattkerlogue/tidyods/issues
+Suggests: 
+    palmerpenguins

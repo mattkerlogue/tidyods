@@ -38,6 +38,116 @@ The `{tidyods}` package exports the following functions for users:
 -   `simple_rectify(path)`: “rectify” a set of cells into a rectangular
     dataset, like a spreadsheet
 
+The package includes an example ODS with two sheets: `penguins` and
+`types`.
+
+``` r
+library(tidyods)
+
+example_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
+
+ods_sheets(example_file)
+#> Unzipping ODS file
+#> Reading XML file
+#> [1] "penguins" "types"
+```
+
+The `penguins` sheet is a simple 6 rows by 4 columns sheet that stores
+the output of the following code:
+
+``` r
+palmerpenguins::penguins |>
+  tidyr::drop_na() |>
+  dplyr::group_by(species, female = sex == "female") |>
+  dplyr::summarise(
+    dplyr::across(c(bill_length_mm, body_mass_g), mean, na.rm = TRUE),
+    .groups = "drop"
+  )
+#> # A tibble: 6 × 4
+#>   species   female bill_length_mm body_mass_g
+#>   <fct>     <lgl>           <dbl>       <dbl>
+#> 1 Adelie    FALSE            40.4       4043.
+#> 2 Adelie    TRUE             37.3       3369.
+#> 3 Chinstrap FALSE            51.1       3939.
+#> 4 Chinstrap TRUE             46.6       3527.
+#> 5 Gentoo    FALSE            49.5       5485.
+#> 6 Gentoo    TRUE             45.6       4680.
+```
+
+``` r
+penguin_sheet <- read_ods_sheet(example_file, "penguins", quick = TRUE)
+#> Getting ODS sheet
+#> Unzipping ODS file
+#> Getting ODS sheetReading XML file
+#> Getting ODS sheetProcessing rows...
+
+penguin_sheet
+#> # A tibble: 7 × 4
+#>   X1        X2     X3             X4         
+#>   <chr>     <chr>  <chr>          <chr>      
+#> 1 species   female bill_length_mm body_mass_g
+#> 2 Adelie    FALSE  40.4           4043       
+#> 3 Adelie    TRUE   37.3           3369       
+#> 4 Chinstrap FALSE  51.1           3939       
+#> 5 Chinstrap TRUE   46.6           3527       
+#> 6 Gentoo    FALSE  49.5           5485       
+#> 7 Gentoo    TRUE   45.6           4680
+```
+
+While the `types` sheet shows examples of the different ODS data types:
+
+``` r
+example_cells <- read_ods_cells(example_file, "types")
+#> Getting ODS sheet
+#> Unzipping ODS file
+#> Getting ODS sheetReading XML file
+#> Getting ODS sheetProcessing rows...
+
+example_cells |> 
+  dplyr::filter(row > 1) |>
+  dplyr::group_by(col) |>
+  dplyr::glimpse()
+#> Rows: 90
+#> Columns: 8
+#> Groups: col [9]
+#> $ row             <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, …
+#> $ col             <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, …
+#> $ cell_type       <chr> "cell", "cell", "cell", "cell", "cell", "cell", "cell"…
+#> $ value_type      <chr> "string", "boolean", "currency", "date", "time", "date…
+#> $ cell_formula    <chr> NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", NA,…
+#> $ cell_content    <chr> "Cat", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06…
+#> $ base_value      <chr> "Cat", "true", "1.2", "2022-06-15", "PT13H24M56S", "20…
+#> $ currency_symbol <chr> NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, "GBP", …
+
+example_cells |>
+  dplyr::filter(row > 1) |>
+  dplyr::group_by(col) |>
+  dplyr::slice_head(n = 2) |>
+  dplyr::select(-cell_type)
+#> # A tibble: 18 × 7
+#> # Groups:   col [9]
+#>      row   col value_type cell_formula   cell_content base_value currency_symbol
+#>    <int> <int> <chr>      <chr>          <chr>        <chr>      <chr>          
+#>  1     2     1 string     <NA>           Cat          Cat        <NA>           
+#>  2     3     1 string     <NA>           Dog          Dog        <NA>           
+#>  3     2     2 boolean    <NA>           TRUE         true       <NA>           
+#>  4     3     2 boolean    <NA>           FALSE        false      <NA>           
+#>  5     2     3 currency   <NA>           £1.20        1.2        GBP            
+#>  6     3     3 currency   <NA>           £1.20        1.2        GBP            
+#>  7     2     4 date       <NA>           15/06/22     2022-06-15 <NA>           
+#>  8     3     4 date       <NA>           06/15/22     2022-06-15 <NA>           
+#>  9     2     5 time       <NA>           13:24:56     PT13H24M5… <NA>           
+#> 10     3     5 time       <NA>           13:24        PT13H24M5… <NA>           
+#> 11     2     6 date       <NA>           15/06/2022 … 2022-06-1… <NA>           
+#> 12     3     6 date       <NA>           15/06/22 13… 2022-06-1… <NA>           
+#> 13     2     7 float      <NA>           12035        12034.567… <NA>           
+#> 14     3     7 float      <NA>           12034.57     12034.567… <NA>           
+#> 15     2     8 float      <NA>           0.5467       0.5467     <NA>           
+#> 16     3     8 percentage <NA>           55%          0.5467     <NA>           
+#> 17     2     9 float      of:=[.G2]*[.H… 6579.3       6579.2982… <NA>           
+#> 18     3     9 float      of:=[.G3]*[.H… 6579.3       6579.2982… <NA>
+```
+
 ## Performance
 
 An ODS file is a zipped collection of XML files and associated files.
