@@ -14,7 +14,8 @@ proof-of-concept.](https://www.repostatus.org/badges/latest/concept.svg)](https:
 `{tidyods}` is an R package to import cells from an OpenDocument
 Spreadsheet (ODS) file, and provide information about the cell’s
 postion, value types and formulas, and provide methods to “rectify”
-cells back to a 2-dimensional data.frame.
+cells back to a 2-dimensional data.frame (specifically as a tidyverse
+tibble).
 
 ## Installation
 
@@ -28,9 +29,9 @@ remotes::install_github("mattkerlogue/tidyods")
 
 The `{tidyods}` package exports the following functions for users:
 
--   `read_ods_cells(path, sheet)`: extract the cells from a sheet in an
-    ODS file
--   `read_ods_sheet(path, sheet, rectify = "simple", base_values = TRUE)`:
+-   `read_ods_cells(path, sheet, quick = FALSE)`: extract the cells from
+    a sheet in an ODS file
+-   `read_ods_sheet(path, sheet, rectify = "simple", base_values = TRUE, quick = FALSE)`:
     extract cells from an ODS sheet and return as a rectangular dataset,
     like a spreadsheet
 -   `ods_sheets(path)`: list the sheets in an ODS fie
@@ -40,7 +41,7 @@ The `{tidyods}` package exports the following functions for users:
 ## Performance
 
 An ODS file is a zipped collection of XML files and associated files.
-This package, like the `{readODS}` package uses the
+`{tidyods}`, like the `{readODS}` package, uses the
 [xml2](https://xml2.r-lib.org) package to process this file. There are
 three likely sources of performance issues: downloading of remote files,
 unzipping the ODS file, processing rows.
@@ -49,10 +50,12 @@ With default settings, performance of `{tidyods}` functions is slower
 than `{readODS}`, however `{tidyods}` provides console messages and
 progress bars to the user.
 
-Performance can be improved by using the `quick` argument, this will
-extract only a simple text representation of the cell, i.e. it will not
-provide information on cell or value types, formulas or the underlying
-base value for numbers, dates or times.
+Performance can be improved by setting `quick = FALSE` in
+`read_ods_cells()` and `read_ods_sheet()`, this will extract only a
+simple text representation of the cell, i.e. it will not provide
+information on cell or value types, formulas or the underlying base
+value for numbers, dates or times. This method also ignores replicated
+white space characters.
 
 To test performance we will use an ODS file published by the UK
 Government on the [number of civil servants by
@@ -60,27 +63,36 @@ postcode](https://www.gov.uk/government/statistics/number-of-civil-servants-by-p
 (5,544 rows by 11 columns). Analysis of read times indicates that using
 the `quick = TRUE` setting for `read_ods_cells()` results in a read that
 is 10 times faster than the full cell extraction method and around 1.5
-times faster than `{readODS}`.
+times faster than reading the sheet with `{readODS}`.
 
 ``` r
 microbenchmark::microbenchmark(
-  "tidyods_slow" = tidyods::read_ods_cells(test_ods, "Staff_in_post", quick = FALSE),
-  "tidyods_quick" = tidyods::read_ods_cells(test_ods, "Staff_in_post", quick = TRUE),
+  "tidyods_slow" = tidyods::read_ods_cells(test_ods, "Staff_in_post", 
+    quick = FALSE),
+  "tidyods_quick" = tidyods::read_ods_cells(test_ods, "Staff_in_post", 
+    quick = TRUE),
   "readODS" = readODS::read_ods(test_ods, "Staff_in_post"),
   times = 3
 )
 
 #> Unit: seconds
-         expr       min        lq      mean    median        uq       max neval
- tidyods_slow 35.483310 35.754623 35.862621 36.025936 36.052276 36.078617     3
-tidyods_quick  3.247025  3.258350  3.293503  3.269675  3.316743  3.363811     3
-      readods  5.114063  5.160641  5.205049  5.207220  5.250541  5.293863     3
+#>          expr     min      lq    mean  median      uq     max neval
+#>  tidyods_slow 35.4833 35.7546 35.8626 36.0259 36.0523 36.0786     3
+#> tidyods_quick  3.2470  3.2584  3.2935  3.2697  3.3167  3.3638     3
+#>       readods  5.1141  5.1606  5.2050  5.2072  5.2505  5.2939     3
 ```
+
+A cursory test of a huge file that is known to be slow/non-performative
+with {readODS} shows promise.
+
+Performance issues are tracked and discussed in [issue
+\#3](https://github.com/mattkerlogue/tidyods/issues/3) in the package’s
+GitHub repository.
 
 However, if performance is a major determinant of your workflow
 (i.e. you have very large files), its likely more sensible to open the
-file in a spreadsheet application and save the file as an XLSX file and
-using `{tidyxl}`.
+file in a spreadsheet application, save the file as a `.xslx` format
+file and read using `{tidyxl}`.
 
 ## Related projects
 
@@ -113,7 +125,7 @@ The initial purpose of `{tidyods}` was to provide a second package to
 the R ecosystem for reading ODS files, in part prompted when
 encountering an error with `{readODS}` and discovering no alternative
 pacakge was available. For example if you run into an error when using
-the `{readxl}` package you could use easily try the `{openxlsx}` or
+the `{readxl}` package you could use easily try the`{openxlsx}` or
 `{xlsx}` instead.
 
 The conceptual code development lead to the creation of an output
