@@ -135,13 +135,13 @@
 <span class="co">#&gt; 7 Gentoo    TRUE   45.6           4680</span></code></pre></div>
 <p>While the <code>types</code> sheet shows examples of the different ODS data types:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">example_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">types_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span><span class="op">)</span>
 <span class="co">#&gt; Getting ODS sheet</span>
 <span class="co">#&gt; Unzipping ODS file</span>
 <span class="co">#&gt; Getting ODS sheetReading XML file</span>
 <span class="co">#&gt; Getting ODS sheetProcessing rows...</span>
 
-<span class="va">example_cells</span> |&gt; 
+<span class="va">types_cells</span> |&gt; 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span>
@@ -157,7 +157,7 @@
 <span class="co">#&gt; $ base_value      &lt;chr&gt; "Cat", "true", "1.2", "2022-06-15", "PT13H24M56S", "20…</span>
 <span class="co">#&gt; $ currency_symbol &lt;chr&gt; NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, "GBP", …</span>
 
-<span class="va">example_cells</span> |&gt;
+<span class="va">types_cells</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> |&gt;
@@ -190,9 +190,26 @@
 </h2>
 <p>An ODS file is a zipped collection of XML files and associated files. <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a>, like the <code>{readODS}</code> package, uses the <a href="https://xml2.r-lib.org" class="external-link">xml2</a> package to process this file. There are three likely sources of performance issues: downloading of remote files, unzipping the ODS file, processing rows.</p>
 <p>With default settings, performance of <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> functions is slower than <code>{readODS}</code>, however <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> provides console messages and progress bars to the user.</p>
-<p>Performance can be improved by setting <code>quick = FALSE</code> in <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> and <code><a href="reference/read_ods_sheet.html">read_ods_sheet()</a></code>, this will extract only a simple text representation of the cell, i.e. it will not provide information on cell or value types, formulas or the underlying base value for numbers, dates or times. This method also ignores replicated white space characters.</p>
-<p>To test performance we will use an ODS file published by the UK Government on the <a href="https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021" class="external-link">number of civil servants by postcode</a> (5,544 rows by 11 columns). Analysis of read times indicates that using the <code>quick = TRUE</code> setting for <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> results in a read that is 10 times faster than the full cell extraction method and around 1.5 times faster than reading the sheet with <code>{readODS}</code>.</p>
+<p>Performance can be improved by setting <code>quick = TRUE</code> in <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> and <code><a href="reference/read_ods_sheet.html">read_ods_sheet()</a></code>, this will extract only a simple text representation of the cell, i.e. it will not provide information on cell or value types, formulas or the underlying base value for numbers, dates or times. This method also ignores replicated white space characters.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">types_cells_quick</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="co">#&gt; Getting ODS sheet</span>
+<span class="co">#&gt; Unzipping ODS file</span>
+<span class="co">#&gt; Getting ODS sheetReading XML file</span>
+<span class="co">#&gt; Getting ODS sheetProcessing rows...</span>
+
+<span class="va">types_cells_quick</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span>
+<span class="co">#&gt; Rows: 90</span>
+<span class="co">#&gt; Columns: 3</span>
+<span class="co">#&gt; Groups: col [9]</span>
+<span class="co">#&gt; $ row          &lt;int&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, …</span>
+<span class="co">#&gt; $ col          &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, …</span>
+<span class="co">#&gt; $ cell_content &lt;chr&gt; "Cat", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06/20…</span></code></pre></div>
+<p>To test performance we will use an ODS file published by the UK Government on the <a href="https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021" class="external-link">number of civil servants by postcode</a> (5,544 rows by 11 columns). Analysis of read times indicates that using the <code>quick = TRUE</code> setting for <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> results in a read that is 10 times faster than the full cell extraction method and around 1.5 times faster than reading the sheet with <code>{readODS}</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">microbenchmark</span><span class="fu">::</span><span class="fu">microbenchmark</span><span class="op">(</span>
   <span class="st">"tidyods_slow"</span> <span class="op">=</span> <span class="fu">tidyods</span><span class="fu">::</span><span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">test_ods</span>, <span class="st">"Staff_in_post"</span>, 
     quick <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,
