@@ -75,14 +75,14 @@ penguin_sheet
 
 While the `types` sheet shows examples of the different ODS data types:
 ```{r}
-example_cells <- read_ods_cells(example_file, "types")
+types_cells <- read_ods_cells(example_file, "types")
 
-example_cells |> 
+types_cells |> 
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
 
-example_cells |>
+types_cells |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::slice_head(n = 2) |>
@@ -99,11 +99,20 @@ With default settings, performance of `{tidyods}` functions is slower than
 `{readODS}`, however `{tidyods}` provides console messages and progress bars to
 the user.
 
-Performance can be improved by setting `quick = FALSE` in `read_ods_cells()` 
+Performance can be improved by setting `quick = TRUE` in `read_ods_cells()` 
 and `read_ods_sheet()`, this will extract only a simple text representation of 
 the cell, i.e. it will not provide information on cell or value types, formulas 
 or the underlying base value for numbers, dates or times. This method also 
 ignores replicated white space characters.
+
+```{r}
+types_cells_quick <- read_ods_cells(example_file, "types", quick = TRUE)
+
+types_cells_quick |>
+  dplyr::filter(row > 1) |>
+  dplyr::group_by(col) |>
+  dplyr::glimpse()
+```
 
 To test performance we will use an ODS file published by the UK Government on the
 [number of civil servants by postcode](https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021) (5,544 rows by 11 columns). Analysis of read 

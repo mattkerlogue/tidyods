@@ -97,13 +97,13 @@ penguin_sheet
 While the `types` sheet shows examples of the different ODS data types:
 
 ``` r
-example_cells <- read_ods_cells(example_file, "types")
+types_cells <- read_ods_cells(example_file, "types")
 #> Getting ODS sheet
 #> Unzipping ODS file
 #> Getting ODS sheetReading XML file
 #> Getting ODS sheetProcessing rows...
 
-example_cells |> 
+types_cells |> 
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
@@ -119,7 +119,7 @@ example_cells |>
 #> $ base_value      <chr> "Cat", "true", "1.2", "2022-06-15", "PT13H24M56S", "20…
 #> $ currency_symbol <chr> NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, "GBP", …
 
-example_cells |>
+types_cells |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::slice_head(n = 2) |>
@@ -160,12 +160,31 @@ With default settings, performance of `{tidyods}` functions is slower
 than `{readODS}`, however `{tidyods}` provides console messages and
 progress bars to the user.
 
-Performance can be improved by setting `quick = FALSE` in
+Performance can be improved by setting `quick = TRUE` in
 `read_ods_cells()` and `read_ods_sheet()`, this will extract only a
 simple text representation of the cell, i.e. it will not provide
 information on cell or value types, formulas or the underlying base
 value for numbers, dates or times. This method also ignores replicated
 white space characters.
+
+``` r
+types_cells_quick <- read_ods_cells(example_file, "types", quick = TRUE)
+#> Getting ODS sheet
+#> Unzipping ODS file
+#> Getting ODS sheetReading XML file
+#> Getting ODS sheetProcessing rows...
+
+types_cells_quick |>
+  dplyr::filter(row > 1) |>
+  dplyr::group_by(col) |>
+  dplyr::glimpse()
+#> Rows: 90
+#> Columns: 3
+#> Groups: col [9]
+#> $ row          <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, …
+#> $ col          <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, …
+#> $ cell_content <chr> "Cat", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06/20…
+```
 
 To test performance we will use an ODS file published by the UK
 Government on the [number of civil servants by
