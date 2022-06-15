@@ -87,6 +87,103 @@
 <li>
 <code>simple_rectify(path)</code>: “rectify” a set of cells into a rectangular dataset, like a spreadsheet</li>
 </ul>
+<p>The package includes an example ODS with two sheets: <code>penguins</code> and <code>types</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a></span><span class="op">)</span>
+
+<span class="va">example_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"basic_example.ods"</span>, package <span class="op">=</span> <span class="st">"tidyods"</span><span class="op">)</span>
+
+<span class="fu"><a href="reference/ods_sheets.html">ods_sheets</a></span><span class="op">(</span><span class="va">example_file</span><span class="op">)</span>
+<span class="co">#&gt; Unzipping ODS file</span>
+<span class="co">#&gt; Reading XML file</span>
+<span class="co">#&gt; [1] "penguins" "types"</span></code></pre></div>
+<p>The <code>penguins</code> sheet is a simple 6 rows by 4 columns sheet that stores the output of the following code:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">palmerpenguins</span><span class="fu">::</span><span class="va"><a href="https://allisonhorst.github.io/palmerpenguins/reference/penguins.html" class="external-link">penguins</a></span> |&gt;
+  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">species</span>, female <span class="op">=</span> <span class="va">sex</span> <span class="op">==</span> <span class="st">"female"</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>
+    <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">bill_length_mm</span>, <span class="va">body_mass_g</span><span class="op">)</span>, <span class="va">mean</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
+    .groups <span class="op">=</span> <span class="st">"drop"</span>
+  <span class="op">)</span>
+<span class="co">#&gt; # A tibble: 6 × 4</span>
+<span class="co">#&gt;   species   female bill_length_mm body_mass_g</span>
+<span class="co">#&gt;   &lt;fct&gt;     &lt;lgl&gt;           &lt;dbl&gt;       &lt;dbl&gt;</span>
+<span class="co">#&gt; 1 Adelie    FALSE            40.4       4043.</span>
+<span class="co">#&gt; 2 Adelie    TRUE             37.3       3369.</span>
+<span class="co">#&gt; 3 Chinstrap FALSE            51.1       3939.</span>
+<span class="co">#&gt; 4 Chinstrap TRUE             46.6       3527.</span>
+<span class="co">#&gt; 5 Gentoo    FALSE            49.5       5485.</span>
+<span class="co">#&gt; 6 Gentoo    TRUE             45.6       4680.</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">penguin_sheet</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"penguins"</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="co">#&gt; Getting ODS sheet</span>
+<span class="co">#&gt; Unzipping ODS file</span>
+<span class="co">#&gt; Getting ODS sheetReading XML file</span>
+<span class="co">#&gt; Getting ODS sheetProcessing rows...</span>
+
+<span class="va">penguin_sheet</span>
+<span class="co">#&gt; # A tibble: 7 × 4</span>
+<span class="co">#&gt;   X1        X2     X3             X4         </span>
+<span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;          &lt;chr&gt;      </span>
+<span class="co">#&gt; 1 species   female bill_length_mm body_mass_g</span>
+<span class="co">#&gt; 2 Adelie    FALSE  40.4           4043       </span>
+<span class="co">#&gt; 3 Adelie    TRUE   37.3           3369       </span>
+<span class="co">#&gt; 4 Chinstrap FALSE  51.1           3939       </span>
+<span class="co">#&gt; 5 Chinstrap TRUE   46.6           3527       </span>
+<span class="co">#&gt; 6 Gentoo    FALSE  49.5           5485       </span>
+<span class="co">#&gt; 7 Gentoo    TRUE   45.6           4680</span></code></pre></div>
+<p>While the <code>types</code> sheet shows examples of the different ODS data types:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">example_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span><span class="op">)</span>
+<span class="co">#&gt; Getting ODS sheet</span>
+<span class="co">#&gt; Unzipping ODS file</span>
+<span class="co">#&gt; Getting ODS sheetReading XML file</span>
+<span class="co">#&gt; Getting ODS sheetProcessing rows...</span>
+
+<span class="va">example_cells</span> |&gt; 
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span>
+<span class="co">#&gt; Rows: 90</span>
+<span class="co">#&gt; Columns: 8</span>
+<span class="co">#&gt; Groups: col [9]</span>
+<span class="co">#&gt; $ row             &lt;int&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, …</span>
+<span class="co">#&gt; $ col             &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, …</span>
+<span class="co">#&gt; $ cell_type       &lt;chr&gt; "cell", "cell", "cell", "cell", "cell", "cell", "cell"…</span>
+<span class="co">#&gt; $ value_type      &lt;chr&gt; "string", "boolean", "currency", "date", "time", "date…</span>
+<span class="co">#&gt; $ cell_formula    &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", NA,…</span>
+<span class="co">#&gt; $ cell_content    &lt;chr&gt; "Cat", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06…</span>
+<span class="co">#&gt; $ base_value      &lt;chr&gt; "Cat", "true", "1.2", "2022-06-15", "PT13H24M56S", "20…</span>
+<span class="co">#&gt; $ currency_symbol &lt;chr&gt; NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, "GBP", …</span>
+
+<span class="va">example_cells</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> |&gt;
+  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">cell_type</span><span class="op">)</span>
+<span class="co">#&gt; # A tibble: 18 × 7</span>
+<span class="co">#&gt; # Groups:   col [9]</span>
+<span class="co">#&gt;      row   col value_type cell_formula   cell_content base_value currency_symbol</span>
+<span class="co">#&gt;    &lt;int&gt; &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;          &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;          </span>
+<span class="co">#&gt;  1     2     1 string     &lt;NA&gt;           Cat          Cat        &lt;NA&gt;           </span>
+<span class="co">#&gt;  2     3     1 string     &lt;NA&gt;           Dog          Dog        &lt;NA&gt;           </span>
+<span class="co">#&gt;  3     2     2 boolean    &lt;NA&gt;           TRUE         true       &lt;NA&gt;           </span>
+<span class="co">#&gt;  4     3     2 boolean    &lt;NA&gt;           FALSE        false      &lt;NA&gt;           </span>
+<span class="co">#&gt;  5     2     3 currency   &lt;NA&gt;           £1.20        1.2        GBP            </span>
+<span class="co">#&gt;  6     3     3 currency   &lt;NA&gt;           £1.20        1.2        GBP            </span>
+<span class="co">#&gt;  7     2     4 date       &lt;NA&gt;           15/06/22     2022-06-15 &lt;NA&gt;           </span>
+<span class="co">#&gt;  8     3     4 date       &lt;NA&gt;           06/15/22     2022-06-15 &lt;NA&gt;           </span>
+<span class="co">#&gt;  9     2     5 time       &lt;NA&gt;           13:24:56     PT13H24M5… &lt;NA&gt;           </span>
+<span class="co">#&gt; 10     3     5 time       &lt;NA&gt;           13:24        PT13H24M5… &lt;NA&gt;           </span>
+<span class="co">#&gt; 11     2     6 date       &lt;NA&gt;           15/06/2022 … 2022-06-1… &lt;NA&gt;           </span>
+<span class="co">#&gt; 12     3     6 date       &lt;NA&gt;           15/06/22 13… 2022-06-1… &lt;NA&gt;           </span>
+<span class="co">#&gt; 13     2     7 float      &lt;NA&gt;           12035        12034.567… &lt;NA&gt;           </span>
+<span class="co">#&gt; 14     3     7 float      &lt;NA&gt;           12034.57     12034.567… &lt;NA&gt;           </span>
+<span class="co">#&gt; 15     2     8 float      &lt;NA&gt;           0.5467       0.5467     &lt;NA&gt;           </span>
+<span class="co">#&gt; 16     3     8 percentage &lt;NA&gt;           55%          0.5467     &lt;NA&gt;           </span>
+<span class="co">#&gt; 17     2     9 float      of:=[.G2]*[.H… 6579.3       6579.2982… &lt;NA&gt;           </span>
+<span class="co">#&gt; 18     3     9 float      of:=[.G3]*[.H… 6579.3       6579.2982… &lt;NA&gt;</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
@@ -95,7 +192,7 @@
 <p>With default settings, performance of <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> functions is slower than <code>{readODS}</code>, however <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> provides console messages and progress bars to the user.</p>
 <p>Performance can be improved by setting <code>quick = FALSE</code> in <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> and <code><a href="reference/read_ods_sheet.html">read_ods_sheet()</a></code>, this will extract only a simple text representation of the cell, i.e. it will not provide information on cell or value types, formulas or the underlying base value for numbers, dates or times. This method also ignores replicated white space characters.</p>
 <p>To test performance we will use an ODS file published by the UK Government on the <a href="https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021" class="external-link">number of civil servants by postcode</a> (5,544 rows by 11 columns). Analysis of read times indicates that using the <code>quick = TRUE</code> setting for <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> results in a read that is 10 times faster than the full cell extraction method and around 1.5 times faster than reading the sheet with <code>{readODS}</code>.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">microbenchmark</span><span class="fu">::</span><span class="fu">microbenchmark</span><span class="op">(</span>
   <span class="st">"tidyods_slow"</span> <span class="op">=</span> <span class="fu">tidyods</span><span class="fu">::</span><span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">test_ods</span>, <span class="st">"Staff_in_post"</span>, 
     quick <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,
