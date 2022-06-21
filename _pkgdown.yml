@@ -1,8 +1,7 @@
 url: https://mattkerlogue.github.io/tidyODS/
-template:
-  bootstrap: 5
 
 template:
+  bootstrap: 5
   opengraph:
     image:
       src: man/figures/tidyods_hex_banner.png
