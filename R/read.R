@@ -7,6 +7,7 @@
 #' @param path The ODS file
 #' @param sheet The sheet within the ODS file
 #' @param quick Whether to use the quick reading process
+#' @param whitespace Whether to process multiple whitespaces
 #'
 #' @return
 #' A tibble with the following information:
@@ -58,7 +59,7 @@
 #' `"A B C"`).
 #'
 #' @export
-read_ods_cells <- function(path, sheet, quick = FALSE) {
+read_ods_cells <- function(path, sheet, quick = FALSE, whitespace = FALSE) {
 
   if (missing(path)) {
     cli::cli_abort("{.arg path} is not defined")
@@ -71,14 +72,14 @@ read_ods_cells <- function(path, sheet, quick = FALSE) {
   if (missing(sheet)) {
     cli::cli_abort("{.arg sheet} is not defined")
   } else if (length(sheet) != 1) {
-    cli::cli_abort("{.arg sheet} must be a character vector of length 1")
-  } else if (!is.character(sheet)) {
-    cli::cli_abort("{.arg sheet} must be a character vector of length 1")
+    cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
+  } else if (!(is.character(sheet) | is.numeric(sheet))) {
+    cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
   }
 
-  tbl_xml <- get_tbl_xml(ods_file = path, sheet_name = sheet)
+  tbl_xml <- get_tbl_xml(ods_file = path, sheet = sheet)
 
-  ods_cells <- extract_table(tbl_xml, quick = quick)
+  ods_cells <- extract_table(tbl_xml, quick = quick, whitespace = whitespace)
 
   return(ods_cells)
 
@@ -86,12 +87,16 @@ read_ods_cells <- function(path, sheet, quick = FALSE) {
 
 #' Read an ODS sheet to a rectangular dataset
 #'
+#' A wrapper around [`read_ods_cells()`] and [`simple_rectify()`] to extract
+#' cells from a sheet and return a
+#'
 #' @param path The ODS file
 #' @param sheet The sheet within the ODS file
 #' @param rectify The method to convert cells to two-dimensions, can only be "simple"
 #' @param base_values Whether to use the base_value of a cell (TRUE, the default)
 #'   or whether to provide the cell content as seen by a spreadsheet user.
 #' @param quick Whether to use the quick reading process
+#' @param whitespace Whether to process multiple whitespaces
 #'
 #' @return
 #' A tibble, presenting cells in a traditional two-dimension spreadsheet format.
@@ -100,18 +105,18 @@ read_ods_cells <- function(path, sheet, quick = FALSE) {
 #' At present, `rectify` can only be set to "simple", this calls the
 #' [simple_rectify()] method to convert the cells to a sheet.
 #'
-#' When set to `TRUE` (the default) the `base_values` argument then the
-#' underlying cell values are used. When `FALSE` then cell content as seen by a
-#' spreadsheet application user will be shown. See [read_ods_cells()] for further
-#' details.
+#' When `base_values = TRUE` (the default) the underlying cell values are used
+#' for non-string value types. When `FALSE` then cell content as seen by a
+#' spreadsheet application user will be shown.
 #'
-#' Setting `quick - TRUE` will ignore the setting of `base_values`, as the quick
-#' process only returns cell content as seen by a spreadsheet users (but
-#' ignoring any repeated white space in the cell content).
+#' Setting `quick = TRUE` will ignore the setting of `base_values`, as the quick
+#' process only returns cell content as seen by a spreadsheet users. When
+#' `whitespace = FALSE` (the default), multiple whitespaces in cell content
+#' are ignored. See [read_ods_cells()] for further details.
 #'
 #' @export
 read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
-                           quick = FALSE) {
+                           quick = FALSE, whitespace = FALSE) {
 
   if (missing(path)) {
     cli::cli_abort("{.arg path} is not defined")
@@ -124,12 +129,13 @@ read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
   if (missing(sheet)) {
     cli::cli_abort("{.arg sheet} is not defined")
   } else if (length(sheet) != 1) {
-    cli::cli_abort("{.arg sheet} must be a character vector of length 1")
-  } else if (!is.character(sheet)) {
-    cli::cli_abort("{.arg sheet} must be a character vector of length 1")
+    cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
+  } else if (!(is.character(sheet) | is.numeric(sheet))) {
+    cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
   }
 
-  ods_cells <- read_ods_cells(path, sheet, quick = quick)
+  ods_cells <- read_ods_cells(path, sheet, quick = quick,
+                              whitespace = whitespace)
 
   if (rectify == "simple" & !quick) {
     ods_sheet <- simple_rectify(ods_cells, base_values)
@@ -153,6 +159,6 @@ ods_sheets <- function(path) {
   ods_xml <- extract_ods_xml(path)
   ods_ns <- xml2::xml_ns(ods_xml)
 
-  names(ods_sheet_paths(ods_xml, ods_ns))
+  names(ods_sheet_paths(ods_xml))
 
 }

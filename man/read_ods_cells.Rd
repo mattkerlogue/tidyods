@@ -4,7 +4,7 @@
 \alias{read_ods_cells}
 \title{Read cells from an ODS sheet}
 \usage{
-read_ods_cells(path, sheet, quick = FALSE)
+read_ods_cells(path, sheet, quick = FALSE, whitespace = FALSE)
 }
 \arguments{
 \item{path}{The ODS file}
@@ -12,6 +12,8 @@ read_ods_cells(path, sheet, quick = FALSE)
 \item{sheet}{The sheet within the ODS file}
 
 \item{quick}{Whether to use the quick reading process}
+
+\item{whitespace}{Whether to process multiple whitespaces}
 }
 \value{
 A tibble with the following information:

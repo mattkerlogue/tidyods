@@ -9,7 +9,8 @@ read_ods_sheet(
   sheet,
   rectify = "simple",
   base_values = TRUE,
-  quick = FALSE
+  quick = FALSE,
+  whitespace = FALSE
 )
 }
 \arguments{
@@ -23,23 +24,26 @@ read_ods_sheet(
 or whether to provide the cell content as seen by a spreadsheet user.}
 
 \item{quick}{Whether to use the quick reading process}
+
+\item{whitespace}{Whether to process multiple whitespaces}
 }
 \value{
 A tibble, presenting cells in a traditional two-dimension spreadsheet format.
 }
 \description{
-Read an ODS sheet to a rectangular dataset
+A wrapper around \code{\link[=read_ods_cells]{read_ods_cells()}} and \code{\link[=simple_rectify]{simple_rectify()}} to extract
+cells from a sheet and return a
 }
 \details{
 At present, \code{rectify} can only be set to "simple", this calls the
 \code{\link[=simple_rectify]{simple_rectify()}} method to convert the cells to a sheet.
 
-When set to \code{TRUE} (the default) the \code{base_values} argument then the
-underlying cell values are used. When \code{FALSE} then cell content as seen by a
-spreadsheet application user will be shown. See \code{\link[=read_ods_cells]{read_ods_cells()}} for further
-details.
+When \code{base_values = TRUE} (the default) the underlying cell values are used
+for non-string value types. When \code{FALSE} then cell content as seen by a
+spreadsheet application user will be shown.
 
-Setting \code{quick - TRUE} will ignore the setting of \code{base_values}, as the quick
-process only returns cell content as seen by a spreadsheet users (but
-ignoring any repeated white space in the cell content).
+Setting \code{quick = TRUE} will ignore the setting of \code{base_values}, as the quick
+process only returns cell content as seen by a spreadsheet users. When
+\code{whitespace = FALSE} (the default), multiple whitespaces in cell content
+are ignored. See \code{\link[=read_ods_cells]{read_ods_cells()}} for further details.
 }
