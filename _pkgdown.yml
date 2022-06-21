@@ -2,3 +2,10 @@ url: https://mattkerlogue.github.io/tidyODS/
 template:
   bootstrap: 5
 
+template:
+  opengraph:
+    image:
+      src: man/figures/tidyods_hex_banner.png
+    twitter:
+      creator: "@mattkerlogue"
+      card: summary_large_image

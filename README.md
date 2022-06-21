@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# tidyods
+# tidyods <img src="man/figures/tidyods_hex.png" align="right" alt="tidyods package logo" width="120" />
 
 <!-- badges: start -->
 
@@ -107,45 +107,54 @@ types_cells |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
-#> Rows: 90
-#> Columns: 8
-#> Groups: col [9]
-#> $ row             <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, …
-#> $ col             <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, …
+#> Rows: 105
+#> Columns: 13
+#> Groups: col [10]
+#> $ row             <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, …
+#> $ col             <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8,…
 #> $ cell_type       <chr> "cell", "cell", "cell", "cell", "cell", "cell", "cell"…
 #> $ value_type      <chr> "string", "boolean", "currency", "date", "time", "date…
-#> $ cell_formula    <chr> NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", NA,…
-#> $ cell_content    <chr> "Cat", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06…
-#> $ base_value      <chr> "Cat", "true", "1.2", "2022-06-15", "PT13H24M56S", "20…
-#> $ currency_symbol <chr> NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, "GBP", …
+#> $ cell_content    <chr> "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/0…
+#> $ base_value      <chr> "Cell", "true", "1.2", "2022-06-15", "PT13H24M56S", "2…
+#> $ numeric_value   <dbl> NA, NA, 1.2000, NA, NA, NA, 12034.5679, 0.5467, 6579.2…
+#> $ logical_value   <lgl> NA, TRUE, NA, NA, NA, NA, NA, NA, NA, NA, NA, FALSE, N…
+#> $ currency_symbol <chr> NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, NA, "GB…
+#> $ has_formula     <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
+#> $ cell_formula    <chr> NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", "of…
+#> $ comment         <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "Test comment"…
+#> $ error           <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
 
 types_cells |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::slice_head(n = 2) |>
   dplyr::select(-cell_type)
-#> # A tibble: 18 × 7
-#> # Groups:   col [9]
-#>      row   col value_type cell_formula   cell_content base_value currency_symbol
-#>    <int> <int> <chr>      <chr>          <chr>        <chr>      <chr>          
-#>  1     2     1 string     <NA>           Cat          Cat        <NA>           
-#>  2     3     1 string     <NA>           Dog          Dog        <NA>           
-#>  3     2     2 boolean    <NA>           TRUE         true       <NA>           
-#>  4     3     2 boolean    <NA>           FALSE        false      <NA>           
-#>  5     2     3 currency   <NA>           £1.20        1.2        GBP            
-#>  6     3     3 currency   <NA>           £1.20        1.2        GBP            
-#>  7     2     4 date       <NA>           15/06/22     2022-06-15 <NA>           
-#>  8     3     4 date       <NA>           06/15/22     2022-06-15 <NA>           
-#>  9     2     5 time       <NA>           13:24:56     PT13H24M5… <NA>           
-#> 10     3     5 time       <NA>           13:24        PT13H24M5… <NA>           
-#> 11     2     6 date       <NA>           15/06/2022 … 2022-06-1… <NA>           
-#> 12     3     6 date       <NA>           15/06/22 13… 2022-06-1… <NA>           
-#> 13     2     7 float      <NA>           12035        12034.567… <NA>           
-#> 14     3     7 float      <NA>           12034.57     12034.567… <NA>           
-#> 15     2     8 float      <NA>           0.5467       0.5467     <NA>           
-#> 16     3     8 percentage <NA>           55%          0.5467     <NA>           
-#> 17     2     9 float      of:=[.G2]*[.H… 6579.3       6579.2982… <NA>           
-#> 18     3     9 float      of:=[.G3]*[.H… 6579.3       6579.2982… <NA>
+#> # A tibble: 20 × 12
+#> # Groups:   col [10]
+#>      row   col value_type cell_content    base_value numeric_value logical_value
+#>    <int> <int> <chr>      <chr>           <chr>              <dbl> <lgl>        
+#>  1     2     1 string     Cell            "Cell"            NA     NA           
+#>  2     3     1 string     Cell with comm… "Cell wit…        NA     NA           
+#>  3     2     2 boolean    TRUE            "true"            NA     TRUE         
+#>  4     3     2 boolean    FALSE           "false"           NA     FALSE        
+#>  5     2     3 currency   £1.20           "1.2"              1.2   NA           
+#>  6     3     3 currency   £1.20           "1.2"              1.2   NA           
+#>  7     2     4 date       15/06/22        "2022-06-…        NA     NA           
+#>  8     3     4 date       06/15/22        "2022-06-…        NA     NA           
+#>  9     2     5 time       13:24:56        "PT13H24M…        NA     NA           
+#> 10     3     5 time       13:24           "PT13H24M…        NA     NA           
+#> 11     2     6 date       15/06/2022 13:… "2022-06-…        NA     NA           
+#> 12     3     6 date       15/06/22 13:24  "2022-06-…        NA     NA           
+#> 13     2     7 float      12035           "12034.56…     12035.    NA           
+#> 14     3     7 float      12034.57        "12034.56…     12035.    NA           
+#> 15     2     8 float      0.5467          "0.5467"           0.547 NA           
+#> 16     3     8 percentage 55%             "0.5467"           0.547 NA           
+#> 17     2     9 float      6579.3          "6579.298…      6579.    NA           
+#> 18     3     9 float      6579.3          "6579.298…      6579.    NA           
+#> 19     2    10 string     #N/A            ""                NA     NA           
+#> 20     3    10 string     #DIV/0!         ""                NA     NA           
+#> # … with 5 more variables: currency_symbol <chr>, has_formula <lgl>,
+#> #   cell_formula <chr>, comment <chr>, error <dbl>
 ```
 
 ## Performance
@@ -178,12 +187,12 @@ types_cells_quick |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
-#> Rows: 90
+#> Rows: 105
 #> Columns: 3
-#> Groups: col [9]
-#> $ row          <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, …
-#> $ col          <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, …
-#> $ cell_content <chr> "Cat", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06/20…
+#> Groups: col [10]
+#> $ row          <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, …
+#> $ col          <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,…
+#> $ cell_content <chr> "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06/2…
 ```
 
 To test performance we will use an ODS file published by the UK
