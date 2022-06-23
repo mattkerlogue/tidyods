@@ -121,10 +121,8 @@
 <span class="co">#&gt; 6 Gentoo    TRUE             45.6       4680.</span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">penguin_sheet</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"penguins"</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; Getting ODS sheet</span>
 <span class="co">#&gt; Unzipping ODS file</span>
-<span class="co">#&gt; Getting ODS sheetReading XML file</span>
-<span class="co">#&gt; Getting ODS sheetProcessing rows...</span>
+<span class="co">#&gt; Reading XML file</span>
 
 <span class="va">penguin_sheet</span>
 <span class="co">#&gt; # A tibble: 7 × 4</span>
@@ -140,18 +138,17 @@
 <p>While the <code>types</code> sheet shows examples of the different ODS data types:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">types_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span><span class="op">)</span>
-<span class="co">#&gt; Getting ODS sheet</span>
 <span class="co">#&gt; Unzipping ODS file</span>
-<span class="co">#&gt; Getting ODS sheetReading XML file</span>
-<span class="co">#&gt; Getting ODS sheetProcessing rows...</span>
+<span class="co">#&gt; Reading XML file</span>
 
 <span class="va">types_cells</span> |&gt; 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt; Rows: 105</span>
+<span class="co">#&gt; Rows: 110</span>
 <span class="co">#&gt; Columns: 13</span>
 <span class="co">#&gt; Groups: col [10]</span>
+<span class="co">#&gt; $ sheet           &lt;chr&gt; "types", "types", "types", "types", "types", "types", …</span>
 <span class="co">#&gt; $ row             &lt;int&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, …</span>
 <span class="co">#&gt; $ col             &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8,…</span>
 <span class="co">#&gt; $ cell_type       &lt;chr&gt; "cell", "cell", "cell", "cell", "cell", "cell", "cell"…</span>
@@ -163,7 +160,6 @@
 <span class="co">#&gt; $ currency_symbol &lt;chr&gt; NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, NA, "GB…</span>
 <span class="co">#&gt; $ has_formula     &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
 <span class="co">#&gt; $ cell_formula    &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", "of…</span>
-<span class="co">#&gt; $ comment         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "Test comment"…</span>
 <span class="co">#&gt; $ error           &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
 
 <span class="va">types_cells</span> |&gt;
@@ -173,73 +169,95 @@
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">cell_type</span><span class="op">)</span>
 <span class="co">#&gt; # A tibble: 20 × 12</span>
 <span class="co">#&gt; # Groups:   col [10]</span>
-<span class="co">#&gt;      row   col value_type cell_content    base_value numeric_value logical_value</span>
-<span class="co">#&gt;    &lt;int&gt; &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;           &lt;chr&gt;              &lt;dbl&gt; &lt;lgl&gt;        </span>
-<span class="co">#&gt;  1     2     1 string     Cell            "Cell"            NA     NA           </span>
-<span class="co">#&gt;  2     3     1 string     Cell with comm… "Cell wit…        NA     NA           </span>
-<span class="co">#&gt;  3     2     2 boolean    TRUE            "true"            NA     TRUE         </span>
-<span class="co">#&gt;  4     3     2 boolean    FALSE           "false"           NA     FALSE        </span>
-<span class="co">#&gt;  5     2     3 currency   £1.20           "1.2"              1.2   NA           </span>
-<span class="co">#&gt;  6     3     3 currency   £1.20           "1.2"              1.2   NA           </span>
-<span class="co">#&gt;  7     2     4 date       15/06/22        "2022-06-…        NA     NA           </span>
-<span class="co">#&gt;  8     3     4 date       06/15/22        "2022-06-…        NA     NA           </span>
-<span class="co">#&gt;  9     2     5 time       13:24:56        "PT13H24M…        NA     NA           </span>
-<span class="co">#&gt; 10     3     5 time       13:24           "PT13H24M…        NA     NA           </span>
-<span class="co">#&gt; 11     2     6 date       15/06/2022 13:… "2022-06-…        NA     NA           </span>
-<span class="co">#&gt; 12     3     6 date       15/06/22 13:24  "2022-06-…        NA     NA           </span>
-<span class="co">#&gt; 13     2     7 float      12035           "12034.56…     12035.    NA           </span>
-<span class="co">#&gt; 14     3     7 float      12034.57        "12034.56…     12035.    NA           </span>
-<span class="co">#&gt; 15     2     8 float      0.5467          "0.5467"           0.547 NA           </span>
-<span class="co">#&gt; 16     3     8 percentage 55%             "0.5467"           0.547 NA           </span>
-<span class="co">#&gt; 17     2     9 float      6579.3          "6579.298…      6579.    NA           </span>
-<span class="co">#&gt; 18     3     9 float      6579.3          "6579.298…      6579.    NA           </span>
-<span class="co">#&gt; 19     2    10 string     #N/A            ""                NA     NA           </span>
-<span class="co">#&gt; 20     3    10 string     #DIV/0!         ""                NA     NA           </span>
-<span class="co">#&gt; # … with 5 more variables: currency_symbol &lt;chr&gt;, has_formula &lt;lgl&gt;,</span>
-<span class="co">#&gt; #   cell_formula &lt;chr&gt;, comment &lt;chr&gt;, error &lt;dbl&gt;</span></code></pre></div>
+<span class="co">#&gt;    sheet   row   col value_type cell_content        base_value     numeric_value</span>
+<span class="co">#&gt;    &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;               &lt;chr&gt;                  &lt;dbl&gt;</span>
+<span class="co">#&gt;  1 types     2     1 string     Cell                "Cell"                NA    </span>
+<span class="co">#&gt;  2 types     3     1 string     Cell with comment   "Cell with co…        NA    </span>
+<span class="co">#&gt;  3 types     2     2 boolean    TRUE                "true"                NA    </span>
+<span class="co">#&gt;  4 types     3     2 boolean    FALSE               "false"               NA    </span>
+<span class="co">#&gt;  5 types     2     3 currency   £1.20               "1.2"                  1.2  </span>
+<span class="co">#&gt;  6 types     3     3 currency   £1.20               "1.2"                  1.2  </span>
+<span class="co">#&gt;  7 types     2     4 date       15/06/22            "2022-06-15"          NA    </span>
+<span class="co">#&gt;  8 types     3     4 date       06/15/22            "2022-06-15"          NA    </span>
+<span class="co">#&gt;  9 types     2     5 time       13:24:56            "PT13H24M56S"         NA    </span>
+<span class="co">#&gt; 10 types     3     5 time       13:24               "PT13H24M56S"         NA    </span>
+<span class="co">#&gt; 11 types     2     6 date       15/06/2022 13:24:56 "2022-06-15T1…        NA    </span>
+<span class="co">#&gt; 12 types     3     6 date       15/06/22 13:24      "2022-06-15T1…        NA    </span>
+<span class="co">#&gt; 13 types     2     7 float      12035               "12034.56789"      12035.   </span>
+<span class="co">#&gt; 14 types     3     7 float      12034.57            "12034.56789"      12035.   </span>
+<span class="co">#&gt; 15 types     2     8 float      0.5467              "0.5467"               0.547</span>
+<span class="co">#&gt; 16 types     3     8 percentage 55%                 "0.5467"               0.547</span>
+<span class="co">#&gt; 17 types     2     9 float      6579.3              "6579.2982654…      6579.   </span>
+<span class="co">#&gt; 18 types     3     9 float      6579.3              "6579.2982654…      6579.   </span>
+<span class="co">#&gt; 19 types     2    10 string     #N/A                ""                    NA    </span>
+<span class="co">#&gt; 20 types     3    10 string     #DIV/0!             ""                    NA    </span>
+<span class="co">#&gt; # … with 5 more variables: logical_value &lt;lgl&gt;, currency_symbol &lt;chr&gt;,</span>
+<span class="co">#&gt; #   has_formula &lt;lgl&gt;, cell_formula &lt;chr&gt;, error &lt;dbl&gt;</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
 </h2>
 <p>An ODS file is a zipped collection of XML files and associated files. <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a>, like the <code>{readODS}</code> package, uses the <a href="https://xml2.r-lib.org" class="external-link">xml2</a> package to process this file. There are three likely sources of performance issues: downloading of remote files, unzipping the ODS file, processing rows.</p>
-<p>With default settings, performance of <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> functions is slower than <code>{readODS}</code>, however <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> provides console messages and progress bars to the user.</p>
-<p>Performance can be improved by setting <code>quick = TRUE</code> in <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> and <code><a href="reference/read_ods_sheet.html">read_ods_sheet()</a></code>, this will extract only a simple text representation of the cell, i.e. it will not provide information on cell or value types, formulas or the underlying base value for numbers, dates or times. This method also ignores replicated white space characters.</p>
+<p>With default settings, performance of <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> functions is marginally slower for small files than <code>{readODS}</code>, but this is unlikely to be noticeable to users. When working with larger files performnace is comparable.</p>
+<p>Performance can be improved by setting <code>quick = TRUE</code> in <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> and <code><a href="reference/read_ods_sheet.html">read_ods_sheet()</a></code>, this will extract only a simple text representation of the cell, i.e. it will not provide information on cell or value types, formulas or the underlying base value for numbers, dates or times.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">types_cells_quick</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; Getting ODS sheet</span>
 <span class="co">#&gt; Unzipping ODS file</span>
-<span class="co">#&gt; Getting ODS sheetReading XML file</span>
-<span class="co">#&gt; Getting ODS sheetProcessing rows...</span>
+<span class="co">#&gt; Reading XML file</span>
 
 <span class="va">types_cells_quick</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co">#&gt; Rows: 105</span>
-<span class="co">#&gt; Columns: 3</span>
+<span class="co">#&gt; Rows: 110</span>
+<span class="co">#&gt; Columns: 4</span>
 <span class="co">#&gt; Groups: col [10]</span>
+<span class="co">#&gt; $ sheet        &lt;chr&gt; "types", "types", "types", "types", "types", "types", "ty…</span>
 <span class="co">#&gt; $ row          &lt;int&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, …</span>
 <span class="co">#&gt; $ col          &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,…</span>
 <span class="co">#&gt; $ cell_content &lt;chr&gt; "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06/2…</span></code></pre></div>
-<p>To test performance we will use an ODS file published by the UK Government on the <a href="https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021" class="external-link">number of civil servants by postcode</a> (5,544 rows by 11 columns). Analysis of read times indicates that using the <code>quick = TRUE</code> setting for <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> results in a read that is 10 times faster than the full cell extraction method and around 1.5 times faster than reading the sheet with <code>{readODS}</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">microbenchmark</span><span class="fu">::</span><span class="fu">microbenchmark</span><span class="op">(</span>
-  <span class="st">"tidyods_slow"</span> <span class="op">=</span> <span class="fu">tidyods</span><span class="fu">::</span><span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">test_ods</span>, <span class="st">"Staff_in_post"</span>, 
-    quick <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>,
-  <span class="st">"tidyods_quick"</span> <span class="op">=</span> <span class="fu">tidyods</span><span class="fu">::</span><span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">test_ods</span>, <span class="st">"Staff_in_post"</span>, 
-    quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
-  <span class="st">"readODS"</span> <span class="op">=</span> <span class="fu">readODS</span><span class="fu">::</span><span class="fu">read_ods</span><span class="op">(</span><span class="va">test_ods</span>, <span class="st">"Staff_in_post"</span><span class="op">)</span>,
-  times <span class="op">=</span> <span class="fl">3</span>
+<code class="sourceCode R"><span class="va">test_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"basic_example.ods"</span>, package <span class="op">=</span> <span class="st">"tidyods"</span><span class="op">)</span>
+
+<span class="fu">microbenchmark</span><span class="fu">::</span><span class="fu">microbenchmark</span><span class="op">(</span>
+  tidy_quick <span class="op">=</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">test_file</span>, <span class="fl">1</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
+  tidy_slow <span class="op">=</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">test_file</span>, <span class="fl">1</span><span class="op">)</span>,
+  tidy_sheet_quick <span class="op">=</span> <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">test_file</span>, <span class="fl">1</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
+  tidy_sheet_slow <span class="op">=</span> <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">test_file</span>, <span class="fl">1</span><span class="op">)</span>,
+  read_ods <span class="op">=</span> <span class="fu">readODS</span><span class="fu">::</span><span class="fu">read_ods</span><span class="op">(</span><span class="va">test_file</span>, <span class="fl">1</span><span class="op">)</span>,
+  times <span class="op">=</span> <span class="fl">100</span>
+<span class="op">)</span>
+
+<span class="co">#&gt; Unit: milliseconds</span>
+<span class="co">#&gt;              expr       min       lq     mean   median       uq       max neval</span>
+<span class="co">#&gt;        tidy_quick 24.280200 25.44304 27.45693 26.25878 29.51594  33.89195   100</span>
+<span class="co">#&gt;         tidy_slow 34.481574 36.26819 38.81044 37.82586 41.17425  47.92445   100</span>
+<span class="co">#&gt;  tidy_sheet_quick 31.678445 33.50053 36.11012 34.95258 38.76044  44.62018   100</span>
+<span class="co">#&gt;   tidy_sheet_slow 41.229846 42.25362 47.12949 46.38392 47.86963 125.16058   100</span>
+<span class="co">#&gt;          read_ods  9.995062 10.46072 12.07059 10.58868 10.95301 118.04728   100</span></code></pre></div>
+<p>To test real-world performance we will use an ODS file published by the UK Government on the <a href="https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021" class="external-link">number of civil servants by postcode</a> (5,544 rows by 11 columns). Analysis of read times indicates similar performance to that achieved by <code>{readODS}</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">postcodes_file</span> <span class="op">&lt;-</span> <span class="st">"~/Downloads/Civil-servants-by-postcode-department-
+  responsibility-level-and-leaving-cause-2021.ods"</span>
+
+<span class="fu">microbenchmark</span><span class="fu">::</span><span class="fu">microbenchmark</span><span class="op">(</span>
+  tidy_quick <span class="op">=</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">postcodes_file</span>, <span class="fl">2</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
+  tidy_slow <span class="op">=</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">postcodes_file</span>, <span class="fl">2</span><span class="op">)</span>,
+  tidy_sheet_quick <span class="op">=</span> <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">postcodes_file</span>, <span class="fl">2</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,
+  tidy_sheet_slow <span class="op">=</span> <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">postcodes_file</span>, <span class="fl">2</span><span class="op">)</span>,
+  read_ods <span class="op">=</span> <span class="fu">readODS</span><span class="fu">::</span><span class="fu">read_ods</span><span class="op">(</span><span class="va">postcodes_file</span>, <span class="fl">2</span><span class="op">)</span>,
+  times <span class="op">=</span> <span class="fl">10</span>
 <span class="op">)</span>
 
 <span class="co">#&gt; Unit: seconds</span>
-<span class="co">#&gt;          expr     min      lq    mean  median      uq     max neval</span>
-<span class="co">#&gt;  tidyods_slow 35.4833 35.7546 35.8626 36.0259 36.0523 36.0786     3</span>
-<span class="co">#&gt; tidyods_quick  3.2470  3.2584  3.2935  3.2697  3.3167  3.3638     3</span>
-<span class="co">#&gt;       readods  5.1141  5.1606  5.2050  5.2072  5.2505  5.2939     3</span></code></pre></div>
-<p>A cursory test of a huge file that is known to be slow/non-performative with {readODS} shows promise.</p>
+<span class="co">#&gt;              expr      min       lq     mean   median       uq      max neval</span>
+<span class="co">#&gt;        tidy_quick 5.696553 5.706185 5.849200 5.808597 5.990277 6.058689    10</span>
+<span class="co">#&gt;         tidy_slow 6.909598 7.037668 7.124450 7.146029 7.185813 7.287308    10</span>
+<span class="co">#&gt;  tidy_sheet_quick 5.758918 5.824600 5.951630 5.926395 6.084767 6.182411    10</span>
+<span class="co">#&gt;   tidy_sheet_slow 6.963679 7.049813 7.158550 7.091867 7.176565 7.626200    10</span>
+<span class="co">#&gt;          read_ods 4.774232 4.893009 5.025191 5.065590 5.108057 5.236603    10</span></code></pre></div>
+<p>Due to the reliance on <a href="https://xml2.r-lib.org/" class="external-link">xml2</a> very large files will perform poorly or run into memory limitations. This is being investigated as part of the package development.</p>
 <p>Performance issues are tracked and discussed in <a href="https://github.com/mattkerlogue/tidyods/issues/3" class="external-link">issue #3</a> in the package’s GitHub repository.</p>
-<p>However, if performance is a major determinant of your workflow (i.e. you have very large files), its likely more sensible to open the file in a spreadsheet application, save the file as a <code>.xslx</code> format file and read using <a href="https://github.com/nacnudus/tidyxl" class="external-link">tidyxl</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="related-projects">Related projects<a class="anchor" aria-label="anchor" href="#related-projects"></a>
