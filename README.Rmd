@@ -95,15 +95,14 @@ An ODS file is a zipped collection of XML files and associated files.
 package to process this file. There are three likely sources of performance 
 issues: downloading of remote files, unzipping the ODS file, processing rows.
 
-With default settings, performance of `{tidyods}` functions is slower than 
-`{readODS}`, however `{tidyods}` provides console messages and progress bars to
-the user.
+With default settings, performance of `{tidyods}` functions is marginally slower
+for small files than `{readODS}`, but this is unlikely to be noticeable to users.
+When working with larger files performnace is comparable.
 
 Performance can be improved by setting `quick = TRUE` in `read_ods_cells()` 
 and `read_ods_sheet()`, this will extract only a simple text representation of 
 the cell, i.e. it will not provide information on cell or value types, formulas 
-or the underlying base value for numbers, dates or times. This method also 
-ignores replicated white space characters.
+or the underlying base value for numbers, dates or times.
 
 ```{r}
 types_cells_quick <- read_ods_cells(example_file, "types", quick = TRUE)
@@ -114,39 +113,60 @@ types_cells_quick |>
   dplyr::glimpse()
 ```
 
-To test performance we will use an ODS file published by the UK Government on the
-[number of civil servants by postcode](https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021) (5,544 rows by 11 columns). Analysis of read 
-times indicates that using the `quick = TRUE` setting for `read_ods_cells()` 
-results in a read that is 10 times faster than the full cell extraction method 
-and around 1.5 times faster than reading the sheet with `{readODS}`.
+```r
+test_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
+
+microbenchmark::microbenchmark(
+  tidy_quick = read_ods_cells(test_file, 1, quick = TRUE),
+  tidy_slow = read_ods_cells(test_file, 1),
+  tidy_sheet_quick = read_ods_sheet(test_file, 1, quick = TRUE),
+  tidy_sheet_slow = read_ods_sheet(test_file, 1),
+  read_ods = readODS::read_ods(test_file, 1),
+  times = 100
+)
+
+#> Unit: milliseconds
+#>              expr       min       lq     mean   median       uq       max neval
+#>        tidy_quick 24.280200 25.44304 27.45693 26.25878 29.51594  33.89195   100
+#>         tidy_slow 34.481574 36.26819 38.81044 37.82586 41.17425  47.92445   100
+#>  tidy_sheet_quick 31.678445 33.50053 36.11012 34.95258 38.76044  44.62018   100
+#>   tidy_sheet_slow 41.229846 42.25362 47.12949 46.38392 47.86963 125.16058   100
+#>          read_ods  9.995062 10.46072 12.07059 10.58868 10.95301 118.04728   100
+
+```
+
+To test real-world performance we will use an ODS file published by the UK 
+Government on the [number of civil servants by postcode](https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021) (5,544 rows by 11 columns). Analysis 
+of read times indicates similar performance to that achieved by `{readODS}`.
 
 ```r
+postcodes_file <- "~/Downloads/Civil-servants-by-postcode-department-
+  responsibility-level-and-leaving-cause-2021.ods"
+
 microbenchmark::microbenchmark(
-  "tidyods_slow" = tidyods::read_ods_cells(test_ods, "Staff_in_post", 
-    quick = FALSE),
-  "tidyods_quick" = tidyods::read_ods_cells(test_ods, "Staff_in_post", 
-    quick = TRUE),
-  "readODS" = readODS::read_ods(test_ods, "Staff_in_post"),
-  times = 3
+  tidy_quick = read_ods_cells(postcodes_file, 2, quick = TRUE),
+  tidy_slow = read_ods_cells(postcodes_file, 2),
+  tidy_sheet_quick = read_ods_sheet(postcodes_file, 2, quick = TRUE),
+  tidy_sheet_slow = read_ods_sheet(postcodes_file, 2),
+  read_ods = readODS::read_ods(postcodes_file, 2),
+  times = 10
 )
 
 #> Unit: seconds
-#>          expr     min      lq    mean  median      uq     max neval
-#>  tidyods_slow 35.4833 35.7546 35.8626 36.0259 36.0523 36.0786     3
-#> tidyods_quick  3.2470  3.2584  3.2935  3.2697  3.3167  3.3638     3
-#>       readods  5.1141  5.1606  5.2050  5.2072  5.2505  5.2939     3
+#>              expr      min       lq     mean   median       uq      max neval
+#>        tidy_quick 5.696553 5.706185 5.849200 5.808597 5.990277 6.058689    10
+#>         tidy_slow 6.909598 7.037668 7.124450 7.146029 7.185813 7.287308    10
+#>  tidy_sheet_quick 5.758918 5.824600 5.951630 5.926395 6.084767 6.182411    10
+#>   tidy_sheet_slow 6.963679 7.049813 7.158550 7.091867 7.176565 7.626200    10
+#>          read_ods 4.774232 4.893009 5.025191 5.065590 5.108057 5.236603    10
 ```
 
-A cursory test of a huge file that is known to be slow/non-performative with 
-{readODS} shows promise.
+Due to the reliance on `{xml2}` very large files will perform poorly or run into
+memory limitations. This is being investigated as part of the package development.
 
 Performance issues are tracked and discussed in 
 [issue #3](https://github.com/mattkerlogue/tidyods/issues/3) 
 in the package's GitHub repository.
-
-However, if performance is a major determinant of your workflow (i.e. you have
-very large files), its likely more sensible to open the file in a spreadsheet
-application, save the file as a `.xslx` format file and read using `{tidyxl}`.
 
 ## Related projects
 The `{tidyODS}` package is heavily inspired by two existing packages:

@@ -25,196 +25,268 @@ unzip_ods_xml <- function(ods_file) {
   cli::cli_progress_message("Unzipping ODS file")
   utils::unzip(ods_file, files = "content.xml", exdir = temp_dir,
                overwrite = TRUE)
+
   return(file.path(temp_dir, "content.xml"))
 
 }
 
 # read the extracted XML file
 extract_ods_xml <- function(ods_file) {
+
   xml_file <- unzip_ods_xml(ods_file)
+
   if (!file.exists(xml_file)){
     cli::cli_abort("Error in unzip procedure")
   }
+
   cli::cli_progress_message("Reading XML file")
-  xml2::read_xml(xml_file)
+
+  return(xml2::read_xml(xml_file))
+
 }
 
 # get xpaths of sheets within the XML
-ods_sheet_paths <- function(ods_xml) {
+ods_sheet_paths <- function(ods_xml, short = FALSE, flip = FALSE) {
 
   # get nodes
   tbl_nodes <- xml2::xml_find_all(
     x = ods_xml,
-    xpath = "/office:document-content/office:body/office:spreadsheet/table:table"
+    xpath = "//table:table"
   )
 
   # get xpaths and name with sheet name
   tbl_paths <- xml2::xml_path(tbl_nodes)
 
-  names(tbl_paths) <- xml2::xml_attr(
+  tbl_names <- xml2::xml_attr(
     x = tbl_nodes,
     attr = "table:name",
     ns = xml2::xml_ns(tbl_nodes)
   )
 
-  return(tbl_paths)
+  if (short) {
+    tbl_paths <- gsub("^.*(table:table\\[\\d+\\]?)\\.*$", "\\1", tbl_paths)
+  }
+
+  if (flip) {
+    out <- stats::setNames(tbl_names, tbl_paths)
+  } else {
+    out <- stats::setNames(tbl_paths, tbl_names)
+  }
+
+  return(out)
 
 }
 
-# get the XML node of a sheet
-get_tbl_xml <- function(ods_file, sheet, .rows_only = TRUE) {
+extract_cells <- function(tbl_xml, ns, quick = FALSE) {
 
-  cli::cli_progress_message("Getting ODS sheet")
-
-  # get the XML
-  ods_xml <- extract_ods_xml(ods_file)
-
-  # get sheet paths
-  ods_sheets <- ods_sheet_paths(ods_xml)
-
-  # evaluate sheet argument
-  if (length(sheet) != 1) {
-    cli::cli_abort(
-      c(
-        "{.arg sheet} must be of length 1",
-        x = "You supplied a vector of length {.val {length(sheet)}}"
-      )
-    )
-  } else if (!(is.character(sheet) | is.numeric(sheet))) {
-    cli::cli_abort(
-      c(
-        "{.arg sheet} must be a character vector",
-        x = "You supplied a {.cls {class(sheet)}} vector"
-      )
-    )
-  } else if (is.character(sheet) & !(sheet %in% names(ods_sheets))) {
-    cli::cli_abort(
-      c(
-        "Invalid {.arg sheet} provided.",
-        x = "{.val {sheet}} does not exist in {.file {ods_file}}",
-        i = "Use {.fun ods_sheets} to get a list of sheets for this file."
-      )
-    )
-  }
-
-  # get the xpath for the sheet
-  tbl_path <- ods_sheets[sheet]
-
-  # find the sheet node
-  tbl_node <- xml2::xml_find_all(
-    x = ods_xml,
-    xpath = tbl_path
+  cell_nodes <- xml2::xml_find_all(
+    tbl_xml,
+    "descendant::table:table-cell | descendant::table:covered-table-cell"
   )
 
-  # default is to extract only the table row objects
-  if (.rows_only) {
-    tbl_node <- xml2::xml_find_all(
-      x = tbl_node,
-      xpath = "table:table-row"
+  cell_paths <- xml2::xml_path(cell_nodes)
+
+  cell_ref <- tibble::tibble(
+    cell_id = seq_along(cell_paths),
+    cell_path = cell_paths,
+    row_path = gsub("/table:table-cell.*$|/table:covered-table-cell.*$",
+                    "", cell_paths),
+    cell_el = xml2::xml_name(cell_nodes, ns)
+  )
+
+  cell_text_nodes <- xml2::xml_find_all(
+    tbl_xml,
+    "descendant::table:table-cell/text:p | descendant::table:covered-table-cell/text:p"
     )
+
+  cell_text <- tibble::tibble(
+    content_text = xml2::xml_text(cell_text_nodes),
+    content_paths = xml2::xml_path(cell_text_nodes),
+    cell_path = gsub("/text:p.*$", "", content_paths)
+  ) %>%
+    dplyr::group_by(cell_path) %>%
+    dplyr::arrange(content_paths) %>%
+    dplyr::summarise(cell_content = paste0(content_text, collapse = "\n"))
+
+  if (!quick) {
+
+    cell_attrs <- xml2::xml_attrs(cell_nodes, ns = ns)
+    cell_attrs_df <- tidyr::unnest_wider(
+      tibble::enframe(cell_attrs, name = "cell_id"),
+      value
+    ) %>%
+      dplyr::rename_with(gsub, pattern = ":|-", replacement = "_")
+
+    if (!("table_number_columns_repeated" %in% names(cell_attrs_df))) {
+      cell_attrs_df <- dplyr::mutate(cell_attrs_df,
+                                    table_number_columns_repeated = NA_character_)
+    }
+
+  } else {
+
+    cell_attrs_df <- tibble::tibble(
+      cell_id = seq_along(cell_paths),
+      office_value_type = xml2::xml_attr(
+        cell_nodes, "office:value-type", ns = ns
+      ),
+      table_number_columns_repeated = xml2::xml_attr(
+        cell_nodes, "table:number-columns-repeated", ns = ns
+      )
+    )
+
   }
 
-  return(tbl_node)
+  cell_tbl <- cell_ref %>%
+    dplyr::full_join(cell_text, by = c("cell_path")) %>%
+    dplyr::left_join(cell_attrs_df, by = c("cell_id"))
+
+  return(cell_tbl)
 
 }
 
-# turn the table node into a tibble
+extract_rows <- function(tbl_xml, ns, quick = FALSE) {
+
+  row_nodes <- xml2::xml_find_all(tbl_xml, "descendant::table:table-row")
+  row_paths <- xml2::xml_path(row_nodes)
+
+  if (!quick) {
+    row_attrs <- xml2::xml_attrs(row_nodes, ns = ns)
+
+    row_attrs_df <- tidyr::unnest_wider(
+      tibble::enframe(row_attrs, name = "row_id"),
+      value
+    ) %>%
+      dplyr::rename_with(gsub, pattern = ":|-", replacement = "_")
+
+    if (!("table_number_rows_repeated" %in% names(row_attrs_df))) {
+      row_attrs_df <- dplyr::mutate(row_attrs_df,
+                                    table_number_rows_repeated = NA_character_)
+    }
+
+  } else {
+
+    row_attrs_df <- tibble::tibble(
+      row_id = seq_along(row_nodes),
+      table_number_rows_repeated = xml2::xml_attr(
+        row_nodes, "table:number-rows-repeated", ns = ns
+      )
+    )
+
+  }
+
+  row_tbl <- tibble::tibble(
+    row_id = seq_along(row_nodes),
+    row_path = row_paths,
+    row_children = xml2::xml_length(row_nodes)
+  ) %>%
+    dplyr::left_join(row_attrs_df, by = "row_id")
+
+  return(row_tbl)
+
+}
+
 extract_table <- function(tbl_xml, quick = FALSE, whitespace = FALSE) {
 
-  cli::cli_progress_message("Processing rows...")
+  ns <- xml2::xml_ns(tbl_xml)
 
-  # set progress bar id
-  pbid <- cli::cli_progress_bar(
-    "Processing rows",
-    total = length(tbl_xml),
-    format_done =
-      "{prettyNum(cli::pb_total, ',')} rows processed in {cli::pb_elapsed}",
-    clear = FALSE
+  cell_tbl <- extract_cells(tbl_xml, ns, quick = quick)
+  row_tbl <- extract_rows(tbl_xml, ns, quick = quick)
+
+  combined_tbl <- dplyr::left_join(
+    cell_tbl, row_tbl,
+    by = c("row_path"),
+    suffix = c("_cell", "_row")
   )
 
-  # process rows
-  row_data <- tibble::tibble(
-    base_row = seq_along(tbl_xml),
-    row_repeats = as.numeric(xml2::xml_attr(tbl_xml, "number-rows-repeated")),
-    row_nodes = list(tbl_xml),
-    row_content = purrr::map(tbl_xml, extract_row, quick = quick, .pb_id = pbid)
-  )
+  sheets <- ods_sheet_paths(tbl_xml, short = TRUE, flip = TRUE)
 
-  # if row is not repeated set repeat weight to 1
-  row_data$row_repeats[is.na(row_data$row_repeats)] <- 1
-
-  # if final row is blank set its repeat to 0
-  # MS Excel has a habit of including the final row as blank
-  # and a large replication weight
-  if (xml2::xml_text(tbl_xml[length(tbl_xml)]) == "") {
-    row_data$row_repeats[length(tbl_xml)] <- 0
-  }
-
-  ods_cells <- row_data %>%
-    dplyr::select(base_row, row_repeats, row_content) %>%
-    tidyr::unnest(row_content) %>%
+  cell_locations <- combined_tbl %>%
+    dplyr::select(
+      row_id, cell_id, table_number_rows_repeated, table_number_columns_repeated,
+      row_children, cell_content, office_value_type, cell_path
+    ) %>%
     dplyr::mutate(
-      cell_repeats = dplyr::case_when(
-        cell_children == 0 ~ 1,
-        is.na(cell_repeats) ~ 1,
-        TRUE ~ cell_repeats
+      sheet = gsub("^.*(table:table\\[\\d+\\]?)\\/.*$", "\\1", cell_path),
+      sheet = sheets[sheet]
+    ) %>%
+    dplyr::arrange(sheet, row_id, cell_id) %>%
+    dplyr::group_by(sheet, row_id) %>%
+    dplyr::mutate(
+      base_col = dplyr::row_number(),
+      last_col = base_col == max(base_col)
+    ) %>%
+    dplyr::group_by(sheet, .add = FALSE) %>%
+    dplyr::mutate(
+      base_row = row_id - min(row_id) + 1,
+      last_row = row_id == max(row_id)
+    ) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(
+      col_repeats = dplyr::case_when(
+        last_col & !is.na(table_number_columns_repeated) &
+          is.na(office_value_type) & is.na(cell_content) ~ 0,
+        is.na(table_number_columns_repeated) ~ 1,
+        TRUE ~ as.numeric(table_number_columns_repeated)
+      ),
+      row_repeats = dplyr::case_when(
+        last_row & row_children == 1 & !is.na(table_number_rows_repeated) &
+          is.na(office_value_type) & is.na(cell_content) ~ 0,
+        is.na(table_number_rows_repeated) ~ 1,
+        TRUE ~ as.numeric(table_number_rows_repeated)
       )
     ) %>%
-    tidyr::uncount(
-      weights = cell_repeats,
-      .id = "col_iteration",
-      .remove = FALSE
-    ) %>%
-    tidyr::uncount(
-      weights = row_repeats,
-      .id = "row_iteration",
-      .remove = FALSE
-    ) %>%
-    dplyr::arrange(base_row, row_iteration, base_col, col_iteration) %>%
+    tidyr::uncount(row_repeats, .remove = FALSE, .id = "row_iteration") %>%
+    tidyr::uncount(col_repeats, .remove = FALSE, .id = "col_iteration") %>%
+    dplyr::arrange(sheet, base_row, row_iteration, base_col, col_iteration) %>%
     dplyr::group_by(base_row, row_iteration, .add = FALSE) %>%
-    dplyr::mutate(row = dplyr::cur_group_id()) %>%
-    dplyr::group_by(base_col, col_iteration, .add = FALSE) %>%
-    dplyr::mutate(col = dplyr::cur_group_id()) %>%
+    dplyr::mutate(row = dplyr::cur_group_id(),
+                  col = dplyr::row_number()) %>%
     dplyr::ungroup()
 
-  # create output tibble
   if (quick) {
-    ods_cells_out <- ods_cells %>%
-      dplyr::select(row, col, cell_content)
+
+    ods_cells <- cell_locations %>%
+      dplyr::select(sheet, row, col, cell_content)
+
   } else {
-    table_template <- tibble::tibble(
-      "base_row" = integer(),
-      "row_repeats" = numeric(),
-      "base_col" = integer(),
-      "cell_element" = character(),
-      "cell_content" = character(),
-      "cell_repeats" = numeric(),
-      "cell_children" = integer(),
-      "office:value-type" = character(),
-      "calcext:value-type" = character(),
-      "table:style-name" = character(),
-      "office:boolean-value" = character(),
-      "office:currency" = character(),
-      "office:value" = character(),
-      "office:date-value" = character(),
-      "office:string-value" = character(),
-      "office:time-value" = character(),
-      "table:formula" = character(),
-      "comment" = character(),
-      "error" = character(),
-      "col_iteration" = integer(),
-      "row_iteration" = integer(),
-      "row" = integer(),
-      "col" = integer()
+
+    template_table <- tibble::tibble(
+      sheet = character(),
+      row = integer(),
+      col = integer(),
+      cell_id = integer(),
+      cell_path = character(),
+      row_id = integer(),
+      row_path = character(),
+      row_children = integer(),
+      table_style_name_row = character(),
+      table_number_rows_repeated = character(),
+      table_number_columns_repeated = character(),
+      cell_el = character(),
+      cell_content = character(),
+      office_value_type = character(),
+      calcext_value_type = character(),
+      table_style_name_cell = character(),
+      office_boolean_value = character(),
+      office_currency = character(),
+      office_value = character(),
+      office_date_value = character(),
+      office_time_value = character(),
+      table_formula = character(),
+      office_string_value = character(),
+      table_number_columns_spanned = character(),
+      table_number_rows_spanned = character()
     )
 
-    ods_cells_out <- table_template %>%
-      dplyr::bind_rows(ods_cells) %>%
-      dplyr::rename_with(gsub, pattern = ":|-", replacement = "_") %>%
+    ods_cells <-  cell_locations %>%
+      dplyr::select(sheet, row, col, cell_id) %>%
+      dplyr::left_join(combined_tbl, by = "cell_id") %>%
+      dplyr::bind_rows(template_table) %>%
       dplyr::mutate(
         cell_type = dplyr::case_when(
-          cell_element == "covered-table-cell" ~ "merged",
-          is.na(office_value_type) ~ "empty",
+          cell_el == "table:covered-table-cell" ~ "merged",
+          is.na(office_value_type) ~ "blank",
+          is.na(cell_content) ~ "blank",
           TRUE ~ "cell"
         ),
         has_formula = !is.na(table_formula),
@@ -246,7 +318,7 @@ extract_table <- function(tbl_xml, quick = FALSE, whitespace = FALSE) {
         error = as.numeric(error)
       ) %>%
       dplyr::select(
-        row, col,
+        sheet, row, col,
         cell_type,
         value_type = office_value_type,
         cell_content,
@@ -256,111 +328,11 @@ extract_table <- function(tbl_xml, quick = FALSE, whitespace = FALSE) {
         currency_symbol = office_currency,
         has_formula,
         cell_formula = table_formula,
-        comment,
         error
       )
-  }
-
-  return(ods_cells_out)
-
-}
-
-# extract cells from a row
-extract_row <- function(row_node, quick = FALSE, whitespace = FALSE, .pb_id = NULL) {
-
-  # get cell nodes
-  cell_nodes <- xml2::xml_children(row_node)
-
-  # process cells
-  if (quick) {
-
-    row_cells <- tibble::tibble(
-      base_col = seq_along(cell_nodes),
-      cell_element = xml2::xml_name(cell_nodes),
-      cell_content = xml2::xml_text(cell_nodes),
-      cell_repeats = as.numeric(
-        xml2::xml_attr(cell_nodes, "number-columns-repeated")
-      ),
-      cell_children = xml2::xml_length(cell_nodes)
-    )
-
-  } else {
-
-    row_cells <- tibble::tibble(
-      base_col = seq_along(cell_nodes),
-      cell_element = xml2::xml_name(cell_nodes),
-      cell_content = purrr::map_chr(cell_nodes, get_text, whitespace = whitespace),
-      cell_repeats = as.numeric(
-        xml2::xml_attr(cell_nodes, "number-columns-repeated")
-      ),
-      cell_children = xml2::xml_length(cell_nodes),
-      comment = purrr::map_chr(cell_nodes, get_comment)
-    )
-
-    cell_attrs <- xml2::xml_attrs(cell_nodes, xml2::xml_ns(cell_nodes))
-
-    attrs_df <- tidyr::unnest_wider(tibble::enframe(cell_attrs), value)
-
-    row_cells <- dplyr::full_join(
-      row_cells,
-      attrs_df,
-      by = c("base_col" = "name")
-    )
 
   }
 
-  # update the progress bar
-  if (!is.null(.pb_id)){
-    cli::cli_progress_update(id = .pb_id)
-  }
-
-  return(row_cells)
-
-}
-
-get_text <- function(cell_node, whitespace = FALSE) {
-
-  # get paragraphs
-  text_elements <- xml2::xml_find_all(cell_node, "text:p")
-
-  if (whitespace) {
-
-    cell_text <- c()
-
-    for (el in text_elements) {
-      el_content <- xml2::xml_contents(el)
-      el_name <- xml2::xml_name(el_content)
-      el_text <- xml2::xml_text(el_content)
-      el_reps <- xml2::xml_attr(el_content, "c")
-      el_reps[is.na(el_reps)] <- 1
-      el_text[el_name == "s"] <- " "
-
-      cell_text <- c(
-        cell_text,
-        paste0(rep(el_text, el_reps), collapse = "")
-      )
-    }
-
-    cell_text <- paste0(cell_text, collapse = "\n")
-
-  } else {
-    cell_text <- paste0(xml2::xml_text(text_elements), collapse = "\n")
-  }
-
-  return(cell_text)
-
-}
-
-get_comment <- function(cell_node) {
-
-  annotation_node <- xml2::xml_find_all(cell_node, "office:annotation")
-
-  if (length(annotation_node) > 0) {
-    comment_text <- get_text(annotation_node, whitespace = TRUE)
-  } else {
-    comment_text <- NA_character_
-  }
-
-  return(comment_text)
+  return(ods_cells)
 
 }

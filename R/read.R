@@ -58,8 +58,13 @@
 #' repeated white space elements (i.e. `"A   B   C"` will be returned as
 #' `"A B C"`).
 #'
+#' @examples
+#' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
+#' example_cells <- read_ods_cells(example, 1)
+#' dplyr::glimpse(example_cells)
+#'
 #' @export
-read_ods_cells <- function(path, sheet, quick = FALSE, whitespace = FALSE) {
+read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE) {
 
   if (missing(path)) {
     cli::cli_abort("{.arg path} is not defined")
@@ -77,7 +82,42 @@ read_ods_cells <- function(path, sheet, quick = FALSE, whitespace = FALSE) {
     cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
   }
 
-  tbl_xml <- get_tbl_xml(ods_file = path, sheet = sheet)
+  ods_xml <- extract_ods_xml(ods_file = path)
+
+  sheets <- ods_sheet_paths(ods_xml)
+
+  sheet_path <- NULL
+
+  if (is.character(sheet)) {
+    if (!(sheet %in% names(sheets))) {
+      cli::cli_abort(
+        c(
+          "Invalid {.arg sheet} provided.",
+          x = "{.val {sheet}} does not exist in {.file {ods_file}}",
+          i = "Use {.fun ods_sheets} to get a list of sheets for this file."
+        )
+      )
+    } else {
+      sheet_path <- sheets[sheet]
+    }
+  } else if (is.numeric(sheet)) {
+    if (sheet > length(sheets)) {
+      cli::cli_abort(
+        c(
+          "Sheet number out of range.",
+          i = "There are only {length(sheets)} sheets in {.file {ods_file}}"
+        )
+      )
+    } else if (sheet > 0 ) {
+      sheet_path <- sheets[sheet]
+    }
+  }
+
+  if (is.null(sheet_path)) {
+    tbl_xml <- ods_xml
+  } else {
+    tbl_xml <- xml2::xml_find_all(ods_xml, sheet_path)
+  }
 
   ods_cells <- extract_table(tbl_xml, quick = quick, whitespace = whitespace)
 
@@ -114,6 +154,10 @@ read_ods_cells <- function(path, sheet, quick = FALSE, whitespace = FALSE) {
 #' `whitespace = FALSE` (the default), multiple whitespaces in cell content
 #' are ignored. See [read_ods_cells()] for further details.
 #'
+#' @examples
+#' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
+#' read_ods_sheet(example, 1)
+#'
 #' @export
 read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
                            quick = FALSE, whitespace = FALSE) {
@@ -132,6 +176,10 @@ read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
     cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
   } else if (!(is.character(sheet) | is.numeric(sheet))) {
     cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
+  } else if (is.numeric(sheet)) {
+    if (sheet < 1) {
+      cli::cli_abort("If numeric {.arg sheet} must be greater than 0")
+    }
   }
 
   ods_cells <- read_ods_cells(path, sheet, quick = quick,
@@ -143,6 +191,8 @@ read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
     ods_sheet <- simple_rectify(ods_cells, base_values = FALSE)
   }
 
+  return(ods_sheet)
+
 }
 
 #' List the sheets in an ODS file
@@ -153,12 +203,21 @@ read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
 #' @param path The ODS file
 #'
 #' @return A character vector of sheet names
+#'
+#' @examples
+#' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
+#' ods_sheets(example)
+#'
 #' @export
 ods_sheets <- function(path) {
 
   ods_xml <- extract_ods_xml(path)
-  ods_ns <- xml2::xml_ns(ods_xml)
 
-  names(ods_sheet_paths(ods_xml))
+  ns <- xml2::xml_ns(ods_xml)
+
+  sheets <- xml2::xml_attr(xml2::xml_find_all(ods_xml, "//table:table", ns = ns),
+                           "table:name", ns = ns)
+
+  return(sheets)
 
 }

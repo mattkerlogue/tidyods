@@ -20,8 +20,32 @@
 #' @return
 #' A tibble representing the original spreadsheet format.
 #'
+#' @examples
+#' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
+#' example_cells <- read_ods_cells(example, 1)
+#' simple_rectify(example_cells, base_values = TRUE)
+#'
 #' @export
 simple_rectify <- function(ods_cells, base_values = TRUE) {
+
+  if ("sheet" %in% names(ods_cells)) {
+    if(length(unique(ods_cells[["sheet"]])) > 1) {
+      cli::cli_abort(
+        c(
+          x = "More than one sheet present in the cells"
+        )
+      )
+    }
+  } else {
+    distinct_rc <- dplyr::distinct(ods_cells, row, col)
+    if (nrow(distinct_rc) != nrow(ods_cells)) {
+      cli::cli_abort(
+        c(
+          x = "Row/column combinations are duplicated"
+        )
+      )
+    }
+  }
 
   all_cell_positions <- tidyr::crossing(
     row = 1:max(ods_cells$row),

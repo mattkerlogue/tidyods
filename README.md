@@ -76,10 +76,8 @@ palmerpenguins::penguins |>
 
 ``` r
 penguin_sheet <- read_ods_sheet(example_file, "penguins", quick = TRUE)
-#> Getting ODS sheet
 #> Unzipping ODS file
-#> Getting ODS sheetReading XML file
-#> Getting ODS sheetProcessing rows...
+#> Reading XML file
 
 penguin_sheet
 #> # A tibble: 7 × 4
@@ -98,18 +96,17 @@ While the `types` sheet shows examples of the different ODS data types:
 
 ``` r
 types_cells <- read_ods_cells(example_file, "types")
-#> Getting ODS sheet
 #> Unzipping ODS file
-#> Getting ODS sheetReading XML file
-#> Getting ODS sheetProcessing rows...
+#> Reading XML file
 
 types_cells |> 
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
-#> Rows: 105
+#> Rows: 110
 #> Columns: 13
 #> Groups: col [10]
+#> $ sheet           <chr> "types", "types", "types", "types", "types", "types", …
 #> $ row             <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, …
 #> $ col             <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8,…
 #> $ cell_type       <chr> "cell", "cell", "cell", "cell", "cell", "cell", "cell"…
@@ -121,7 +118,6 @@ types_cells |>
 #> $ currency_symbol <chr> NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, NA, "GB…
 #> $ has_formula     <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
 #> $ cell_formula    <chr> NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", "of…
-#> $ comment         <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "Test comment"…
 #> $ error           <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
 
 types_cells |>
@@ -131,30 +127,30 @@ types_cells |>
   dplyr::select(-cell_type)
 #> # A tibble: 20 × 12
 #> # Groups:   col [10]
-#>      row   col value_type cell_content    base_value numeric_value logical_value
-#>    <int> <int> <chr>      <chr>           <chr>              <dbl> <lgl>        
-#>  1     2     1 string     Cell            "Cell"            NA     NA           
-#>  2     3     1 string     Cell with comm… "Cell wit…        NA     NA           
-#>  3     2     2 boolean    TRUE            "true"            NA     TRUE         
-#>  4     3     2 boolean    FALSE           "false"           NA     FALSE        
-#>  5     2     3 currency   £1.20           "1.2"              1.2   NA           
-#>  6     3     3 currency   £1.20           "1.2"              1.2   NA           
-#>  7     2     4 date       15/06/22        "2022-06-…        NA     NA           
-#>  8     3     4 date       06/15/22        "2022-06-…        NA     NA           
-#>  9     2     5 time       13:24:56        "PT13H24M…        NA     NA           
-#> 10     3     5 time       13:24           "PT13H24M…        NA     NA           
-#> 11     2     6 date       15/06/2022 13:… "2022-06-…        NA     NA           
-#> 12     3     6 date       15/06/22 13:24  "2022-06-…        NA     NA           
-#> 13     2     7 float      12035           "12034.56…     12035.    NA           
-#> 14     3     7 float      12034.57        "12034.56…     12035.    NA           
-#> 15     2     8 float      0.5467          "0.5467"           0.547 NA           
-#> 16     3     8 percentage 55%             "0.5467"           0.547 NA           
-#> 17     2     9 float      6579.3          "6579.298…      6579.    NA           
-#> 18     3     9 float      6579.3          "6579.298…      6579.    NA           
-#> 19     2    10 string     #N/A            ""                NA     NA           
-#> 20     3    10 string     #DIV/0!         ""                NA     NA           
-#> # … with 5 more variables: currency_symbol <chr>, has_formula <lgl>,
-#> #   cell_formula <chr>, comment <chr>, error <dbl>
+#>    sheet   row   col value_type cell_content        base_value     numeric_value
+#>    <chr> <int> <int> <chr>      <chr>               <chr>                  <dbl>
+#>  1 types     2     1 string     Cell                "Cell"                NA    
+#>  2 types     3     1 string     Cell with comment   "Cell with co…        NA    
+#>  3 types     2     2 boolean    TRUE                "true"                NA    
+#>  4 types     3     2 boolean    FALSE               "false"               NA    
+#>  5 types     2     3 currency   £1.20               "1.2"                  1.2  
+#>  6 types     3     3 currency   £1.20               "1.2"                  1.2  
+#>  7 types     2     4 date       15/06/22            "2022-06-15"          NA    
+#>  8 types     3     4 date       06/15/22            "2022-06-15"          NA    
+#>  9 types     2     5 time       13:24:56            "PT13H24M56S"         NA    
+#> 10 types     3     5 time       13:24               "PT13H24M56S"         NA    
+#> 11 types     2     6 date       15/06/2022 13:24:56 "2022-06-15T1…        NA    
+#> 12 types     3     6 date       15/06/22 13:24      "2022-06-15T1…        NA    
+#> 13 types     2     7 float      12035               "12034.56789"      12035.   
+#> 14 types     3     7 float      12034.57            "12034.56789"      12035.   
+#> 15 types     2     8 float      0.5467              "0.5467"               0.547
+#> 16 types     3     8 percentage 55%                 "0.5467"               0.547
+#> 17 types     2     9 float      6579.3              "6579.2982654…      6579.   
+#> 18 types     3     9 float      6579.3              "6579.2982654…      6579.   
+#> 19 types     2    10 string     #N/A                ""                    NA    
+#> 20 types     3    10 string     #DIV/0!             ""                    NA    
+#> # … with 5 more variables: logical_value <lgl>, currency_symbol <chr>,
+#> #   has_formula <lgl>, cell_formula <chr>, error <dbl>
 ```
 
 ## Performance
@@ -165,72 +161,91 @@ An ODS file is a zipped collection of XML files and associated files.
 three likely sources of performance issues: downloading of remote files,
 unzipping the ODS file, processing rows.
 
-With default settings, performance of `{tidyods}` functions is slower
-than `{readODS}`, however `{tidyods}` provides console messages and
-progress bars to the user.
+With default settings, performance of `{tidyods}` functions is
+marginally slower for small files than `{readODS}`, but this is unlikely
+to be noticeable to users. When working with larger files performnace is
+comparable.
 
 Performance can be improved by setting `quick = TRUE` in
 `read_ods_cells()` and `read_ods_sheet()`, this will extract only a
 simple text representation of the cell, i.e. it will not provide
 information on cell or value types, formulas or the underlying base
-value for numbers, dates or times. This method also ignores replicated
-white space characters.
+value for numbers, dates or times.
 
 ``` r
 types_cells_quick <- read_ods_cells(example_file, "types", quick = TRUE)
-#> Getting ODS sheet
 #> Unzipping ODS file
-#> Getting ODS sheetReading XML file
-#> Getting ODS sheetProcessing rows...
+#> Reading XML file
 
 types_cells_quick |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
-#> Rows: 105
-#> Columns: 3
+#> Rows: 110
+#> Columns: 4
 #> Groups: col [10]
+#> $ sheet        <chr> "types", "types", "types", "types", "types", "types", "ty…
 #> $ row          <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, …
 #> $ col          <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9,…
 #> $ cell_content <chr> "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06/2…
 ```
 
-To test performance we will use an ODS file published by the UK
-Government on the [number of civil servants by
+``` r
+test_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
+
+microbenchmark::microbenchmark(
+  tidy_quick = read_ods_cells(test_file, 1, quick = TRUE),
+  tidy_slow = read_ods_cells(test_file, 1),
+  tidy_sheet_quick = read_ods_sheet(test_file, 1, quick = TRUE),
+  tidy_sheet_slow = read_ods_sheet(test_file, 1),
+  read_ods = readODS::read_ods(test_file, 1),
+  times = 100
+)
+
+#> Unit: milliseconds
+#>              expr       min       lq     mean   median       uq       max neval
+#>        tidy_quick 24.280200 25.44304 27.45693 26.25878 29.51594  33.89195   100
+#>         tidy_slow 34.481574 36.26819 38.81044 37.82586 41.17425  47.92445   100
+#>  tidy_sheet_quick 31.678445 33.50053 36.11012 34.95258 38.76044  44.62018   100
+#>   tidy_sheet_slow 41.229846 42.25362 47.12949 46.38392 47.86963 125.16058   100
+#>          read_ods  9.995062 10.46072 12.07059 10.58868 10.95301 118.04728   100
+```
+
+To test real-world performance we will use an ODS file published by the
+UK Government on the [number of civil servants by
 postcode](https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021)
-(5,544 rows by 11 columns). Analysis of read times indicates that using
-the `quick = TRUE` setting for `read_ods_cells()` results in a read that
-is 10 times faster than the full cell extraction method and around 1.5
-times faster than reading the sheet with `{readODS}`.
+(5,544 rows by 11 columns). Analysis of read times indicates similar
+performance to that achieved by `{readODS}`.
 
 ``` r
+postcodes_file <- "~/Downloads/Civil-servants-by-postcode-department-
+  responsibility-level-and-leaving-cause-2021.ods"
+
 microbenchmark::microbenchmark(
-  "tidyods_slow" = tidyods::read_ods_cells(test_ods, "Staff_in_post", 
-    quick = FALSE),
-  "tidyods_quick" = tidyods::read_ods_cells(test_ods, "Staff_in_post", 
-    quick = TRUE),
-  "readODS" = readODS::read_ods(test_ods, "Staff_in_post"),
-  times = 3
+  tidy_quick = read_ods_cells(postcodes_file, 2, quick = TRUE),
+  tidy_slow = read_ods_cells(postcodes_file, 2),
+  tidy_sheet_quick = read_ods_sheet(postcodes_file, 2, quick = TRUE),
+  tidy_sheet_slow = read_ods_sheet(postcodes_file, 2),
+  read_ods = readODS::read_ods(postcodes_file, 2),
+  times = 10
 )
 
 #> Unit: seconds
-#>          expr     min      lq    mean  median      uq     max neval
-#>  tidyods_slow 35.4833 35.7546 35.8626 36.0259 36.0523 36.0786     3
-#> tidyods_quick  3.2470  3.2584  3.2935  3.2697  3.3167  3.3638     3
-#>       readods  5.1141  5.1606  5.2050  5.2072  5.2505  5.2939     3
+#>              expr      min       lq     mean   median       uq      max neval
+#>        tidy_quick 5.696553 5.706185 5.849200 5.808597 5.990277 6.058689    10
+#>         tidy_slow 6.909598 7.037668 7.124450 7.146029 7.185813 7.287308    10
+#>  tidy_sheet_quick 5.758918 5.824600 5.951630 5.926395 6.084767 6.182411    10
+#>   tidy_sheet_slow 6.963679 7.049813 7.158550 7.091867 7.176565 7.626200    10
+#>          read_ods 4.774232 4.893009 5.025191 5.065590 5.108057 5.236603    10
 ```
 
-A cursory test of a huge file that is known to be slow/non-performative
-with {readODS} shows promise.
+Due to the reliance on `{xml2}` very large files will perform poorly or
+run into memory limitations. This is being investigated as part of the
+package development.
 
 Performance issues are tracked and discussed in [issue
 \#3](https://github.com/mattkerlogue/tidyods/issues/3) in the package’s
 GitHub repository.
-
-However, if performance is a major determinant of your workflow
-(i.e. you have very large files), its likely more sensible to open the
-file in a spreadsheet application, save the file as a `.xslx` format
-file and read using `{tidyxl}`.
 
 ## Related projects
 

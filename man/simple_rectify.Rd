@@ -29,3 +29,9 @@ Column headers are of the format "X#", i.e. "X" and the column number. You
 can use another function such as \code{\link[janitor:row_to_names]{janitor::row_to_names()}} to replace these
 with values from a row within the dataset.
 }
+\examples{
+example <- system.file("extdata", "basic_example.ods", package = "tidyods")
+example_cells <- read_ods_cells(example, 1)
+simple_rectify(example_cells, base_values = TRUE)
+
+}

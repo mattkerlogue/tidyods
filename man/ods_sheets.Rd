@@ -16,3 +16,8 @@ A character vector of sheet names
 Get a list of sheets in the ODS file, either to explore the structure of a
 file or to use as an input for iterating over a whole spreadsheet document.
 }
+\examples{
+example <- system.file("extdata", "basic_example.ods", package = "tidyods")
+ods_sheets(example)
+
+}

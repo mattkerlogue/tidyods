@@ -4,7 +4,7 @@
 \alias{read_ods_cells}
 \title{Read cells from an ODS sheet}
 \usage{
-read_ods_cells(path, sheet, quick = FALSE, whitespace = FALSE)
+read_ods_cells(path, sheet = 1, quick = FALSE, whitespace = FALSE)
 }
 \arguments{
 \item{path}{The ODS file}
@@ -70,4 +70,10 @@ significant speed enhancements by setting the \code{quick} argument to FALSE,
 this will extract only the text content of the cell. Note this also ignores
 repeated white space elements (i.e. \code{"A   B   C"} will be returned as
 \code{"A B C"}).
+}
+\examples{
+example <- system.file("extdata", "basic_example.ods", package = "tidyods")
+example_cells <- read_ods_cells(example, 1)
+dplyr::glimpse(example_cells)
+
 }

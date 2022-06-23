@@ -47,3 +47,8 @@ process only returns cell content as seen by a spreadsheet users. When
 \code{whitespace = FALSE} (the default), multiple whitespaces in cell content
 are ignored. See \code{\link[=read_ods_cells]{read_ods_cells()}} for further details.
 }
+\examples{
+example <- system.file("extdata", "basic_example.ods", package = "tidyods")
+read_ods_sheet(example, 1)
+
+}
