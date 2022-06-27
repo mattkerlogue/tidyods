@@ -1,8 +1,8 @@
 pandoc: 2.14.2
-pkgdown: 2.0.4
+pkgdown: 2.0.5
 pkgdown_sha: ~
 articles: {}
-last_built: 2022-06-23T23:25Z
+last_built: 2022-06-27T01:10Z
 urls:
   reference: https://mattkerlogue.github.io/tidyODS/reference
   article: https://mattkerlogue.github.io/tidyODS/articles

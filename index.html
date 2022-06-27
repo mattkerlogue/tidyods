@@ -98,8 +98,6 @@
 <span class="va">example_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"basic_example.ods"</span>, package <span class="op">=</span> <span class="st">"tidyods"</span><span class="op">)</span>
 
 <span class="fu"><a href="reference/ods_sheets.html">ods_sheets</a></span><span class="op">(</span><span class="va">example_file</span><span class="op">)</span>
-<span class="co">#&gt; Unzipping ODS file</span>
-<span class="co">#&gt; Reading XML file</span>
 <span class="co">#&gt; [1] "penguins" "types"</span></code></pre></div>
 <p>The <code>penguins</code> sheet is a simple 6 rows by 4 columns sheet that stores the output of the following code:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -121,38 +119,61 @@
 <span class="co">#&gt; 6 Gentoo    TRUE             45.6       4680.</span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">penguin_sheet</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"penguins"</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; Unzipping ODS file</span>
-<span class="co">#&gt; Reading XML file</span>
+<span class="co">#&gt; ℹ Extracting XML</span>
+<span class="co">#&gt; ✔ Extracting XML [12ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Getting sheet</span>
+<span class="co">#&gt; ✔ Getting sheet [7ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Extracting cell and row info</span>
+<span class="co">#&gt; ✔ Extracting cell and row info [22ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Generating output table</span>
+<span class="co">#&gt; ✔ Generating output table [25ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Rectifying cells to sheet layout</span>
+<span class="co">#&gt; ✔ Rectifying cells to sheet layout [15ms]</span>
+<span class="co">#&gt; </span>
 
 <span class="va">penguin_sheet</span>
-<span class="co">#&gt; # A tibble: 7 × 4</span>
-<span class="co">#&gt;   X1        X2     X3             X4         </span>
+<span class="co">#&gt; # A tibble: 6 × 4</span>
+<span class="co">#&gt;   species   female bill_length_mm body_mass_g</span>
 <span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;          &lt;chr&gt;      </span>
-<span class="co">#&gt; 1 species   female bill_length_mm body_mass_g</span>
-<span class="co">#&gt; 2 Adelie    FALSE  40.4           4043       </span>
-<span class="co">#&gt; 3 Adelie    TRUE   37.3           3369       </span>
-<span class="co">#&gt; 4 Chinstrap FALSE  51.1           3939       </span>
-<span class="co">#&gt; 5 Chinstrap TRUE   46.6           3527       </span>
-<span class="co">#&gt; 6 Gentoo    FALSE  49.5           5485       </span>
-<span class="co">#&gt; 7 Gentoo    TRUE   45.6           4680</span></code></pre></div>
+<span class="co">#&gt; 1 Adelie    FALSE  40.4           4043       </span>
+<span class="co">#&gt; 2 Adelie    TRUE   37.3           3369       </span>
+<span class="co">#&gt; 3 Chinstrap FALSE  51.1           3939       </span>
+<span class="co">#&gt; 4 Chinstrap TRUE   46.6           3527       </span>
+<span class="co">#&gt; 5 Gentoo    FALSE  49.5           5485       </span>
+<span class="co">#&gt; 6 Gentoo    TRUE   45.6           4680</span></code></pre></div>
 <p>While the <code>types</code> sheet shows examples of the different ODS data types:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">types_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span><span class="op">)</span>
-<span class="co">#&gt; Unzipping ODS file</span>
-<span class="co">#&gt; Reading XML file</span>
+<span class="co">#&gt; ℹ Extracting XML</span>
+<span class="co">#&gt; ✔ Extracting XML [4ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Getting sheet</span>
+<span class="co">#&gt; ✔ Getting sheet [6ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Extracting cell and row info</span>
+<span class="co">#&gt; ✔ Extracting cell and row info [28ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Generating output table</span>
+<span class="co">#&gt; ✔ Generating output table [30ms]</span>
+<span class="co">#&gt; </span>
 
 <span class="va">types_cells</span> |&gt; 
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span>
 <span class="co">#&gt; Rows: 110</span>
-<span class="co">#&gt; Columns: 13</span>
+<span class="co">#&gt; Columns: 15</span>
 <span class="co">#&gt; Groups: col [10]</span>
 <span class="co">#&gt; $ sheet           &lt;chr&gt; "types", "types", "types", "types", "types", "types", …</span>
 <span class="co">#&gt; $ row             &lt;int&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, …</span>
 <span class="co">#&gt; $ col             &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8,…</span>
 <span class="co">#&gt; $ cell_type       &lt;chr&gt; "cell", "cell", "cell", "cell", "cell", "cell", "cell"…</span>
 <span class="co">#&gt; $ value_type      &lt;chr&gt; "string", "boolean", "currency", "date", "time", "date…</span>
+<span class="co">#&gt; $ is_empty        &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
 <span class="co">#&gt; $ cell_content    &lt;chr&gt; "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/0…</span>
 <span class="co">#&gt; $ base_value      &lt;chr&gt; "Cell", "true", "1.2", "2022-06-15", "PT13H24M56S", "2…</span>
 <span class="co">#&gt; $ numeric_value   &lt;dbl&gt; NA, NA, 1.2000, NA, NA, NA, 12034.5679, 0.5467, 6579.2…</span>
@@ -160,39 +181,40 @@
 <span class="co">#&gt; $ currency_symbol &lt;chr&gt; NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, NA, "GB…</span>
 <span class="co">#&gt; $ has_formula     &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
 <span class="co">#&gt; $ cell_formula    &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", "of…</span>
-<span class="co">#&gt; $ error           &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
+<span class="co">#&gt; $ has_error       &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
+<span class="co">#&gt; $ error_type      &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, 7, NA, NA, NA, NA,…</span>
 
 <span class="va">types_cells</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">cell_type</span><span class="op">)</span>
-<span class="co">#&gt; # A tibble: 20 × 12</span>
+<span class="co">#&gt; # A tibble: 20 × 14</span>
 <span class="co">#&gt; # Groups:   col [10]</span>
-<span class="co">#&gt;    sheet   row   col value_type cell_content        base_value     numeric_value</span>
-<span class="co">#&gt;    &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;               &lt;chr&gt;                  &lt;dbl&gt;</span>
-<span class="co">#&gt;  1 types     2     1 string     Cell                "Cell"                NA    </span>
-<span class="co">#&gt;  2 types     3     1 string     Cell with comment   "Cell with co…        NA    </span>
-<span class="co">#&gt;  3 types     2     2 boolean    TRUE                "true"                NA    </span>
-<span class="co">#&gt;  4 types     3     2 boolean    FALSE               "false"               NA    </span>
-<span class="co">#&gt;  5 types     2     3 currency   £1.20               "1.2"                  1.2  </span>
-<span class="co">#&gt;  6 types     3     3 currency   £1.20               "1.2"                  1.2  </span>
-<span class="co">#&gt;  7 types     2     4 date       15/06/22            "2022-06-15"          NA    </span>
-<span class="co">#&gt;  8 types     3     4 date       06/15/22            "2022-06-15"          NA    </span>
-<span class="co">#&gt;  9 types     2     5 time       13:24:56            "PT13H24M56S"         NA    </span>
-<span class="co">#&gt; 10 types     3     5 time       13:24               "PT13H24M56S"         NA    </span>
-<span class="co">#&gt; 11 types     2     6 date       15/06/2022 13:24:56 "2022-06-15T1…        NA    </span>
-<span class="co">#&gt; 12 types     3     6 date       15/06/22 13:24      "2022-06-15T1…        NA    </span>
-<span class="co">#&gt; 13 types     2     7 float      12035               "12034.56789"      12035.   </span>
-<span class="co">#&gt; 14 types     3     7 float      12034.57            "12034.56789"      12035.   </span>
-<span class="co">#&gt; 15 types     2     8 float      0.5467              "0.5467"               0.547</span>
-<span class="co">#&gt; 16 types     3     8 percentage 55%                 "0.5467"               0.547</span>
-<span class="co">#&gt; 17 types     2     9 float      6579.3              "6579.2982654…      6579.   </span>
-<span class="co">#&gt; 18 types     3     9 float      6579.3              "6579.2982654…      6579.   </span>
-<span class="co">#&gt; 19 types     2    10 string     #N/A                ""                    NA    </span>
-<span class="co">#&gt; 20 types     3    10 string     #DIV/0!             ""                    NA    </span>
-<span class="co">#&gt; # … with 5 more variables: logical_value &lt;lgl&gt;, currency_symbol &lt;chr&gt;,</span>
-<span class="co">#&gt; #   has_formula &lt;lgl&gt;, cell_formula &lt;chr&gt;, error &lt;dbl&gt;</span></code></pre></div>
+<span class="co">#&gt;    sheet   row   col value_type is_empty cell_content   base_value numeric_value</span>
+<span class="co">#&gt;    &lt;chr&gt; &lt;int&gt; &lt;int&gt; &lt;chr&gt;      &lt;lgl&gt;    &lt;chr&gt;          &lt;chr&gt;              &lt;dbl&gt;</span>
+<span class="co">#&gt;  1 types     2     1 string     FALSE    Cell           Cell              NA    </span>
+<span class="co">#&gt;  2 types     3     1 string     FALSE    Cell with com… Cell with…        NA    </span>
+<span class="co">#&gt;  3 types     2     2 boolean    FALSE    TRUE           true              NA    </span>
+<span class="co">#&gt;  4 types     3     2 boolean    FALSE    FALSE          false             NA    </span>
+<span class="co">#&gt;  5 types     2     3 currency   FALSE    £1.20          1.2                1.2  </span>
+<span class="co">#&gt;  6 types     3     3 currency   FALSE    £1.20          1.2                1.2  </span>
+<span class="co">#&gt;  7 types     2     4 date       FALSE    15/06/22       2022-06-15        NA    </span>
+<span class="co">#&gt;  8 types     3     4 date       FALSE    06/15/22       2022-06-15        NA    </span>
+<span class="co">#&gt;  9 types     2     5 time       FALSE    13:24:56       PT13H24M5…        NA    </span>
+<span class="co">#&gt; 10 types     3     5 time       FALSE    13:24          PT13H24M5…        NA    </span>
+<span class="co">#&gt; 11 types     2     6 date       FALSE    15/06/2022 13… 2022-06-1…        NA    </span>
+<span class="co">#&gt; 12 types     3     6 date       FALSE    15/06/22 13:24 2022-06-1…        NA    </span>
+<span class="co">#&gt; 13 types     2     7 float      FALSE    12035          12034.567…     12035.   </span>
+<span class="co">#&gt; 14 types     3     7 float      FALSE    12034.57       12034.567…     12035.   </span>
+<span class="co">#&gt; 15 types     2     8 float      FALSE    0.5467         0.5467             0.547</span>
+<span class="co">#&gt; 16 types     3     8 percentage FALSE    55%            0.5467             0.547</span>
+<span class="co">#&gt; 17 types     2     9 float      FALSE    6579.3         6579.2982…      6579.   </span>
+<span class="co">#&gt; 18 types     3     9 float      FALSE    6579.3         6579.2982…      6579.   </span>
+<span class="co">#&gt; 19 types     2    10 string     FALSE    #N/A           #N/A              NA    </span>
+<span class="co">#&gt; 20 types     3    10 string     FALSE    #DIV/0!        #DIV/0!           NA    </span>
+<span class="co">#&gt; # … with 6 more variables: logical_value &lt;lgl&gt;, currency_symbol &lt;chr&gt;,</span>
+<span class="co">#&gt; #   has_formula &lt;lgl&gt;, cell_formula &lt;chr&gt;, has_error &lt;lgl&gt;, error_type &lt;dbl&gt;</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
@@ -202,8 +224,18 @@
 <p>Performance can be improved by setting <code>quick = TRUE</code> in <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> and <code><a href="reference/read_ods_sheet.html">read_ods_sheet()</a></code>, this will extract only a simple text representation of the cell, i.e. it will not provide information on cell or value types, formulas or the underlying base value for numbers, dates or times.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">types_cells_quick</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="co">#&gt; Unzipping ODS file</span>
-<span class="co">#&gt; Reading XML file</span>
+<span class="co">#&gt; ℹ Extracting XML</span>
+<span class="co">#&gt; ✔ Extracting XML [4ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Getting sheet</span>
+<span class="co">#&gt; ✔ Getting sheet [6ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Extracting cell and row info</span>
+<span class="co">#&gt; ✔ Extracting cell and row info [19ms]</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; ℹ Generating output table</span>
+<span class="co">#&gt; ✔ Generating output table [23ms]</span>
+<span class="co">#&gt; </span>
 
 <span class="va">types_cells_quick</span> |&gt;
   <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> |&gt;
@@ -327,7 +359,7 @@
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer>

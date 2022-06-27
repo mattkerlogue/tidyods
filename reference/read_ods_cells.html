@@ -79,23 +79,32 @@ the cell's postion, value types and containing formulas.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A tibble with the following information:</p><ul><li><p><code>row</code>: the row number of the cell</p></li>
+<p>A tibble with the following information:</p><ul><li><p><code>sheet</code>: the sheet of the cell</p></li>
+<li><p><code>row</code>: the row number of the cell</p></li>
 <li><p><code>col</code>: the column number of the cell</p></li>
 <li><p><code>cell_type</code>: the type of cell, either "cell", "empty" or "merged"</p></li>
 <li><p><code>value_type</code>: the ODS value type (see details)</p></li>
-<li><p><code>cell_formula</code>: the ODS formula specification</p></li>
+<li><p><code>is_empty</code>: if the cell has no content (can apply to cell and merged types)</p></li>
 <li><p><code>cell_content</code>: the value of the cell as represented to the user of a
 spreadsheet application (i.e. with text formatting applied)</p></li>
 <li><p><code>base_value</code>: the underlying value of a cell (see details)</p></li>
-<li><p><code>currency symbol</code>: the currency symbol for cells with a <code>value_type</code> of
+<li><p><code>numeric_value</code>: the <code>base_value</code> as a numeric vector for numeric types</p></li>
+<li><p><code>logical_value</code>: the <code>base_value</code> as a logical vector for boolean types</p></li>
+<li><p><code>currency_symbol</code>: the currency symbol for cells with a <code>value_type</code> of
 currency</p></li>
-</ul><p>If using the <code>quick</code> argument you only <code>row</code>, <code>col</code> and <code>cell_content</code> are
+<li><p><code>has_formula</code>: whether the cell has a formula</p></li>
+<li><p><code>cell_formula</code>: the ODS formula specification</p></li>
+<li><p><code>has_error</code>: whether the cell has an error</p></li>
+<li><p><code>error_type</code>: the error type</p></li>
+</ul><p>If using the <code>quick</code> argument then only <code>row</code>, <code>col</code> and <code>cell_content</code> are
 returned.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Cells are assigned a <code>cell_type</code> of "cell" when they have content, "empty"
-if they have no content, or "merged" if they are part of a set of merged cells.</p>
+    <p>Cells are assigned a <code>cell_type</code> of "merged" if they are covered by a cell
+merge, "blank" if they have no value type or cell content, otherwise they are
+a "cell". Use <code>is_empty</code> to determine if the cell is blank, as the ODS
+specification allows for the retention of content in cells hidden by a merge.</p>
 <p>The <code>value_type</code> of a cell is based on the <a href="https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949" class="external-link">"value-type" attribute</a>
 defined by the OpenDocument Format specification. There are 7 value types:</p><ul><li><p><code>boolean</code>: equivalent to R's <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">base::logical()</a></code> data type</p></li>
 <li><p><code>currency</code>: a numeric value, optionally with a currency symbol</p></li>
@@ -105,8 +114,9 @@ different numeric types</p></li>
 <li><p><code>percentage</code>: a numeric value, formatted for display as a percentage</p></li>
 <li><p><code>string</code>: equivalent to R's <code><a href="https://rdrr.io/r/base/character.html" class="external-link">base::character()</a></code></p></li>
 <li><p><code>time</code>: a duration, stored in ISO format</p></li>
-</ul><p>For currency value types optionally a currency symbol (e.g. GBP, EUR, USD) can
-be set, this is provided separate from the <code>base_value</code> as <code>currency_symbol</code>.</p>
+</ul><p>For currency value types optionally a currency symbol (e.g. GBP, EUR, USD)
+can be set, this is provided separately from the <code>base_value</code> as
+<code>currency_symbol</code>.</p>
 <p><code>read_ods_cells</code> provides two representations of a cell's value. The
 <code>cell_content</code> column provides the cell's value as presented to the user of
 a traditional spreadsheet application (such as Microsoft Excel, Google Sheets
@@ -118,22 +128,36 @@ significant speed enhancements by setting the <code>quick</code> argument to FAL
 this will extract only the text content of the cell. Note this also ignores
 repeated white space elements (i.e. <code>"A   B   C"</code> will be returned as
 <code>"A B C"</code>).</p>
+<p>The values of <code>error_type</code> are equivalent to those produced by
+<a href="https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa" class="external-link">Microsoft Excel</a>
+and <a href="https://help.libreoffice.org/7.3/en-GB/text/scalc/01/func_error_type.html?&amp;DbPAR=SHARED&amp;System=MAC" class="external-link">LibreOffice</a>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">example</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"basic_example.ods"</span>, package <span class="op">=</span> <span class="st">"tidyods"</span><span class="op">)</span></span>
 <span class="r-in"><span class="va">example_cells</span> <span class="op">&lt;-</span> <span class="fu">read_ods_cells</span><span class="op">(</span><span class="va">example</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Unzipping ODS file</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading XML file</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting XML</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting XML <span style="color: #B2B2B2;">[26ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Getting sheet</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Getting sheet <span style="color: #B2B2B2;">[30ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting cell and row info</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting cell and row info <span style="color: #B2B2B2;">[168ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Generating output table</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Generating output table <span style="color: #B2B2B2;">[79ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">example_cells</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rows: 28</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Columns: 13</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Columns: 15</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ sheet           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "penguins", "penguins", "penguins", "penguins", "pengu…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ row             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, …</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ col             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, …</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ cell_type       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "cell", "cell", "cell", "cell", "cell", "cell", "cell"…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ value_type      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "string", "string", "string", "string", "string", "boo…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ is_empty        <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ cell_content    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "species", "female", "bill_length_mm", "body_mass_g", …</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ base_value      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "species", "female", "bill_length_mm", "body_mass_g", …</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ numeric_value   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, 40.39041, 4043.49315, NA, NA, …</span>
@@ -141,7 +165,8 @@ repeated white space elements (i.e. <code>"A   B   C"</code> will be returned as
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ currency_symbol <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ has_formula     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ cell_formula    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ error           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ has_error       <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ error_type      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
 <span class="r-in"></span>
 </code></pre></div>
     </div>
@@ -154,7 +179,7 @@ repeated white space elements (i.e. <code>"A   B   C"</code> will be returned as
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
     </footer></div>
