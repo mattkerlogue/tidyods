@@ -150,39 +150,49 @@ read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE) {
 
 #' Read an ODS sheet to a rectangular dataset
 #'
-#' A wrapper around [`read_ods_cells()`] and [`simple_rectify()`] to extract
-#' cells from a sheet and return a
+#' A wrapper around [`read_ods_cells()`] and one of the
+#' [rectify functions][tidyods::simple_rectify()] provided in the package.
 #'
 #' @param path The ODS file
 #' @param sheet The sheet within the ODS file
-#' @param rectify The method to convert cells to two-dimensions, can only be "simple"
+#' @param rectify The method to convert cells to two-dimensions, either "simple"
+#'   or "smart (see details).
 #' @param base_values Whether to use the base_value of a cell (TRUE, the default)
 #'   or whether to provide the cell content as seen by a spreadsheet user.
-#' @param quick Whether to use the quick reading process
-#' @param whitespace Whether to process multiple whitespaces
+#' @param quick Whether to use the quick reading process.
+#' @param whitespace Whether to process multiple whitespaces.
+#' @param skip The number of rows to skip before attempting to rectify the cells.
+#' @param col_headers Whether to use the first row (after any skipping) as the
+#'   column header (`TRUE` is the default), alternatively a character vector of
+#'   column names can be provided.
 #'
 #' @return
 #' A tibble, presenting cells in a traditional two-dimension spreadsheet format.
 #'
 #' @details
-#' At present, `rectify` can only be set to "simple", this calls the
-#' [simple_rectify()] method to convert the cells to a sheet.
+#' When `rectify = "simple"` then the [simple_rectify()] function will be used
+#' to coerce the cells to a sheet. You can instruct the rectifier to skip rows,
+#' whether to use the first row as column headers (or provide your own), and
+#' whether to use the underlying values or the formatted cell content for the
+#' value of the output cell. If `quick = TRUE` this implies using the cell
+#' content, thus the user setting for `base_values` is ignored and treated as if
+#' set to `FALSE`.
 #'
-#' When `base_values = TRUE` (the default) the underlying cell values are used
-#' for non-string value types. When `FALSE` then cell content as seen by a
-#' spreadsheet application user will be shown.
-#'
-#' Setting `quick = TRUE` will ignore the setting of `base_values`, as the quick
-#' process only returns cell content as seen by a spreadsheet users. When
-#' `whitespace = FALSE` (the default), multiple whitespaces in cell content
-#' are ignored. See [read_ods_cells()] for further details.
+#' When `rectify = "smart"` then the [smart_rectify()] function will be used,
+#' this will attempt to guess the location of the column headers as well as
+#' coercing the columns using value type information extracted from the ODS.
+#' Using the smart rectifier ignores any settings for `base_values`, `skip` and
+#' `col_headers`. You cannot set `quick = TRUE` if you want to use the
+#' smart rectifier.
 #'
 #' @examples
 #' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 #' read_ods_sheet(example, 1)
+#' #' read_ods_sheet(example, 2, "smart")
 #'
 #' @export
-read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
+read_ods_sheet <- function(path, sheet = 1, rectify = c("simple", "smart"),
+                           skip = 0, col_headers = TRUE, base_values = TRUE,
                            quick = FALSE, whitespace = FALSE) {
 
   if (missing(path)) {
@@ -193,9 +203,7 @@ read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
     cli::cli_abort("{.arg path} must be a character vector of length 1")
   }
 
-  if (missing(sheet)) {
-    cli::cli_abort("{.arg sheet} is not defined")
-  } else if (length(sheet) != 1) {
+  if (length(sheet) != 1) {
     cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
   } else if (!(is.character(sheet) | is.numeric(sheet))) {
     cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
@@ -205,13 +213,28 @@ read_ods_sheet <- function(path, sheet, rectify = "simple", base_values = TRUE,
     }
   }
 
+  rectify <- match.arg(rectify)
+
+  if (rectify == "smart" & quick) {
+    cli::cli_abort(
+      c(x = "{.arg quick} cannot be set to TRUE if {.arg rectify} is set to {.val smart}")
+    )
+  }
+
   ods_cells <- read_ods_cells(path, sheet, quick = quick,
                               whitespace = whitespace)
 
+  cli::cli_progress_step("Rectifying cells to sheet layout")
   if (rectify == "simple" & !quick) {
-    ods_sheet <- simple_rectify(ods_cells, base_values)
+    ods_sheet <- simple_rectify(ods_cells, skip = skip,
+                                col_headers = col_headers,
+                                base_values = base_values)
   } else if (rectify == "simple" & quick) {
-    ods_sheet <- simple_rectify(ods_cells, base_values = FALSE)
+    ods_sheet <- simple_rectify(ods_cells, skip = skip,
+                                col_headers = col_headers,
+                                base_values = FALSE)
+  } else if (rectify == "smart") {
+    ods_sheet <- smart_rectify(ods_cells)
   }
 
   return(ods_sheet)
