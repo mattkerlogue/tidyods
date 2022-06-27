@@ -47,8 +47,6 @@ library(tidyods)
 example_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
 
 ods_sheets(example_file)
-#> Unzipping ODS file
-#> Reading XML file
 #> [1] "penguins" "types"
 ```
 
@@ -76,41 +74,64 @@ palmerpenguins::penguins |>
 
 ``` r
 penguin_sheet <- read_ods_sheet(example_file, "penguins", quick = TRUE)
-#> Unzipping ODS file
-#> Reading XML file
+#> ℹ Extracting XML
+#> ✔ Extracting XML [12ms]
+#> 
+#> ℹ Getting sheet
+#> ✔ Getting sheet [7ms]
+#> 
+#> ℹ Extracting cell and row info
+#> ✔ Extracting cell and row info [22ms]
+#> 
+#> ℹ Generating output table
+#> ✔ Generating output table [25ms]
+#> 
+#> ℹ Rectifying cells to sheet layout
+#> ✔ Rectifying cells to sheet layout [15ms]
+#> 
 
 penguin_sheet
-#> # A tibble: 7 × 4
-#>   X1        X2     X3             X4         
+#> # A tibble: 6 × 4
+#>   species   female bill_length_mm body_mass_g
 #>   <chr>     <chr>  <chr>          <chr>      
-#> 1 species   female bill_length_mm body_mass_g
-#> 2 Adelie    FALSE  40.4           4043       
-#> 3 Adelie    TRUE   37.3           3369       
-#> 4 Chinstrap FALSE  51.1           3939       
-#> 5 Chinstrap TRUE   46.6           3527       
-#> 6 Gentoo    FALSE  49.5           5485       
-#> 7 Gentoo    TRUE   45.6           4680
+#> 1 Adelie    FALSE  40.4           4043       
+#> 2 Adelie    TRUE   37.3           3369       
+#> 3 Chinstrap FALSE  51.1           3939       
+#> 4 Chinstrap TRUE   46.6           3527       
+#> 5 Gentoo    FALSE  49.5           5485       
+#> 6 Gentoo    TRUE   45.6           4680
 ```
 
 While the `types` sheet shows examples of the different ODS data types:
 
 ``` r
 types_cells <- read_ods_cells(example_file, "types")
-#> Unzipping ODS file
-#> Reading XML file
+#> ℹ Extracting XML
+#> ✔ Extracting XML [4ms]
+#> 
+#> ℹ Getting sheet
+#> ✔ Getting sheet [6ms]
+#> 
+#> ℹ Extracting cell and row info
+#> ✔ Extracting cell and row info [28ms]
+#> 
+#> ℹ Generating output table
+#> ✔ Generating output table [30ms]
+#> 
 
 types_cells |> 
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
 #> Rows: 110
-#> Columns: 13
+#> Columns: 15
 #> Groups: col [10]
 #> $ sheet           <chr> "types", "types", "types", "types", "types", "types", …
 #> $ row             <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, …
 #> $ col             <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8,…
 #> $ cell_type       <chr> "cell", "cell", "cell", "cell", "cell", "cell", "cell"…
 #> $ value_type      <chr> "string", "boolean", "currency", "date", "time", "date…
+#> $ is_empty        <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
 #> $ cell_content    <chr> "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/0…
 #> $ base_value      <chr> "Cell", "true", "1.2", "2022-06-15", "PT13H24M56S", "2…
 #> $ numeric_value   <dbl> NA, NA, 1.2000, NA, NA, NA, 12034.5679, 0.5467, 6579.2…
@@ -118,39 +139,40 @@ types_cells |>
 #> $ currency_symbol <chr> NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, NA, "GB…
 #> $ has_formula     <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
 #> $ cell_formula    <chr> NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", "of…
-#> $ error           <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
+#> $ has_error       <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
+#> $ error_type      <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, 7, NA, NA, NA, NA,…
 
 types_cells |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::slice_head(n = 2) |>
   dplyr::select(-cell_type)
-#> # A tibble: 20 × 12
+#> # A tibble: 20 × 14
 #> # Groups:   col [10]
-#>    sheet   row   col value_type cell_content        base_value     numeric_value
-#>    <chr> <int> <int> <chr>      <chr>               <chr>                  <dbl>
-#>  1 types     2     1 string     Cell                "Cell"                NA    
-#>  2 types     3     1 string     Cell with comment   "Cell with co…        NA    
-#>  3 types     2     2 boolean    TRUE                "true"                NA    
-#>  4 types     3     2 boolean    FALSE               "false"               NA    
-#>  5 types     2     3 currency   £1.20               "1.2"                  1.2  
-#>  6 types     3     3 currency   £1.20               "1.2"                  1.2  
-#>  7 types     2     4 date       15/06/22            "2022-06-15"          NA    
-#>  8 types     3     4 date       06/15/22            "2022-06-15"          NA    
-#>  9 types     2     5 time       13:24:56            "PT13H24M56S"         NA    
-#> 10 types     3     5 time       13:24               "PT13H24M56S"         NA    
-#> 11 types     2     6 date       15/06/2022 13:24:56 "2022-06-15T1…        NA    
-#> 12 types     3     6 date       15/06/22 13:24      "2022-06-15T1…        NA    
-#> 13 types     2     7 float      12035               "12034.56789"      12035.   
-#> 14 types     3     7 float      12034.57            "12034.56789"      12035.   
-#> 15 types     2     8 float      0.5467              "0.5467"               0.547
-#> 16 types     3     8 percentage 55%                 "0.5467"               0.547
-#> 17 types     2     9 float      6579.3              "6579.2982654…      6579.   
-#> 18 types     3     9 float      6579.3              "6579.2982654…      6579.   
-#> 19 types     2    10 string     #N/A                ""                    NA    
-#> 20 types     3    10 string     #DIV/0!             ""                    NA    
-#> # … with 5 more variables: logical_value <lgl>, currency_symbol <chr>,
-#> #   has_formula <lgl>, cell_formula <chr>, error <dbl>
+#>    sheet   row   col value_type is_empty cell_content   base_value numeric_value
+#>    <chr> <int> <int> <chr>      <lgl>    <chr>          <chr>              <dbl>
+#>  1 types     2     1 string     FALSE    Cell           Cell              NA    
+#>  2 types     3     1 string     FALSE    Cell with com… Cell with…        NA    
+#>  3 types     2     2 boolean    FALSE    TRUE           true              NA    
+#>  4 types     3     2 boolean    FALSE    FALSE          false             NA    
+#>  5 types     2     3 currency   FALSE    £1.20          1.2                1.2  
+#>  6 types     3     3 currency   FALSE    £1.20          1.2                1.2  
+#>  7 types     2     4 date       FALSE    15/06/22       2022-06-15        NA    
+#>  8 types     3     4 date       FALSE    06/15/22       2022-06-15        NA    
+#>  9 types     2     5 time       FALSE    13:24:56       PT13H24M5…        NA    
+#> 10 types     3     5 time       FALSE    13:24          PT13H24M5…        NA    
+#> 11 types     2     6 date       FALSE    15/06/2022 13… 2022-06-1…        NA    
+#> 12 types     3     6 date       FALSE    15/06/22 13:24 2022-06-1…        NA    
+#> 13 types     2     7 float      FALSE    12035          12034.567…     12035.   
+#> 14 types     3     7 float      FALSE    12034.57       12034.567…     12035.   
+#> 15 types     2     8 float      FALSE    0.5467         0.5467             0.547
+#> 16 types     3     8 percentage FALSE    55%            0.5467             0.547
+#> 17 types     2     9 float      FALSE    6579.3         6579.2982…      6579.   
+#> 18 types     3     9 float      FALSE    6579.3         6579.2982…      6579.   
+#> 19 types     2    10 string     FALSE    #N/A           #N/A              NA    
+#> 20 types     3    10 string     FALSE    #DIV/0!        #DIV/0!           NA    
+#> # … with 6 more variables: logical_value <lgl>, currency_symbol <chr>,
+#> #   has_formula <lgl>, cell_formula <chr>, has_error <lgl>, error_type <dbl>
 ```
 
 ## Performance
@@ -174,8 +196,18 @@ value for numbers, dates or times.
 
 ``` r
 types_cells_quick <- read_ods_cells(example_file, "types", quick = TRUE)
-#> Unzipping ODS file
-#> Reading XML file
+#> ℹ Extracting XML
+#> ✔ Extracting XML [4ms]
+#> 
+#> ℹ Getting sheet
+#> ✔ Getting sheet [6ms]
+#> 
+#> ℹ Extracting cell and row info
+#> ✔ Extracting cell and row info [19ms]
+#> 
+#> ℹ Generating output table
+#> ✔ Generating output table [23ms]
+#> 
 
 types_cells_quick |>
   dplyr::filter(row > 1) |>

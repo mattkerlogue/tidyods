@@ -6,8 +6,10 @@
 \usage{
 read_ods_sheet(
   path,
-  sheet,
-  rectify = "simple",
+  sheet = 1,
+  rectify = c("simple", "smart"),
+  skip = 0,
+  col_headers = TRUE,
   base_values = TRUE,
   quick = FALSE,
   whitespace = FALSE
@@ -18,37 +20,48 @@ read_ods_sheet(
 
 \item{sheet}{The sheet within the ODS file}
 
-\item{rectify}{The method to convert cells to two-dimensions, can only be "simple"}
+\item{rectify}{The method to convert cells to two-dimensions, either "simple"
+or "smart (see details).}
+
+\item{skip}{The number of rows to skip before attempting to rectify the cells.}
+
+\item{col_headers}{Whether to use the first row (after any skipping) as the
+column header (\code{TRUE} is the default), alternatively a character vector of
+column names can be provided.}
 
 \item{base_values}{Whether to use the base_value of a cell (TRUE, the default)
 or whether to provide the cell content as seen by a spreadsheet user.}
 
-\item{quick}{Whether to use the quick reading process}
+\item{quick}{Whether to use the quick reading process.}
 
-\item{whitespace}{Whether to process multiple whitespaces}
+\item{whitespace}{Whether to process multiple whitespaces.}
 }
 \value{
 A tibble, presenting cells in a traditional two-dimension spreadsheet format.
 }
 \description{
-A wrapper around \code{\link[=read_ods_cells]{read_ods_cells()}} and \code{\link[=simple_rectify]{simple_rectify()}} to extract
-cells from a sheet and return a
+A wrapper around \code{\link[=read_ods_cells]{read_ods_cells()}} and one of the
+\link[=simple_rectify]{rectify functions} provided in the package.
 }
 \details{
-At present, \code{rectify} can only be set to "simple", this calls the
-\code{\link[=simple_rectify]{simple_rectify()}} method to convert the cells to a sheet.
+When \code{rectify = "simple"} then the \code{\link[=simple_rectify]{simple_rectify()}} function will be used
+to coerce the cells to a sheet. You can instruct the rectifier to skip rows,
+whether to use the first row as column headers (or provide your own), and
+whether to use the underlying values or the formatted cell content for the
+value of the output cell. If \code{quick = TRUE} this implies using the cell
+content, thus the user setting for \code{base_values} is ignored and treated as if
+set to \code{FALSE}.
 
-When \code{base_values = TRUE} (the default) the underlying cell values are used
-for non-string value types. When \code{FALSE} then cell content as seen by a
-spreadsheet application user will be shown.
-
-Setting \code{quick = TRUE} will ignore the setting of \code{base_values}, as the quick
-process only returns cell content as seen by a spreadsheet users. When
-\code{whitespace = FALSE} (the default), multiple whitespaces in cell content
-are ignored. See \code{\link[=read_ods_cells]{read_ods_cells()}} for further details.
+When \code{rectify = "smart"} then the \code{\link[=smart_rectify]{smart_rectify()}} function will be used,
+this will attempt to guess the location of the column headers as well as
+coercing the columns using value type information extracted from the ODS.
+Using the smart rectifier ignores any settings for \code{base_values}, \code{skip} and
+\code{col_headers}. You cannot set \code{quick = TRUE} if you want to use the
+smart rectifier.
 }
 \examples{
 example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 read_ods_sheet(example, 1)
+#' read_ods_sheet(example, 2, "smart")
 
 }

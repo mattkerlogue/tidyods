@@ -18,19 +18,26 @@ read_ods_cells(path, sheet = 1, quick = FALSE, whitespace = FALSE)
 \value{
 A tibble with the following information:
 \itemize{
+\item \code{sheet}: the sheet of the cell
 \item \code{row}: the row number of the cell
 \item \code{col}: the column number of the cell
 \item \code{cell_type}: the type of cell, either "cell", "empty" or "merged"
 \item \code{value_type}: the ODS value type (see details)
-\item \code{cell_formula}: the ODS formula specification
+\item \code{is_empty}: if the cell has no content (can apply to cell and merged types)
 \item \code{cell_content}: the value of the cell as represented to the user of a
 spreadsheet application (i.e. with text formatting applied)
 \item \code{base_value}: the underlying value of a cell (see details)
-\item \verb{currency symbol}: the currency symbol for cells with a \code{value_type} of
+\item \code{numeric_value}: the \code{base_value} as a numeric vector for numeric types
+\item \code{logical_value}: the \code{base_value} as a logical vector for boolean types
+\item \code{currency_symbol}: the currency symbol for cells with a \code{value_type} of
 currency
+\item \code{has_formula}: whether the cell has a formula
+\item \code{cell_formula}: the ODS formula specification
+\item \code{has_error}: whether the cell has an error
+\item \code{error_type}: the error type
 }
 
-If using the \code{quick} argument you only \code{row}, \code{col} and \code{cell_content} are
+If using the \code{quick} argument then only \code{row}, \code{col} and \code{cell_content} are
 returned.
 }
 \description{
@@ -39,8 +46,10 @@ dataaset each cell is its own row with columns providing information about
 the cell's postion, value types and containing formulas.
 }
 \details{
-Cells are assigned a \code{cell_type} of "cell" when they have content, "empty"
-if they have no content, or "merged" if they are part of a set of merged cells.
+Cells are assigned a \code{cell_type} of "merged" if they are covered by a cell
+merge, "blank" if they have no value type or cell content, otherwise they are
+a "cell". Use \code{is_empty} to determine if the cell is blank, as the ODS
+specification allows for the retention of content in cells hidden by a merge.
 
 The \code{value_type} of a cell is based on the \href{https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949}{"value-type" attribute}
 defined by the OpenDocument Format specification. There are 7 value types:
@@ -55,8 +64,9 @@ different numeric types
 \item \code{time}: a duration, stored in ISO format
 }
 
-For currency value types optionally a currency symbol (e.g. GBP, EUR, USD) can
-be set, this is provided separate from the \code{base_value} as \code{currency_symbol}.
+For currency value types optionally a currency symbol (e.g. GBP, EUR, USD)
+can be set, this is provided separately from the \code{base_value} as
+\code{currency_symbol}.
 
 \code{read_ods_cells} provides two representations of a cell's value. The
 \code{cell_content} column provides the cell's value as presented to the user of
@@ -70,6 +80,10 @@ significant speed enhancements by setting the \code{quick} argument to FALSE,
 this will extract only the text content of the cell. Note this also ignores
 repeated white space elements (i.e. \code{"A   B   C"} will be returned as
 \code{"A B C"}).
+
+The values of \code{error_type} are equivalent to those produced by
+\href{https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa}{Microsoft Excel}
+and \href{https://help.libreoffice.org/7.3/en-GB/text/scalc/01/func_error_type.html?&DbPAR=SHARED&System=MAC}{LibreOffice}.
 }
 \examples{
 example <- system.file("extdata", "basic_example.ods", package = "tidyods")
