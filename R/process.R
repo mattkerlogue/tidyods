@@ -7,7 +7,7 @@ unzip_ods_xml <- function(ods_file) {
 
   # if remote file location download the file to temp_dir
   if (grepl("^((http|ftp)s?|sftp)://", ods_file)) {
-    cli::cli_progress_message("Reading remote file")
+    cli::cli_progress_step("Reading remote file")
     utils::download.file(
       url = ods_file,
       destfile = file.path(temp_dir, basename(ods_file)),
@@ -22,7 +22,6 @@ unzip_ods_xml <- function(ods_file) {
     cli::cli_abort("{.file {ods_file}} does not have a valid extension, .ods")
   }
 
-  cli::cli_progress_message("Unzipping ODS file")
   utils::unzip(ods_file, files = "content.xml", exdir = temp_dir,
                overwrite = TRUE)
 
@@ -38,8 +37,6 @@ extract_ods_xml <- function(ods_file) {
   if (!file.exists(xml_file)){
     cli::cli_abort("Error in unzip procedure")
   }
-
-  cli::cli_progress_message("Reading XML file")
 
   return(xml2::read_xml(xml_file))
 
@@ -185,12 +182,7 @@ extract_rows <- function(tbl_xml, ns, quick = FALSE) {
 
 }
 
-extract_table <- function(tbl_xml, quick = FALSE, whitespace = FALSE) {
-
-  ns <- xml2::xml_ns(tbl_xml)
-
-  cell_tbl <- extract_cells(tbl_xml, ns, quick = quick)
-  row_tbl <- extract_rows(tbl_xml, ns, quick = quick)
+generate_cell_output <- function(row_tbl, cell_tbl, sheets, quick = FALSE) {
 
   combined_tbl <- dplyr::left_join(
     cell_tbl, row_tbl,
@@ -198,7 +190,7 @@ extract_table <- function(tbl_xml, quick = FALSE, whitespace = FALSE) {
     suffix = c("_cell", "_row")
   )
 
-  sheets <- ods_sheet_paths(tbl_xml, short = TRUE, flip = TRUE)
+  sheets <- purrr::set_names(x = names(sheets), nm = sheets)
 
   cell_locations <- combined_tbl %>%
     dplyr::select(
@@ -206,7 +198,7 @@ extract_table <- function(tbl_xml, quick = FALSE, whitespace = FALSE) {
       row_children, cell_content, office_value_type, cell_path
     ) %>%
     dplyr::mutate(
-      sheet = gsub("^.*(table:table\\[\\d+\\]?)\\/.*$", "\\1", cell_path),
+      sheet = gsub("^(.*table:table\\[\\d+\\]?)\\/.*$", "\\1", cell_path),
       sheet = sheets[sheet]
     ) %>%
     dplyr::arrange(sheet, row_id, cell_id) %>%
@@ -289,6 +281,7 @@ extract_table <- function(tbl_xml, quick = FALSE, whitespace = FALSE) {
           is.na(cell_content) ~ "blank",
           TRUE ~ "cell"
         ),
+        is_empty = is.na(cell_content),
         has_formula = !is.na(table_formula),
         base_value = dplyr::case_when(
           is.na(office_value_type) ~ NA_character_,
@@ -305,22 +298,26 @@ extract_table <- function(tbl_xml, quick = FALSE, whitespace = FALSE) {
         ),
         numeric_value = as.numeric(office_value),
         logical_value = as.logical(office_boolean_value),
-        error = dplyr::case_when(
-          cell_content == "#NUM!" ~ "503",
-          cell_content == "#VALUE!" ~ "519",
-          cell_content == "#NULL!" ~ "521",
-          cell_content == "#REF!" ~ "524",
-          cell_content == "#NAME?" ~ "525",
-          cell_content == "#DIV/0" ~ "532",
-          grepl("^Err:\\d{3}$", cell_content) ~ gsub("Err:", "", cell_content),
+        error_type = dplyr::case_when(
+          cell_content == "#NULL!" ~ "1",
+          cell_content == "#DIV/0!" ~ "2",
+          cell_content == "#VALUE!" ~ "3",
+          cell_content == "#REF!" ~ "4",
+          cell_content == "#NAME?" ~ "5",
+          cell_content == "#NUM!" ~ "6",
+          cell_content == "#N/A" ~ "7",
+          grepl("^Err:\\d{3}$", cell_content) ~ "7",
           TRUE ~ NA_character_
         ),
-        error = as.numeric(error)
+        error_type = as.numeric(error_type),
+        has_error = !is.na(error_type),
+        base_value = dplyr::if_else(has_error, cell_content, base_value)
       ) %>%
       dplyr::select(
         sheet, row, col,
         cell_type,
         value_type = office_value_type,
+        is_empty,
         cell_content,
         base_value,
         numeric_value,
@@ -328,7 +325,8 @@ extract_table <- function(tbl_xml, quick = FALSE, whitespace = FALSE) {
         currency_symbol = office_currency,
         has_formula,
         cell_formula = table_formula,
-        error
+        has_error,
+        error_type
       )
 
   }

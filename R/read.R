@@ -12,23 +12,32 @@
 #' @return
 #' A tibble with the following information:
 #'
+#' - `sheet`: the sheet of the cell
 #' - `row`: the row number of the cell
 #' - `col`: the column number of the cell
 #' - `cell_type`: the type of cell, either "cell", "empty" or "merged"
 #' - `value_type`: the ODS value type (see details)
-#' - `cell_formula`: the ODS formula specification
+#' - `is_empty`: if the cell has no content (can apply to cell and merged types)
 #' - `cell_content`: the value of the cell as represented to the user of a
 #'   spreadsheet application (i.e. with text formatting applied)
 #' - `base_value`: the underlying value of a cell (see details)
-#' - `currency symbol`: the currency symbol for cells with a `value_type` of
+#' - `numeric_value`: the `base_value` as a numeric vector for numeric types
+#' - `logical_value`: the `base_value` as a logical vector for boolean types
+#' - `currency_symbol`: the currency symbol for cells with a `value_type` of
 #'   currency
+#' - `has_formula`: whether the cell has a formula
+#' - `cell_formula`: the ODS formula specification
+#' - `has_error`: whether the cell has an error
+#' - `error_type`: the error type
 #'
-#' If using the `quick` argument you only `row`, `col` and `cell_content` are
+#' If using the `quick` argument then only `row`, `col` and `cell_content` are
 #' returned.
 #'
 #' @details
-#' Cells are assigned a `cell_type` of "cell" when they have content, "empty"
-#' if they have no content, or "merged" if they are part of a set of merged cells.
+#' Cells are assigned a `cell_type` of "merged" if they are covered by a cell
+#' merge, "blank" if they have no value type or cell content, otherwise they are
+#' a "cell". Use `is_empty` to determine if the cell is blank, as the ODS
+#' specification allows for the retention of content in cells hidden by a merge.
 #'
 #' The `value_type` of a cell is based on the ["value-type" attribute](https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949)
 #' defined by the OpenDocument Format specification. There are 7 value types:
@@ -42,8 +51,9 @@
 #' - `string`: equivalent to R's [base::character()]
 #' - `time`: a duration, stored in ISO format
 #'
-#' For currency value types optionally a currency symbol (e.g. GBP, EUR, USD) can
-#' be set, this is provided separate from the `base_value` as `currency_symbol`.
+#' For currency value types optionally a currency symbol (e.g. GBP, EUR, USD)
+#' can be set, this is provided separately from the `base_value` as
+#' `currency_symbol`.
 #'
 #' `read_ods_cells` provides two representations of a cell's value. The
 #' `cell_content` column provides the cell's value as presented to the user of
@@ -57,6 +67,10 @@
 #' this will extract only the text content of the cell. Note this also ignores
 #' repeated white space elements (i.e. `"A   B   C"` will be returned as
 #' `"A B C"`).
+#'
+#' The values of `error_type` are equivalent to those produced by
+#' [Microsoft Excel](https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa)
+#' and [LibreOffice](https://help.libreoffice.org/7.3/en-GB/text/scalc/01/func_error_type.html?&DbPAR=SHARED&System=MAC).
 #'
 #' @examples
 #' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
@@ -74,16 +88,16 @@ read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE) {
     cli::cli_abort("{.arg path} must be a character vector of length 1")
   }
 
-  if (missing(sheet)) {
-    cli::cli_abort("{.arg sheet} is not defined")
-  } else if (length(sheet) != 1) {
+  if (length(sheet) != 1) {
     cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
   } else if (!(is.character(sheet) | is.numeric(sheet))) {
     cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
   }
 
+  cli::cli_progress_step("Extracting XML")
   ods_xml <- extract_ods_xml(ods_file = path)
 
+  cli::cli_progress_step("Getting sheet")
   sheets <- ods_sheet_paths(ods_xml)
 
   sheet_path <- NULL
@@ -119,8 +133,17 @@ read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE) {
     tbl_xml <- xml2::xml_find_all(ods_xml, sheet_path)
   }
 
-  ods_cells <- extract_table(tbl_xml, quick = quick, whitespace = whitespace)
+  ns <- xml2::xml_ns(tbl_xml)
 
+  cli::cli_progress_step("Extracting cell and row info")
+  row_tbl <- extract_rows(tbl_xml, ns, quick = quick)
+  cell_tbl <- extract_cells(tbl_xml, ns, quick = quick)
+
+  cli::cli_progress_step("Generating output table")
+  ods_cells <- generate_cell_output(row_tbl, cell_tbl, sheets,
+                                    quick = quick)
+
+  cli::cli_progress_cleanup()
   return(ods_cells)
 
 }
