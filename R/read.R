@@ -76,7 +76,6 @@
 #' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 #' example_cells <- read_ods_cells(example, 1)
 #' dplyr::glimpse(example_cells)
-#'
 #' @export
 read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE) {
 
@@ -188,8 +187,7 @@ read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE) {
 #' @examples
 #' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 #' read_ods_sheet(example, 1)
-#' #' read_ods_sheet(example, 2, "smart")
-#'
+#' read_ods_sheet(example, 2, "smart")
 #' @export
 read_ods_sheet <- function(path, sheet = 1, rectify = c("simple", "smart"),
                            skip = 0, col_headers = TRUE, base_values = TRUE,
@@ -253,7 +251,6 @@ read_ods_sheet <- function(path, sheet = 1, rectify = c("simple", "smart"),
 #' @examples
 #' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 #' ods_sheets(example)
-#'
 #' @export
 ods_sheets <- function(path) {
 

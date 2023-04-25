@@ -31,7 +31,7 @@ There are two functions to "rectify" a set of ODS cells extracted by
 rectangle.
 }
 \details{
-#' \code{simple_rectify()} will perform a basic reshaping of the dataset using either
+\code{simple_rectify()} will perform a basic reshaping of the dataset using either
 the \code{base_value} or \code{cell_content} column of the supplied cells. It also
 provides options to skip rows and whether to set column headers.
 
@@ -54,5 +54,4 @@ example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 example_cells <- read_ods_cells(example, 1)
 simple_rectify(example_cells, base_values = TRUE)
 smart_rectify(example_cells)
-
 }

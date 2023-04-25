@@ -89,5 +89,4 @@ and \href{https://help.libreoffice.org/7.3/en-GB/text/scalc/01/func_error_type.h
 example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 example_cells <- read_ods_cells(example, 1)
 dplyr::glimpse(example_cells)
-
 }

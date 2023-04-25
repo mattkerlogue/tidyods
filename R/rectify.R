@@ -14,7 +14,7 @@
 #'   column names can be provided.
 #'
 #' @details
-#' #' `simple_rectify()` will perform a basic reshaping of the dataset using either
+#' `simple_rectify()` will perform a basic reshaping of the dataset using either
 #' the `base_value` or `cell_content` column of the supplied cells. It also
 #' provides options to skip rows and whether to set column headers.
 #'
@@ -40,7 +40,6 @@
 #' example_cells <- read_ods_cells(example, 1)
 #' simple_rectify(example_cells, base_values = TRUE)
 #' smart_rectify(example_cells)
-#'
 #' @export
 #' @rdname rectify
 simple_rectify <- function(ods_cells, skip = 0, col_headers = TRUE,

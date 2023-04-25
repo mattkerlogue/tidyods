@@ -62,6 +62,5 @@ smart rectifier.
 \examples{
 example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 read_ods_sheet(example, 1)
-#' read_ods_sheet(example, 2, "smart")
-
+read_ods_sheet(example, 2, "smart")
 }
