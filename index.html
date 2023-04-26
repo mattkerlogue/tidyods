@@ -137,16 +137,19 @@
 <code class="sourceCode R"><span><span class="va">penguin_sheet</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"penguins"</span>, quick <span class="op">=</span> <span class="cn">TRUE</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">penguin_sheet</span></span>
-<span><span class="co">#&gt; # A tibble: 4 × 8</span></span>
-<span><span class="co">#&gt;   col   `1`            `2`              `3`              `4`   `5`   `6`   `7`  </span></span>
-<span><span class="co">#&gt;   &lt;chr&gt; &lt;chr&gt;          &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;</span></span>
-<span><span class="co">#&gt; 1 x1    species        Adelie           Adelie           Chin… Chin… Gent… Gent…</span></span>
-<span><span class="co">#&gt; 2 x2    female         FALSE            TRUE             FALSE TRUE  FALSE TRUE </span></span>
-<span><span class="co">#&gt; 3 x3    bill_length_mm 40.3904109589041 37.2575342465753 51.0… 46.5… 49.4… 45.5…</span></span>
-<span><span class="co">#&gt; 4 x4    body_mass_g    4043.49315068493 3368.83561643836 3938… 3527… 5484… 4679…</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 7 × 5</span></span>
+<span><span class="co">#&gt;     row x1        x2     x3               x4              </span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;            &lt;chr&gt;           </span></span>
+<span><span class="co">#&gt; 1     1 species   female bill_length_mm   body_mass_g     </span></span>
+<span><span class="co">#&gt; 2     2 Adelie    FALSE  40.3904109589041 4043.49315068493</span></span>
+<span><span class="co">#&gt; 3     3 Adelie    TRUE   37.2575342465753 3368.83561643836</span></span>
+<span><span class="co">#&gt; 4     4 Chinstrap FALSE  51.0941176470588 3938.97058823529</span></span>
+<span><span class="co">#&gt; 5     5 Chinstrap TRUE   46.5735294117647 3527.20588235294</span></span>
+<span><span class="co">#&gt; 6     6 Gentoo    FALSE  49.4737704918033 5484.83606557377</span></span>
+<span><span class="co">#&gt; 7     7 Gentoo    TRUE   45.5637931034483 4679.74137931035</span></span></code></pre></div>
 <p>The <code>types</code> sheet shows examples of the different ODS data types:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">types_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">types_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">types_cells</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -223,7 +226,8 @@
 <p>With default settings, performance of <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> functions is comparable to <a href="https://docs.ropensci.org/readODS" class="external-link">readODS</a> for small files, when working with larger files performance is somewhat quicker than <a href="https://docs.ropensci.org/readODS" class="external-link">readODS</a>.</p>
 <p>Performance can be improved by setting <code>quick = TRUE</code> in <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> and <code><a href="reference/read_ods_sheet.html">read_ods_sheet()</a></code>, this will extract only a simple text representation of the cell, i.e. it will not provide information on cell or value types, formulas or the underlying base value for numbers, dates or times.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">types_cells_quick</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span>, quick <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">types_cells_quick</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span>,</span>
+<span>                                    quick <span class="op">=</span> <span class="cn">TRUE</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">types_cells_quick</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>

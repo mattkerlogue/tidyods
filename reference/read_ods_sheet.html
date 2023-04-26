@@ -62,7 +62,8 @@ rectify functions provided in the package."><meta property="og:image" content="h
 <span>  col_headers <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  base_values <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  quick <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  whitespace <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  whitespace <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -103,6 +104,10 @@ or whether to provide the cell content as seen by a spreadsheet user.</p></dd>
 <dt>whitespace</dt>
 <dd><p>Whether to process multiple whitespaces.</p></dd>
 
+
+<dt>quiet</dt>
+<dd><p>Whether to silence console messages (recommended for bulk processing)</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -132,16 +137,16 @@ smart rectifier.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"basic_example.ods"</span>, package <span class="op">=</span> <span class="st">"tidyods"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">read_ods_sheet</span><span class="op">(</span><span class="va">example</span>, <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting XML</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting XML <span style="color: #B2B2B2;">[11ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting XML <span style="color: #B2B2B2;">[10ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Getting sheet</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Getting sheet <span style="color: #B2B2B2;">[21ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Getting sheet <span style="color: #B2B2B2;">[17ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting cell and row info</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting cell and row info <span style="color: #B2B2B2;">[155ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting cell and row info <span style="color: #B2B2B2;">[122ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Rectifying cells to sheet layout</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rectifying cells to sheet layout <span style="color: #B2B2B2;">[39ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rectifying cells to sheet layout <span style="color: #B2B2B2;">[33ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   species   female bill_length_mm   body_mass_g     </span>
@@ -154,16 +159,16 @@ smart rectifier.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> Gentoo    true   45.5637931034483 4679.74137931035</span>
 <span class="r-in"><span><span class="fu">read_ods_sheet</span><span class="op">(</span><span class="va">example</span>, <span class="fl">2</span>, <span class="st">"smart"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting XML</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting XML <span style="color: #B2B2B2;">[11ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting XML <span style="color: #B2B2B2;">[10ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Getting sheet</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Getting sheet <span style="color: #B2B2B2;">[20ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Getting sheet <span style="color: #B2B2B2;">[17ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting cell and row info</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting cell and row info <span style="color: #B2B2B2;">[167ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting cell and row info <span style="color: #B2B2B2;">[133ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Rectifying cells to sheet layout</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rectifying cells to sheet layout <span style="color: #B2B2B2;">[231ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rectifying cells to sheet layout <span style="color: #B2B2B2;">[191ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 11 × 10</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    String      Boolean Currency Date  Time  DateTime    Float Percentage Formula</span>
