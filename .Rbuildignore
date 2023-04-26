@@ -7,3 +7,4 @@
 ^pkgdown$
 ^\.github$
 ^tidyods.code-workspace$
+^CODE_OF_CONDUCT\.md$
