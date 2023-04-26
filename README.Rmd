@@ -79,7 +79,7 @@ penguin_sheet
 The `types` sheet shows examples of the different ODS data types:
 ```{r}
 #| message: false
-types_cells <- read_ods_cells(example_file, "types")
+types_cells <- read_ods_cells(example_file, "types", quiet = TRUE)
 
 types_cells |> 
   dplyr::filter(row > 1) |>
@@ -111,7 +111,8 @@ or the underlying base value for numbers, dates or times.
 
 ```{r}
 #| message: false
-types_cells_quick <- read_ods_cells(example_file, "types", quick = TRUE)
+types_cells_quick <- read_ods_cells(example_file, "types",
+                                    quick = TRUE, quiet = TRUE)
 
 types_cells_quick |>
   dplyr::filter(row > 1) |>

@@ -94,19 +94,22 @@ dataset.
 penguin_sheet <- read_ods_sheet(example_file, "penguins", quick = TRUE, quiet = TRUE)
 
 penguin_sheet
-#> # A tibble: 4 × 8
-#>   col   `1`            `2`              `3`              `4`   `5`   `6`   `7`  
-#>   <chr> <chr>          <chr>            <chr>            <chr> <chr> <chr> <chr>
-#> 1 x1    species        Adelie           Adelie           Chin… Chin… Gent… Gent…
-#> 2 x2    female         FALSE            TRUE             FALSE TRUE  FALSE TRUE 
-#> 3 x3    bill_length_mm 40.3904109589041 37.2575342465753 51.0… 46.5… 49.4… 45.5…
-#> 4 x4    body_mass_g    4043.49315068493 3368.83561643836 3938… 3527… 5484… 4679…
+#> # A tibble: 7 × 5
+#>     row x1        x2     x3               x4              
+#>   <int> <chr>     <chr>  <chr>            <chr>           
+#> 1     1 species   female bill_length_mm   body_mass_g     
+#> 2     2 Adelie    FALSE  40.3904109589041 4043.49315068493
+#> 3     3 Adelie    TRUE   37.2575342465753 3368.83561643836
+#> 4     4 Chinstrap FALSE  51.0941176470588 3938.97058823529
+#> 5     5 Chinstrap TRUE   46.5735294117647 3527.20588235294
+#> 6     6 Gentoo    FALSE  49.4737704918033 5484.83606557377
+#> 7     7 Gentoo    TRUE   45.5637931034483 4679.74137931035
 ```
 
 The `types` sheet shows examples of the different ODS data types:
 
 ``` r
-types_cells <- read_ods_cells(example_file, "types")
+types_cells <- read_ods_cells(example_file, "types", quiet = TRUE)
 
 types_cells |> 
   dplyr::filter(row > 1) |>
@@ -196,7 +199,8 @@ information on cell or value types, formulas or the underlying base
 value for numbers, dates or times.
 
 ``` r
-types_cells_quick <- read_ods_cells(example_file, "types", quick = TRUE)
+types_cells_quick <- read_ods_cells(example_file, "types",
+                                    quick = TRUE, quiet = TRUE)
 
 types_cells_quick |>
   dplyr::filter(row > 1) |>
