@@ -94,16 +94,16 @@ dataset.
 penguin_sheet <- read_ods_sheet(example_file, "penguins", quick = TRUE, quiet = TRUE)
 
 penguin_sheet
-#> # A tibble: 7 × 5
-#>     row x1        x2     x3               x4              
-#>   <int> <chr>     <chr>  <chr>            <chr>           
-#> 1     1 species   female bill_length_mm   body_mass_g     
-#> 2     2 Adelie    FALSE  40.3904109589041 4043.49315068493
-#> 3     3 Adelie    TRUE   37.2575342465753 3368.83561643836
-#> 4     4 Chinstrap FALSE  51.0941176470588 3938.97058823529
-#> 5     5 Chinstrap TRUE   46.5735294117647 3527.20588235294
-#> 6     6 Gentoo    FALSE  49.4737704918033 5484.83606557377
-#> 7     7 Gentoo    TRUE   45.5637931034483 4679.74137931035
+#> # A tibble: 7 × 4
+#>   x1        x2     x3               x4              
+#>   <chr>     <chr>  <chr>            <chr>           
+#> 1 species   female bill_length_mm   body_mass_g     
+#> 2 Adelie    FALSE  40.3904109589041 4043.49315068493
+#> 3 Adelie    TRUE   37.2575342465753 3368.83561643836
+#> 4 Chinstrap FALSE  51.0941176470588 3938.97058823529
+#> 5 Chinstrap TRUE   46.5735294117647 3527.20588235294
+#> 6 Gentoo    FALSE  49.4737704918033 5484.83606557377
+#> 7 Gentoo    TRUE   45.5637931034483 4679.74137931035
 ```
 
 The `types` sheet shows examples of the different ODS data types:
