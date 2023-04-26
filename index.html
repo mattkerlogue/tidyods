@@ -137,16 +137,16 @@
 <code class="sourceCode R"><span><span class="va">penguin_sheet</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"penguins"</span>, quick <span class="op">=</span> <span class="cn">TRUE</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">penguin_sheet</span></span>
-<span><span class="co">#&gt; # A tibble: 7 × 5</span></span>
-<span><span class="co">#&gt;     row x1        x2     x3               x4              </span></span>
-<span><span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;            &lt;chr&gt;           </span></span>
-<span><span class="co">#&gt; 1     1 species   female bill_length_mm   body_mass_g     </span></span>
-<span><span class="co">#&gt; 2     2 Adelie    FALSE  40.3904109589041 4043.49315068493</span></span>
-<span><span class="co">#&gt; 3     3 Adelie    TRUE   37.2575342465753 3368.83561643836</span></span>
-<span><span class="co">#&gt; 4     4 Chinstrap FALSE  51.0941176470588 3938.97058823529</span></span>
-<span><span class="co">#&gt; 5     5 Chinstrap TRUE   46.5735294117647 3527.20588235294</span></span>
-<span><span class="co">#&gt; 6     6 Gentoo    FALSE  49.4737704918033 5484.83606557377</span></span>
-<span><span class="co">#&gt; 7     7 Gentoo    TRUE   45.5637931034483 4679.74137931035</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 7 × 4</span></span>
+<span><span class="co">#&gt;   x1        x2     x3               x4              </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;  &lt;chr&gt;            &lt;chr&gt;           </span></span>
+<span><span class="co">#&gt; 1 species   female bill_length_mm   body_mass_g     </span></span>
+<span><span class="co">#&gt; 2 Adelie    FALSE  40.3904109589041 4043.49315068493</span></span>
+<span><span class="co">#&gt; 3 Adelie    TRUE   37.2575342465753 3368.83561643836</span></span>
+<span><span class="co">#&gt; 4 Chinstrap FALSE  51.0941176470588 3938.97058823529</span></span>
+<span><span class="co">#&gt; 5 Chinstrap TRUE   46.5735294117647 3527.20588235294</span></span>
+<span><span class="co">#&gt; 6 Gentoo    FALSE  49.4737704918033 5484.83606557377</span></span>
+<span><span class="co">#&gt; 7 Gentoo    TRUE   45.5637931034483 4679.74137931035</span></span></code></pre></div>
 <p>The <code>types</code> sheet shows examples of the different ODS data types:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">types_cells</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
