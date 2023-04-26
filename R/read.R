@@ -180,6 +180,7 @@ read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE,
 #' @param col_headers Whether to use the first row (after any skipping) as the
 #'   column header (`TRUE` is the default), alternatively a character vector of
 #'   column names can be provided.
+#' @param quiet Whether to silence console messages (recommended for bulk processing)
 #'
 #' @return
 #' A tibble, presenting cells in a traditional two-dimension spreadsheet format.

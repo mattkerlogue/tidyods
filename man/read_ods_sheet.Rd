@@ -12,7 +12,8 @@ read_ods_sheet(
   col_headers = TRUE,
   base_values = TRUE,
   quick = FALSE,
-  whitespace = FALSE
+  whitespace = FALSE,
+  quiet = FALSE
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ or whether to provide the cell content as seen by a spreadsheet user.}
 \item{quick}{Whether to use the quick reading process.}
 
 \item{whitespace}{Whether to process multiple whitespaces.}
+
+\item{quiet}{Whether to silence console messages (recommended for bulk processing)}
 }
 \value{
 A tibble, presenting cells in a traditional two-dimension spreadsheet format.
