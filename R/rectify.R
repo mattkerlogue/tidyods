@@ -139,6 +139,19 @@ simple_rectify <- function(ods_cells, skip = 0, col_headers = TRUE,
 
 }
 
+quick_rectify <- function(ods_cells) {
+
+  tidyr::crossing(
+    row = seq_len(max(ods_cells$row)),
+    col = seq_len(max(ods_cells$col)),
+  ) |>
+    dplyr::left_join(ods_cells, by = c("row", "col")) |>
+    dplyr::mutate(col = paste0("x", col)) |>
+    dplyr::select(row, col, base_value) |>
+    tidyr::pivot_wider(names_from = row, values_from = base_value)
+
+}
+
 
 #' @export
 #' @rdname rectify

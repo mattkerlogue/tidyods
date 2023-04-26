@@ -4,54 +4,119 @@
 \alias{read_ods_cells}
 \title{Read cells from an ODS sheet}
 \usage{
-read_ods_cells(path, sheet = 1, quick = FALSE, whitespace = FALSE)
+read_ods_cells(
+  path,
+  sheet = 1,
+  quick = FALSE,
+  whitespace = FALSE,
+  quiet = FALSE
+)
 }
 \arguments{
 \item{path}{The ODS file}
 
-\item{sheet}{The sheet within the ODS file}
+\item{sheet}{The sheet name or index number, set to NA for all sheets}
 
 \item{quick}{Whether to use the quick reading process}
 
-\item{whitespace}{Whether to process multiple whitespaces}
+\item{whitespace}{Whether to process multiple whitespaces (ignore for now)}
+
+\item{quiet}{Whether to silence console messages (recommended for bulk processing)}
 }
 \value{
-A tibble with the following information:
-\itemize{
-\item \code{sheet}: the sheet of the cell
-\item \code{row}: the row number of the cell
-\item \code{col}: the column number of the cell
-\item \code{cell_type}: the type of cell, either "cell", "empty" or "merged"
-\item \code{value_type}: the ODS value type (see details)
-\item \code{is_empty}: if the cell has no content (can apply to cell and merged types)
-\item \code{cell_content}: the value of the cell as represented to the user of a
-spreadsheet application (i.e. with text formatting applied)
-\item \code{base_value}: the underlying value of a cell (see details)
-\item \code{numeric_value}: the \code{base_value} as a numeric vector for numeric types
-\item \code{logical_value}: the \code{base_value} as a logical vector for boolean types
-\item \code{currency_symbol}: the currency symbol for cells with a \code{value_type} of
-currency
-\item \code{has_formula}: whether the cell has a formula
-\item \code{cell_formula}: the ODS formula specification
-\item \code{has_error}: whether the cell has an error
-\item \code{error_type}: the error type
-}
-
-If using the \code{quick} argument then only \code{row}, \code{col} and \code{cell_content} are
-returned.
+A tibble (data.frame) of cells from the ODS sheet(s).
 }
 \description{
 Import cells from an OpenDocument Spreadsheet (ODS) file. In the resulting
-dataaset each cell is its own row with columns providing information about
-the cell's postion, value types and containing formulas.
+dataset each cell is its own row with columns providing information about
+the cell's position, value types and containing formulas.
 }
 \details{
-Cells are assigned a \code{cell_type} of "merged" if they are covered by a cell
-merge, "blank" if they have no value type or cell content, otherwise they are
-a "cell". Use \code{is_empty} to determine if the cell is blank, as the ODS
-specification allows for the retention of content in cells hidden by a merge.
+The goal of \code{read_ods_cells()} is to extract the constituent value(s) and
+other information about cells stored in an ODS file and to present that
+in a "tidy" format that allows further programmatic manipulation. It is
+modelled after the functionality of \code{\link[tidyxl:tidy_xlsx]{tidyxl::tidy_xlsx()}} which performs a
+similar role for Microsoft Excel spreadsheets.
 
-The \code{value_type} of a cell is based on the \href{https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949}{"value-type" attribute}
+There are between two to four presentations of a cell's value in the
+resulting tibble:
+\itemize{
+\item the \code{base_value}, a character vector providing the "most raw" version of
+a cell's value (see below regarding variation when setting \code{quick=TRUE});
+\item the \code{cell_content}, a character vector providing the version of a cell's
+value as seen by the user of a spreadsheet application;
+\item for float, currency percentage value types, a \code{numeric_value} with the raw
+value of the cell as a base R numeric vector, currency value types also
+have a \code{currency_symbol} providing the 3-character ISO currency symbol;
+\item for date and time value types, a character vector with the raw value
+conforming to the relevant ISO standard.
+}
+
+Processing the ODS XML is a memory intensive process, you can achieve
+significant speed enhancements by setting the \code{quick} argument to FALSE.
+This process wille extract only a minimum of information about the cells,
+namely: \code{sheet}, \code{row}, \code{col}, \code{value_type} and a \code{base_value}. The
+\code{base_value} when using the \code{quick} argument will combine the raw value
+stored for float and percentage value types with the \code{cell_content} (i.e
+formatted character string) for all other value types.
+
+#' @details # Cell information
+The resulting data.frame has 25 columns:
+\itemize{
+\item \code{sheet}: the sheet the cell is from
+\item \code{row}: the row number of the cell
+\item \code{col}: the column number of the cell
+\item \code{cell_type}: the type of cell, either \code{cell}, \code{empty}, \code{merge-hidden} or
+\code{merge-lead}
+\item \code{is_empty}: a logical vector indicating if the cell is empty
+\item \code{value_type}: the value type, either \code{boolean}, \code{currency}, \code{date},
+\code{float}, \code{percentage}, \code{string} or \code{time}
+\item \code{cell_content}: the content as presented to users of a spreadsheet application
+\item \code{base_value}: the "base" value of the cell
+\item \code{numeric_value}: base values for numeric value types as a numeric vector
+\item \code{currency_symbol}: the currency symbol associated with currency value types
+\item \code{boolean_value}: base values for boolean value types as a logical vector
+\item \code{date_value}: base values for date value types (incl date-time) as a character vector
+\item \code{time_value}: base value for time value types as a character vector
+\item \code{has_formula}: a logical vector indicating if the cell content are calculated by a formula
+\item \code{formula}: the formula used to calculate the cell content
+\item \code{has_error}: a logical vector indicating if the cell formula results in an error
+\item \code{error_type}: a numeric vector indicating the type of error
+\item \code{has_annotation}: a logival vector indicating if the cell has a comment or annotation
+\item \code{annotation}: the text of any comment or annotation
+\item \code{is_merged}: a logical indicating if the cell is part of a merge group
+\item \code{merge_colspan}: for merge leader cells, the number of columns spanned
+\item \code{merge_rowspan}: for merge leader cells, the number of rows spanned
+\item \code{merge_shape}: for merge leader cells, the shape of the merge group, either \code{vetical},
+\code{horizontal}, or \code{rectangle}
+\item \code{cell_style}: the style code of the cell
+\item \code{row_style}: the style code of the row
+}
+\subsection{Cell types and merge groups}{
+
+Cells are assigned one of four \code{cell_type} values:
+\itemize{
+\item a cell is \code{empty} if it has no content or no value type,
+\item a cell is a \code{merge-lead} if it is the top-left cell of a merge group,
+other cells in the merge group are assigned \code{merge-hidden}
+\item everything else is simply a \code{cell}
+}
+
+Cells in a merge group will also have \code{is_merged} set to \code{TRUE}. The top-left
+cell in a merge group has information about the number of columns
+(\code{merge_colspan}) and rows (\code{merge_rowspan}) in the merge group as well as
+an indication of shape (\code{vertical}, \code{horizontal} or \code{rectangle}). Merge
+groups are not uniquely identified.
+
+The ODS specification allows for cells hidden by a merge to have content,
+annecdotally this appears to be supported by ODS files created by
+LibreOffice but not by ODS files created by Microsoft Excel.
+}
+
+\subsection{Value types}{
+
+The \code{value_type} of a cell is based on the
+\href{https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949}{"value-type" attribute}
 defined by the OpenDocument Format specification. There are 7 value types:
 \itemize{
 \item \code{boolean}: equivalent to R's \code{\link[base:logical]{base::logical()}} data type
@@ -66,24 +131,17 @@ different numeric types
 
 For currency value types optionally a currency symbol (e.g. GBP, EUR, USD)
 can be set, this is provided separately from the \code{base_value} as
-\code{currency_symbol}.
+\code{currency_symbol}, the formatting of currency symbols is handled by style
+information, the value as visible to a spreadsheet user is provided in the
+\code{cell_content} column.
+}
 
-\code{read_ods_cells} provides two representations of a cell's value. The
-\code{cell_content} column provides the cell's value as presented to the user of
-a traditional spreadsheet application (such as Microsoft Excel, Google Sheets
-or LibreOffice Calc), i.e. after applying cell formatting rules. The
-\code{base_value} column provides the cell's underlying value, i.e. without
-formatting.
-
-Processing the ODS XML is a memory intensive process, you can achieve
-significant speed enhancements by setting the \code{quick} argument to FALSE,
-this will extract only the text content of the cell. Note this also ignores
-repeated white space elements (i.e. \code{"A   B   C"} will be returned as
-\code{"A B C"}).
+\subsection{Error types}{
 
 The values of \code{error_type} are equivalent to those produced by
 \href{https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa}{Microsoft Excel}
 and \href{https://help.libreoffice.org/7.3/en-GB/text/scalc/01/func_error_type.html?&DbPAR=SHARED&System=MAC}{LibreOffice}.
+}
 }
 \examples{
 example <- system.file("extdata", "basic_example.ods", package = "tidyods")

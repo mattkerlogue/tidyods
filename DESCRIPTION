@@ -9,7 +9,7 @@ Description: Import cells from ODS files. Identify a cell's postion, value types
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 Imports: 
     cli,
     dplyr,
@@ -18,6 +18,7 @@ Imports:
     readr,
     tibble,
     tidyr,
+    tidyselect,
     xml2
 URL: https://github.com/mattkerlogue/tidyods, 
     https://mattkerlogue.github.io/tidyods/
