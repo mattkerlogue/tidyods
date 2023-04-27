@@ -10,9 +10,11 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Depends: 
+    R (>= 4.1.0)
 Imports: 
     cli,
-    dplyr,
+    dplyr (>= 1.1.0),
     magrittr,
     purrr,
     readr,
