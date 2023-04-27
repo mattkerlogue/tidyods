@@ -1,6 +1,6 @@
 Package: tidyods
 Title: Read cells from ODS files
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: 
     person("Matt", "Kerlogue", , "matt.kerlogue@me.com", role = c("aut", "cre"))
 Description: Import cells from ODS files. Identify a cell's postion, value types
