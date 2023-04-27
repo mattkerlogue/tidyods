@@ -70,23 +70,23 @@ simple_rectify <- function(ods_cells, skip = 0, col_headers = TRUE,
   )
 
   if (base_values) {
-    simple_content <- ods_cells %>%
+    simple_content <- ods_cells |>
       dplyr::select(row, col, cell_value = base_value)
   } else  {
-    simple_content <- ods_cells %>%
-      dplyr::select(row, col, cell_content) %>%
+    simple_content <- ods_cells |>
+      dplyr::select(row, col, cell_content) |>
       dplyr::mutate(
         cell_value = dplyr::if_else(cell_content == "",
                                     NA_character_,
                                     cell_content)
-      ) %>%
+      ) |>
       dplyr::select(-cell_content)
   }
 
-  ods_sheet <- all_cell_positions %>%
-    dplyr::left_join(simple_content, by = c("row", "col")) %>%
-    dplyr::mutate(col = paste0("X", col)) %>%
-    tidyr::pivot_wider(names_from = col, values_from = cell_value) %>%
+  ods_sheet <- all_cell_positions |>
+    dplyr::left_join(simple_content, by = c("row", "col")) |>
+    dplyr::mutate(col = paste0("X", col)) |>
+    tidyr::pivot_wider(names_from = col, values_from = cell_value) |>
     dplyr::select(-row)
 
   # handle Excel blank final column if gets past extraction process
@@ -158,10 +158,10 @@ quick_rectify <- function(ods_cells) {
 #' @rdname rectify
 smart_rectify <- function(ods_cells) {
 
-  guess_header <- ods_cells %>%
-    dplyr::group_by(row) %>%
-    dplyr::summarise(empty = sum(is_empty)) %>%
-    dplyr::filter(empty == min(empty)) %>%
+  guess_header <- ods_cells |>
+    dplyr::group_by(row) |>
+    dplyr::summarise(empty = sum(is_empty)) |>
+    dplyr::filter(empty == min(empty)) |>
     dplyr::filter(row == min(row))
 
   header_full <- guess_header$empty == 0
@@ -178,22 +178,22 @@ smart_rectify <- function(ods_cells) {
     )
   }
 
-  col_value_types <- ods_cells %>%
-    dplyr::filter(row > header_row) %>%
+  col_value_types <- ods_cells |>
+    dplyr::filter(row > header_row) |>
     dplyr::mutate(
       value_type = dplyr::if_else(
         value_type == "percentage" | value_type == "currency",
         "float",
         value_type)
-    ) %>%
-    dplyr::group_by(col) %>%
-    dplyr::count(value_type) %>%
-    dplyr::mutate(prop = n/sum(n)) %>%
+    ) |>
+    dplyr::group_by(col) |>
+    dplyr::count(value_type) |>
+    dplyr::mutate(prop = n/sum(n)) |>
     tidyr::drop_na(value_type)
 
-  col_string_info <- ods_cells %>%
-    dplyr::filter(row > header_row & value_type == "string") %>%
-    dplyr::group_by(col) %>%
+  col_string_info <- ods_cells |>
+    dplyr::filter(row > header_row & value_type == "string") |>
+    dplyr::group_by(col) |>
     dplyr::summarise(
       string_vals = dplyr::n(),
       unique_strings = length(unique(cell_content)),
@@ -201,30 +201,30 @@ smart_rectify <- function(ods_cells) {
       na_vals = sum(cell_content %in% na_values),
       errors = sum(!is.na(error_type)),
       .groups = "keep"
-    ) %>%
+    ) |>
     dplyr::mutate(
       strings_all_markers = sum(shorthand, na_vals, errors) == string_vals,
       strings_all_errors = errors == string_vals
-    ) %>%
+    ) |>
     dplyr::ungroup()
 
-  drop_string <- col_string_info %>%
-    dplyr::filter(strings_all_markers & !strings_all_errors) %>%
+  drop_string <- col_string_info |>
+    dplyr::filter(strings_all_markers & !strings_all_errors) |>
     dplyr::pull(col)
 
-  dropped_values <- ods_cells %>%
+  dropped_values <- ods_cells |>
     dplyr::filter(col %in% drop_string &
                     value_type == "string" &
-                    row > header_row) %>%
+                    row > header_row) |>
     dplyr::count(col, cell_content)
 
-  col_mutlitype <- col_value_types %>%
-    dplyr::filter(!(value_type == "string" & col %in% drop_string)) %>%
-    dplyr::count(col) %>%
-    dplyr::filter(n > 1) %>%
+  col_mutlitype <- col_value_types |>
+    dplyr::filter(!(value_type == "string" & col %in% drop_string)) |>
+    dplyr::count(col) |>
+    dplyr::filter(n > 1) |>
     dplyr::pull(col)
 
-  col_type_out <- col_value_types %>%
+  col_type_out <- col_value_types |>
     dplyr::filter(!(value_type == "string" & col %in% drop_string))
 
   ods_sheet <- simple_rectify(ods_cells, skip = header_row - 1)
