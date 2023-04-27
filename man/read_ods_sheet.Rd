@@ -12,7 +12,6 @@ read_ods_sheet(
   col_headers = TRUE,
   base_values = TRUE,
   quick = FALSE,
-  whitespace = FALSE,
   quiet = FALSE
 )
 }
@@ -34,8 +33,6 @@ column names can be provided.}
 or whether to provide the cell content as seen by a spreadsheet user.}
 
 \item{quick}{Whether to use the quick reading process.}
-
-\item{whitespace}{Whether to process multiple whitespaces.}
 
 \item{quiet}{Whether to silence console messages (recommended for bulk processing)}
 }

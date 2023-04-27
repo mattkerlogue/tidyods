@@ -63,7 +63,7 @@ cell_components_basic <- function(sheet_xml, ns, quick) {
 }
 
 # extract full cell information
-cell_components_extended <- function(sheet_xml, ns, quick) {
+cell_components_extended <- function(sheet_xml, ns) {
 
   cell_xml <- xml2::xml_find_all(
     sheet_xml,
@@ -74,47 +74,27 @@ cell_components_extended <- function(sheet_xml, ns, quick) {
 
   cell_attrs <- xml2::xml_attrs(cell_xml, ns)
 
-  cell_attrs_tbl <- tibble::tibble(
-    cell_path = cell_paths,
-    cell_attrs = cell_attrs
-  ) |>
-    tidyr::unnest_wider(cell_attrs)
+  cell_content_tbl <- extract_text(cell_xml, ns)
 
-  names(cell_attrs_tbl) <- gsub("-|:", "_", names(cell_attrs_tbl))
+  cell_attrs_tbl <- extract_attributes(cell_xml, ns)
 
-  annotation_textp <- xml2::xml_find_all(
-    cell_xml,
-    "descendant::office:annotation/text:p"
-  )
-
-  if (length(annotation_textp) > 0) {
-    cell_annotations_tbl <- tibble::tibble(
-      cell_path = gsub(
-        "(.*table:table-cell(\\[\\d+\\])?)\\/.*", "\\1",
-        xml2::xml_path(annotation_textp)
-      ),
-      annotation_text = xml2::xml_text(annotation_textp)
-    ) |>
-      dplyr::summarise(
-        cell_annotation = paste0(annotation_text, collapse = " "),
-        .by = cell_path
-      )
-  } else {
-    cell_annotations_tbl <- tibble::tibble(
-      cell_path = character(),
-      cell_annotation = character()
-    )
-  }
+  cell_annotations_tbl <- extract_annotations(cell_xml, ns)
 
   cell_tbl_0 <- tibble::tibble(
     cell_path = cell_paths,
     row_path = gsub("(.*table:table-row(\\[\\d+\\])?).*", "\\1", cell_paths),
     sheet_path = gsub("(.*table:table(\\[\\d+\\])?)\\/.*", "\\1", cell_paths),
-    base_row = suppressWarnings(as.numeric(gsub(".*table:table-row\\[(\\d+)\\].*", "\\1", cell_paths))),
-    base_col = suppressWarnings(as.numeric(gsub(".*table:table-cell\\[(\\d+)\\].*", "\\1", cell_paths))),
+    base_row = suppressWarnings(
+      as.numeric(gsub(".*table:table-row\\[(\\d+)\\].*", "\\1", cell_paths))
+    ),
+    base_col = suppressWarnings(
+      as.numeric(gsub(".*table:table-cell\\[(\\d+)\\].*", "\\1", cell_paths))
+    ),
     cell_el = xml2::xml_name(cell_xml),
-    cell_content = xml2::xml_text(cell_xml)
   ) |>
+    dplyr::left_join(
+      cell_content_tbl, by = "cell_path"
+    ) |>
     dplyr::left_join(
       cell_attrs_tbl, by = "cell_path"
     ) |>
@@ -133,6 +113,133 @@ cell_components_extended <- function(sheet_xml, ns, quick) {
   return(cell_tbl)
 
 }
+
+extract_attributes <- function(cell_xml, ns) {
+
+  cell_attrs <- xml2::xml_attrs(cell_xml, ns)
+
+  cell_attrs_tbl <- tibble::tibble(
+    cell_path = xml2::xml_path(cell_xml),
+    cell_attrs = cell_attrs
+  ) |>
+    tidyr::unnest_wider(cell_attrs)
+
+  names(cell_attrs_tbl) <- gsub("-|:", "_", names(cell_attrs_tbl))
+
+  return(cell_attrs_tbl)
+
+}
+
+extract_annotations <- function(cell_xml, ns) {
+
+  annotation_xml <- xml2::xml_find_all(
+    cell_xml,
+    "office:annotation/text:p"
+  )
+
+  if (length(annotation_xml) == 0) {
+
+    annotation_tbl <- tibble::tibble(
+      cell_path = character(),
+      cell_annotation = character()
+    )
+
+    return(annotation_tbl)
+
+  }
+
+  annotation_fragments <- xml2::xml_contents(annotation_xml)
+
+  annotation_tbl <- tibble::tibble(
+    id = seq_len(length(annotation_fragments)),
+    xml_path = xml2::xml_path(annotation_fragments),
+    el = xml2::xml_name(annotation_fragments, ns),
+    text = xml2::xml_text(annotation_fragments),
+    rep = suppressWarnings(
+      as.numeric(xml2::xml_attr(annotation_fragments, "text:c", ns))
+      )
+  ) |>
+    dplyr::mutate(
+      rep = tidyr::replace_na(rep, 1),
+      text = dplyr::if_else(
+        el == "text:s",
+        paste0(rep(" ", 4), collapse = ""),
+        text
+      ),
+      text_path = gsub("(.*office:annotation/text:p(\\[\\d+\\])?).*", "\\1", xml_path)
+    ) |>
+    dplyr::arrange(text_path, id) |>
+    dplyr::reframe(
+      cell_annotation = paste0(text, collapse = ""), .by = "text_path"
+    ) |>
+    dplyr::mutate(
+      id = dplyr::row_number(),
+      cell_path = gsub("(.*table-cell(\\[\\d+\\])?).*", "\\1", text_path)
+    ) |>
+    dplyr::reframe(
+      cell_annotation = paste0(cell_annotation, collapse = "\n"), .by = "cell_path"
+    )
+
+  return(annotation_tbl)
+
+}
+
+extract_text <- function(cell_xml, ns) {
+
+  cell_children <- xml2::xml_length(cell_xml)
+
+  # shortcut if cells have singular content
+  if (sum(cell_children > 1) == 0) {
+
+    text_tbl <- tibble::tibble(
+      cell_path = xml2::xml_path(cell_xml),
+      cell_content = xml2::xml_text(cell_xml)
+    )
+
+    return(text_tbl)
+
+  }
+
+  cell_components <- xml2::xml_contents(cell_xml)
+  component_el <- xml2::xml_name(cell_components, ns)
+  text_components <- cell_components[component_el == "text:p"]
+
+  text_fragments <- xml2::xml_contents(text_components)
+
+  text_tbl <- tibble::tibble(
+    id = seq_len(length(text_fragments)),
+    xml_path = xml2::xml_path(text_fragments),
+    el = xml2::xml_name(text_fragments, ns),
+    text = xml2::xml_text(text_fragments),
+    rep = suppressWarnings(
+      as.numeric(xml2::xml_attr(text_fragments, "text:c", ns))
+    )
+  ) |>
+    dplyr::mutate(
+      rep = tidyr::replace_na(rep, 1),
+      text = dplyr::if_else(
+        el == "text:s",
+        paste0(rep(" ", 4), collapse = ""),
+        text
+      ),
+      text_path = gsub("(.*table-cell(\\[\\d+\\])?\\/text:p(\\[\\d+\\])?).*", "\\1", xml_path)
+    ) |>
+    dplyr::arrange(text_path, id) |>
+    dplyr::reframe(
+      cell_content = paste0(text, collapse = ""), .by = "text_path"
+    ) |>
+    dplyr::mutate(
+      id = dplyr::row_number(),
+      cell_path = gsub("(.*table-cell(\\[\\d+\\])?).*", "\\1", text_path)
+    ) |>
+    dplyr::reframe(
+      cell_content = paste0(cell_content, collapse = "\n"), .by = "cell_path"
+    )
+
+  return(text_tbl)
+
+}
+
 
 # merge cell and row components, replicate repeated rows/cols
 combine_cells_rows <- function(cell_tbl, row_tbl) {

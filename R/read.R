@@ -8,7 +8,6 @@
 #' @param sheet The sheet name or index number, set to NA for all sheets
 #' @param quick Whether to use the quick reading process
 #' @param quiet Whether to silence console messages (recommended for bulk processing)
-#' @param whitespace Whether to process multiple whitespaces (ignore for now)
 #'
 #' @return
 #' A tibble (data.frame) of cells from the ODS sheet(s).
@@ -122,8 +121,7 @@
 #' example_cells <- read_ods_cells(example, 1)
 #' dplyr::glimpse(example_cells)
 #' @export
-read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE,
-                           quiet = FALSE) {
+read_ods_cells <- function(path, sheet = 1, quick = FALSE, quiet = FALSE) {
 
   if (missing(path)) {
     cli::cli_abort("{.arg path} is not defined")
@@ -175,7 +173,6 @@ read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE,
 #' @param base_values Whether to use the base_value of a cell (TRUE, the default)
 #'   or whether to provide the cell content as seen by a spreadsheet user.
 #' @param quick Whether to use the quick reading process.
-#' @param whitespace Whether to process multiple whitespaces.
 #' @param skip The number of rows to skip before attempting to rectify the cells.
 #' @param col_headers Whether to use the first row (after any skipping) as the
 #'   column header (`TRUE` is the default), alternatively a character vector of
@@ -208,7 +205,7 @@ read_ods_cells <- function(path, sheet = 1, quick = FALSE, whitespace = FALSE,
 #' @export
 read_ods_sheet <- function(path, sheet = 1, rectify = c("simple", "smart"),
                            skip = 0, col_headers = TRUE, base_values = TRUE,
-                           quick = FALSE, whitespace = FALSE, quiet = FALSE) {
+                           quick = FALSE, quiet = FALSE) {
 
   if (missing(path)) {
     cli::cli_abort("{.arg path} is not defined")
@@ -236,8 +233,7 @@ read_ods_sheet <- function(path, sheet = 1, rectify = c("simple", "smart"),
     )
   }
 
-  ods_cells <- read_ods_cells(path, sheet, quick = quick, quiet = quiet,
-                              whitespace = whitespace)
+  ods_cells <- read_ods_cells(path, sheet, quick = quick, quiet = quiet)
 
   if (!quiet) cli::cli_progress_step("Rectifying cells to sheet layout")
   if (rectify == "simple" & !quick) {

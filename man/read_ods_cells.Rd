@@ -4,13 +4,7 @@
 \alias{read_ods_cells}
 \title{Read cells from an ODS sheet}
 \usage{
-read_ods_cells(
-  path,
-  sheet = 1,
-  quick = FALSE,
-  whitespace = FALSE,
-  quiet = FALSE
-)
+read_ods_cells(path, sheet = 1, quick = FALSE, quiet = FALSE)
 }
 \arguments{
 \item{path}{The ODS file}
@@ -18,8 +12,6 @@ read_ods_cells(
 \item{sheet}{The sheet name or index number, set to NA for all sheets}
 
 \item{quick}{Whether to use the quick reading process}
-
-\item{whitespace}{Whether to process multiple whitespaces (ignore for now)}
 
 \item{quiet}{Whether to silence console messages (recommended for bulk processing)}
 }
