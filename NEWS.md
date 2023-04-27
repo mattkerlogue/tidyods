@@ -1,8 +1,10 @@
 # tidyods 0.0.1
 
-2023-04-26
+2023-04-27
 
-* Refactor of read code to optimise performance
+* Refactor of code to improve performance
+* Handle complex text in cell content (repeating spaces & paragraphs)
+* Bump to version 0.0.1
 
 # tidyods 0.0.0.9000
 
