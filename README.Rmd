@@ -118,21 +118,21 @@ types_cells_quick |>
 
 ```r
 microbenchmark::microbenchmark(
-  tidy_quick = read_ods_cells(test_file, 1, quick = TRUE, quiet = TRUE),
-  tidy_slow = read_ods_cells(test_file, 1, quiet = TRUE),
-  tidy_sheet_quick = read_ods_sheet(test_file, 1, quick = TRUE, quiet = TRUE),
-  tidy_sheet_slow = read_ods_sheet(test_file, 1, col_headers = FALSE, quiet = TRUE),
-  read_ods = readODS::read_ods(test_file, 1),
+  tidy_quick = read_ods_cells(example_file, 1, quick = TRUE, quiet = TRUE),
+  tidy_slow = read_ods_cells(example_file, 1, quiet = TRUE),
+  tidy_sheet_quick = read_ods_sheet(example_file, 1, quick = TRUE, quiet = TRUE),
+  tidy_sheet_slow = read_ods_sheet(example_file, 1, col_headers = FALSE, quiet = TRUE),
+  read_ods = readODS::read_ods(example_file, 1),
   times = 100
 )
 
 #> Unit: milliseconds
-#>              expr      min       lq     mean   median       uq      max neval
-#>        tidy_quick 15.23212 15.47123 17.18423 15.75612 19.63400 24.96314   100
-#>         tidy_slow 28.35093 28.96369 32.35403 32.61939 33.12927 93.57155   100
-#>  tidy_sheet_quick 20.23506 20.71425 22.60712 20.94858 24.92263 33.24444   100
-#>   tidy_sheet_slow 33.68740 37.59218 38.50192 38.23584 38.65365 83.94258   100
-#>          read_ods 22.08662 22.49030 24.85253 22.69582 26.27524 86.27527   100
+#>              expr    min     lq   mean median     uq    max neval
+#>        tidy_quick 15.232 15.471 17.184 15.756 19.634 24.963   100
+#>         tidy_slow 28.351 28.964 32.354 32.619 33.129 93.572   100
+#>  tidy_sheet_quick 20.235 20.714 22.607 20.949 24.923 33.244   100
+#>   tidy_sheet_slow 33.687 37.592 38.502 38.236 38.654 83.943   100
+#>          read_ods 22.087 22.490 24.853 22.696 26.275 86.275   100
 ```
 
 To test real-world performance we will use an ODS file published by the UK 
@@ -152,12 +152,12 @@ microbenchmark::microbenchmark(
 )
 
 #> Unit: seconds
-#>              expr       min        lq      mean    median        uq       max neval
-#>        tidy_quick  4.098092  4.154072  4.224539  4.220140  4.243436  4.435128    10
-#>         tidy_slow 10.586546 10.623044 10.769785 10.701773 10.899784 11.087568    10
-#>  tidy_sheet_quick  4.187749  4.238513  4.366650  4.313114  4.471208  4.751120    10
-#>   tidy_sheet_slow 10.937299 11.020185 11.212016 11.194713 11.400564 11.581303    10
-#>          read_ods 11.059351 11.101889 11.408563 11.233118 11.470871 12.388928    10
+#>             expr    min     lq   mean median     uq    max neval
+#>       tidy_quick  4.003  4.055  4.129  4.088  4.193  4.341    10
+#>        tidy_slow 10.453 10.497 10.592 10.559 10.636 10.992    10
+#> tidy_sheet_quick  4.096  4.125  4.232  4.170  4.260  4.660    10
+#>  tidy_sheet_slow 10.679 10.786 10.983 10.908 11.158 11.669    10
+#>         read_ods 10.552 10.757 10.877 10.801 10.971 11.493    10
 ```
 
 The dependency on `{xml2}` is likely to cause the function to fail/crash when
