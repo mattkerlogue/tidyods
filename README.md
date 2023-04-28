@@ -154,7 +154,7 @@ types_cells |>
 #>    sheet   row   col is_empty value_type cell_content   base_value numeric_value
 #>    <chr> <dbl> <dbl> <lgl>    <chr>      <chr>          <chr>              <dbl>
 #>  1 types     2     1 FALSE    string     Cell           Cell              NA    
-#>  2 types     3     1 FALSE    string     2022-06-16T00… 2022-06-1…        NA    
+#>  2 types     3     1 FALSE    string     Cell with com… Cell with…        NA    
 #>  3 types     2     2 FALSE    boolean    TRUE           true              NA    
 #>  4 types     3     2 FALSE    boolean    FALSE          false             NA    
 #>  5 types     2     3 FALSE    currency   £1.20          1.2                1.2  
@@ -188,15 +188,9 @@ An ODS file is a zipped collection of XML files and associated files.
 are three likely sources of performance issues: downloading of remote
 files, unzipping the ODS file, processing rows.
 
-With default settings, performance of `{tidyods}` functions is
-comparable to `{readODS}` for small files, when working with larger
-files performance is somewhat quicker than `{readODS}`.
-
-Performance can be improved by setting `quick = TRUE` in
-`read_ods_cells()` and `read_ods_sheet()`, this will extract only a
-simple text representation of the cell, i.e. it will not provide
-information on cell or value types, formulas or the underlying base
-value for numbers, dates or times.
+Performance of `read_ods_cells()` and `read_ods_sheet()` is largely
+comparable to that provided by `{readODS}`. Performance can be improved
+by setting `quick = TRUE`, which extracts only the .
 
 ``` r
 types_cells_quick <- read_ods_cells(example_file, "types",
@@ -217,24 +211,22 @@ types_cells_quick |>
 ```
 
 ``` r
-test_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
-
 microbenchmark::microbenchmark(
-+   tidy_quick = read_ods_cells(test_file, 1, quick = TRUE, quiet = TRUE),
-+   tidy_slow = read_ods_cells(test_file, 1, quiet = TRUE),
-+   tidy_sheet_quick = read_ods_sheet(test_file, 1, quick = TRUE, quiet = TRUE),
-+   tidy_sheet_slow = read_ods_sheet(test_file, 1, col_headers = FALSE, quiet = TRUE),
-+   read_ods = readODS::read_ods(test_file, 1),
-+   times = 100
-+ )
+  tidy_quick = read_ods_cells(example_file, 1, quick = TRUE, quiet = TRUE),
+  tidy_slow = read_ods_cells(example_file, 1, quiet = TRUE),
+  tidy_sheet_quick = read_ods_sheet(example_file, 1, quick = TRUE, quiet = TRUE),
+  tidy_sheet_slow = read_ods_sheet(example_file, 1, col_headers = FALSE, quiet = TRUE),
+  read_ods = readODS::read_ods(example_file, 1),
+  times = 100
+)
 
 #> Unit: milliseconds
-#>              expr      min       lq     mean   median       uq       max neval
-#>        tidy_quick 15.27992 15.60860 16.31240 15.80013 16.07870  31.66500   100
-#>         tidy_slow 26.96623 27.66971 30.18053 27.99699 28.71550 125.81871   100
-#>  tidy_sheet_quick 19.86716 20.52970 22.55174 20.84087 21.70159  47.90370   100
-#>   tidy_sheet_slow 32.29455 33.28417 35.45937 33.90800 34.99032  44.82710   100
-#>          read_ods 21.84952 22.42372 23.44579 22.63387 23.04967  33.24858   100
+#>              expr    min     lq   mean median     uq    max neval
+#>        tidy_quick 15.232 15.471 17.184 15.756 19.634 24.963   100
+#>         tidy_slow 28.351 28.964 32.354 32.619 33.129 93.572   100
+#>  tidy_sheet_quick 20.235 20.714 22.607 20.949 24.923 33.244   100
+#>   tidy_sheet_slow 33.687 37.592 38.502 38.236 38.654 83.943   100
+#>          read_ods 22.087 22.490 24.853 22.696 26.275 86.275   100
 ```
 
 To test real-world performance we will use an ODS file published by the
@@ -243,29 +235,25 @@ postcode](https://www.gov.uk/government/statistics/number-of-civil-servants-by-p
 a sheet of 5,544 rows by 11 columns.
 
 ``` r
-postcodes_file <- system.file(
-  "extdata",
-  "Civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021.ods",
-  package = "tidyods"
-)
+postcodes_file <- system.file("extdata", "civil-service-postcodes-2021.ods",
+  package = "tidyods")
 
 microbenchmark::microbenchmark(
-+   tidy_quick = read_ods_cells(postcodes_file, 2, quick = TRUE, quiet = TRUE),
-+   tidy_slow = read_ods_cells(postcodes_file, 2, quiet = TRUE),
-+   tidy_sheet_quick = read_ods_sheet(postcodes_file, 2, quick = TRUE, quiet = TRUE),
-+   tidy_sheet_slow = read_ods_sheet(postcodes_file, 2, col_headers = FALSE, quiet = TRUE),
-+   read_ods = readODS::read_ods(postcodes_file, 2),
-+   times = 10
-+ )
+  tidy_quick = read_ods_cells(postcodes_file, 2, quick = TRUE, quiet = TRUE),
+  tidy_slow = read_ods_cells(postcodes_file, 2, quiet = TRUE),
+  tidy_sheet_quick = read_ods_sheet(postcodes_file, 2, quick = TRUE, quiet = TRUE),
+  tidy_sheet_slow = read_ods_sheet(postcodes_file, 2, col_headers = FALSE, quiet = TRUE),
+  read_ods = readODS::read_ods(postcodes_file, 2),
+  times = 10
+)
 
 #> Unit: seconds
-#>              expr       min        lq      mean    median        uq       max neval
-#>        tidy_quick  4.055970  4.063083  4.146814  4.124268  4.202820  4.344831    10
-#>         tidy_slow  5.844290  6.010520  6.071356  6.058574  6.183601  6.243177    10
-#>  tidy_sheet_quick  4.112764  4.194695  4.325126  4.298507  4.438064  4.574808    10
-#>   tidy_sheet_slow  6.037985  6.150493  6.217836  6.220751  6.315860  6.413734    10
-#>          read_ods 10.505124 10.961019 11.263066 11.217981 11.605392 12.229583    10
-
+#>             expr    min     lq   mean median     uq    max neval
+#>       tidy_quick  4.003  4.055  4.129  4.088  4.193  4.341    10
+#>        tidy_slow 10.453 10.497 10.592 10.559 10.636 10.992    10
+#> tidy_sheet_quick  4.096  4.125  4.232  4.170  4.260  4.660    10
+#>  tidy_sheet_slow 10.679 10.786 10.983 10.908 11.158 11.669    10
+#>         read_ods 10.552 10.757 10.877 10.801 10.971 11.493    10
 ```
 
 The dependency on `{xml2}` is likely to cause the function to fail/crash
