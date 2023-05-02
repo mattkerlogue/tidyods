@@ -188,18 +188,6 @@ extract_text <- function(cell_xml, ns) {
 
   cell_children <- xml2::xml_length(cell_xml)
 
-  # shortcut if cells have singular content
-  if (sum(cell_children > 1) == 0) {
-
-    text_tbl <- tibble::tibble(
-      cell_path = xml2::xml_path(cell_xml),
-      cell_content = xml2::xml_text(cell_xml)
-    )
-
-    return(text_tbl)
-
-  }
-
   cell_components <- xml2::xml_contents(cell_xml)
   component_el <- xml2::xml_name(cell_components, ns)
   text_components <- cell_components[component_el == "text:p"]
