@@ -278,7 +278,7 @@
 <span><span class="co">#&gt; tidy_sheet_quick  4.096  4.125  4.232  4.170  4.260  4.660    10</span></span>
 <span><span class="co">#&gt;  tidy_sheet_slow 10.679 10.786 10.983 10.908 11.158 11.669    10</span></span>
 <span><span class="co">#&gt;         read_ods 10.552 10.757 10.877 10.801 10.971 11.493    10</span></span></code></pre></div>
-<p>The dependency on <a href="https://xml2.r-lib.org/" class="external-link">xml2</a> is likely to cause the function to fail/crash when working with exceptionally large files.</p>
+<p>The dependency on <a href="https://xml2.r-lib.org/" class="external-link">xml2</a> is likely to cause the function to fail/crash when working with exceptionally large files. This is a limitation inherited from the libxml2 C library that is used to power <a href="https://xml2.r-lib.org/" class="external-link">xml2</a>, which is <a href="https://gitlab.gnome.org/GNOME/libxml2/-/wikis/Memory-management#general-memory-requirements" class="external-link">documented</a> as requiring available memory equal to around 4 times the size of the file being processed. As the XML in an ODS is contained in a zip file the system file size of an ODS file can easily hide the true requirements of processing the file. Files are now checked for size and operations cancelled if its estimated to exceed available memory.</p>
 <p>Performance issues are tracked and discussed in <a href="https://github.com/mattkerlogue/tidyods/issues/3" class="external-link">issue #3</a> in the package’s GitHub repository.</p>
 </div>
 <div class="section level2">
