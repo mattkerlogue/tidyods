@@ -190,7 +190,15 @@ files, unzipping the ODS file, processing rows.
 
 Performance of `read_ods_cells()` and `read_ods_sheet()` is largely
 comparable to that provided by `{readODS}`. Performance can be improved
-by setting `quick = TRUE`, which extracts only the .
+by setting `quick = TRUE`, which extracts only a “vital” subset of
+information about cells: the sheet, row and column position, the value
+type and a cell value. For “float” and “percentage” value types quick
+extracts the underlying numeric value but for all other value types it
+extracts the formatted cell content (e.g. for date 2/5/23 rather than
+the ISO standard 2023-05-0). The `quick` function also does not
+accurately handle complex text structure (e.g. repeated white space or
+multi-line cell content), it will also include the text of any embedded
+comments/annotations in the cell content.
 
 ``` r
 types_cells_quick <- read_ods_cells(example_file, "types",
