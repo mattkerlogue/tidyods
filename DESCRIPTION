@@ -21,7 +21,8 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
-    xml2
+    xml2,
+    zip
 URL: https://github.com/mattkerlogue/tidyods, 
     https://mattkerlogue.github.io/tidyods/
 BugReports: https://github.com/mattkerlogue/tidyods/issues

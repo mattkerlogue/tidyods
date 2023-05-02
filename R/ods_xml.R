@@ -22,8 +22,8 @@ unzip_ods_xml <- function(ods_file) {
     cli::cli_abort("{.file {ods_file}} does not have a valid extension, .ods")
   }
 
-  utils::unzip(ods_file, files = "content.xml", exdir = temp_dir,
-               overwrite = TRUE)
+  zip::unzip(ods_file, files = "content.xml", overwrite = TRUE,
+             junkpaths = TRUE, exdir = temp_dir)
 
   return(file.path(temp_dir, "content.xml"))
 
