@@ -32,6 +32,8 @@ unzip_ods_xml <- function(ods_file) {
 # read the extracted XML file
 extract_ods_xml <- function(ods_file) {
 
+  check_xml_memory(ods_file)
+
   xml_file <- unzip_ods_xml(ods_file)
 
   if (!file.exists(xml_file)){
@@ -41,3 +43,41 @@ extract_ods_xml <- function(ods_file) {
   return(xml2::read_xml(xml_file))
 
 }
+
+# check whether {xml2} is going to have problems reading the file
+check_xml_memory <- function(path, verbose = FALSE) {
+
+  zip_files <- zip::zip_list(path)
+
+  content_size <- zip_files$uncompressed_size[zip_files$filename == "content.xml"]
+
+  # libxml2 requires memory approx 4 times the size of the file
+  xml2_req <- content_size * 4
+
+  sys_mem <- ps::ps_system_memory()
+
+  avail_mem <- sys_mem$avail
+
+  if (xml2_req > avail_mem) {
+    pretty_need <- prettyunits::pretty_bytes(xml2_req)
+    pretty_avail <- prettyunits::pretty_bytes(avail_mem)
+    cli::cli_abort(c(
+      "ODS file is too large to process",
+      "i" = "ODS XML is estimated to need {pretty_need} of memory",
+      "x" = "Available system memory is estimated at {pretty_avail}"
+    ))
+  }
+
+  if (verbose) {
+    pretty_need <- prettyunits::pretty_bytes(xml2_req)
+    pretty_avail <- prettyunits::pretty_bytes(avail_mem)
+    cli::cli({
+      cli::cli_alert_info("ODS XML is estimated to need {pretty_need} of memory")
+      cli::cli_alert_success("Available system memory is estimated at {pretty_avail}")
+    })
+  }
+
+  return(invisible(TRUE))
+
+}
+

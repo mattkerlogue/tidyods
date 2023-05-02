@@ -16,6 +16,8 @@ Imports:
     cli,
     dplyr (>= 1.1.0),
     magrittr,
+    prettyunits,
+    ps,
     purrr,
     readr,
     tibble,
