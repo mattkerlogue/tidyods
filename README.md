@@ -265,7 +265,15 @@ microbenchmark::microbenchmark(
 ```
 
 The dependency on `{xml2}` is likely to cause the function to fail/crash
-when working with exceptionally large files.
+when working with exceptionally large files. This is a limitation
+inherited from the libxml2 C library that is used to power `{xml2}`,
+which is
+[documented](https://gitlab.gnome.org/GNOME/libxml2/-/wikis/Memory-management#general-memory-requirements)
+as requiring available memory equal to around 4 times the size of the
+file being processed. As the XML in an ODS is contained in a zip file
+the system file size of an ODS file can easily hide the true
+requirements of processing the file. Files are now checked for size and
+operations cancelled if its estimated to exceed available memory.
 
 Performance issues are tracked and discussed in [issue
 \#3](https://github.com/mattkerlogue/tidyods/issues/3) in the package’s
