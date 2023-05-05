@@ -148,3 +148,44 @@ test_that("XML namespace (Excel)", {
   )
   expect_equal(xml2::xml_name(excel_ods, excel_ns), "office:document-content")
 })
+
+
+test_that("File size check passes", {
+  expect_invisible(check_xml_memory(example_file))
+})
+
+test_that("File size check vebose message", {
+
+  mockery::stub(
+    check_xml_memory,
+    "zip::zip_list",
+    data.frame(uncompressed_size = 1000, filename = "content.xml")
+  )
+
+  mockery::stub(
+    check_xml_memory,
+    "ps::ps_system_memory",
+    list(avail = 8000)
+  )
+
+  expect_message(check_xml_memory(example_file, verbose = TRUE))
+
+})
+
+test_that("File size check fails", {
+
+  mockery::stub(
+    check_xml_memory,
+    "zip::zip_list",
+    data.frame(uncompressed_size = 2000, filename = "content.xml")
+  )
+
+  mockery::stub(
+    check_xml_memory,
+    "ps::ps_system_memory",
+    list(avail = 1000)
+  )
+
+  expect_error(check_xml_memory(example_file, verbose = TRUE))
+
+})
