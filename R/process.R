@@ -41,9 +41,12 @@ cell_components_basic <- function(sheet_xml, ns, quick) {
     cell_path = cell_paths,
     row_path = gsub("(.*table:table-row(\\[\\d+\\])?).*", "\\1", cell_paths),
     sheet_path = gsub("(.*table:table(\\[\\d+\\])?)\\/.*", "\\1", cell_paths),
-    col_repeats = suppressWarnings(as.numeric(xml2::xml_attr(cell_xml, "table:number-columns-repeated", ns))),
-    base_row = suppressWarnings(as.numeric(gsub(".*table:table-row\\[(\\d+)\\].*", "\\1", cell_paths))),
-    base_col = suppressWarnings(as.numeric(gsub(".*table:table-cell\\[(\\d+)\\].*", "\\1", cell_paths))),
+    base_row = suppressWarnings(
+      as.numeric(gsub(".*table:table-row\\[(\\d+)\\].*", "\\1", cell_paths))
+    ),
+    col_repeats = suppressWarnings(
+      as.numeric(xml2::xml_attr(cell_xml, "table:number-columns-repeated", ns))
+    ),
     office_value_type = xml2::xml_attr(cell_xml, "office:value-type", ns),
     cell_content = xml2::xml_text(cell_xml),
     cell_numeric = suppressWarnings(as.numeric(xml2::xml_attr(cell_xml, "office:value", ns)))
@@ -56,7 +59,9 @@ cell_components_basic <- function(sheet_xml, ns, quick) {
         !is.na(cell_numeric) ~ as.character(cell_numeric),
         TRUE ~ cell_content
       )
-    )
+    ) |>
+    dplyr::group_by(sheet_path, row_path) |>
+    dplyr::mutate(base_col = dplyr::row_number(), .after = "base_row")
 
   return(cell_tbl)
 
@@ -87,11 +92,10 @@ cell_components_extended <- function(sheet_xml, ns) {
     base_row = suppressWarnings(
       as.numeric(gsub(".*table:table-row\\[(\\d+)\\].*", "\\1", cell_paths))
     ),
-    base_col = suppressWarnings(
-      as.numeric(gsub(".*table:table-cell\\[(\\d+)\\].*", "\\1", cell_paths))
-    ),
-    cell_el = xml2::xml_name(cell_xml),
+    cell_el = xml2::xml_name(cell_xml, ns),
   ) |>
+    dplyr::group_by(sheet_path, row_path) |>
+    dplyr::mutate(base_col = dplyr::row_number(), .after = "base_row") |>
     dplyr::left_join(
       cell_content_tbl, by = "cell_path"
     ) |>
@@ -103,12 +107,9 @@ cell_components_extended <- function(sheet_xml, ns) {
     )
 
   cell_tbl <- tidyods_cell_scaffold() |>
-    dplyr::bind_rows(cell_tbl_0) |>
-    dplyr::mutate(
-      col_repeats = suppressWarnings(as.numeric(table_number_columns_repeated)),
-      .after = base_col
-    ) |>
-    dplyr::select(-table_number_columns_repeated)
+    dplyr::bind_rows(cell_tbl_0)
+
+  names(cell_tbl)[names(cell_tbl) == "table_number_columns_repeated"] <- "col_repeats"
 
   return(cell_tbl)
 
@@ -232,29 +233,33 @@ extract_text <- function(cell_xml, ns) {
 # merge cell and row components, replicate repeated rows/cols
 combine_cells_rows <- function(cell_tbl, row_tbl) {
 
-  full_tbl <- cell_tbl |>
-    dplyr::left_join(
-      row_tbl, by = "row_path"
-    ) |>
-    dplyr::mutate(
-      across(c(base_row, base_col, col_repeats, row_repeats), ~tidyr::replace_na(.x, 1)),
-      keep = dplyr::case_when(
-        is.na(office_value_type) ~ FALSE,
-        is.na(cell_content) & base_col == max(base_col) & col_repeats > 1 ~ FALSE,
-        is.na(cell_content) & base_row == max(base_row) & col_repeats > 1 ~ FALSE,
-        TRUE ~ TRUE
-      )
-    ) |>
-    dplyr::filter(
-      keep
-    ) |>
+  init_tbl <- cell_tbl |>
+    dplyr::left_join(row_tbl, by = "row_path")
+
+  init_tbl$base_row[is.na(init_tbl$base_row)] <- 1
+  init_tbl$base_col[is.na(init_tbl$base_col)] <- 1
+  init_tbl$col_repeats[is.na(init_tbl$col_repeats)] <- 1
+  init_tbl$row_repeats[is.na(init_tbl$row_repeats)] <- 1
+
+  init_tbl$keep <- dplyr::case_when(
+    init_tbl$cell_el == "table:covered-table-cell" ~ TRUE,
+    is.na(init_tbl$cell_content) & is.na(init_tbl$office_value_type) &
+      init_tbl$col_repeats > 1 ~ FALSE,
+    is.na(init_tbl$cell_content) & is.na(init_tbl$office_value_type) &
+      init_tbl$col_repeats > 1 ~ FALSE,
+    TRUE ~ TRUE
+  )
+
+  full_tbl_0 <- init_tbl[init_tbl[["keep"]], ] |>
     tidyr::uncount(row_repeats, .remove = FALSE, .id = "row_iteration") |>
     tidyr::uncount(col_repeats, .remove = FALSE, .id = "col_iteration") |>
-    dplyr::arrange(sheet_path, base_row, row_repeats, base_col, col_repeats) |>
-    dplyr::group_by(sheet_path, base_row, row_repeats, .add = FALSE) |>
-    dplyr::mutate(row = dplyr::cur_group_id(),
-                  col = dplyr::row_number(),
-                  .before = 1L) |>
+    dplyr::arrange(sheet_path, base_row, row_iteration, base_col, col_iteration) |>
+    dplyr::group_by(sheet_path, base_row, row_iteration, .add = FALSE) |>
+    dplyr::mutate(
+      row = dplyr::cur_group_id(),
+      col = dplyr::row_number(),
+      .before = 1L
+    ) |>
     dplyr::ungroup()
 
   return(full_tbl)
