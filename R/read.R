@@ -33,7 +33,7 @@
 #'
 #' Processing the ODS XML is a memory intensive process, you can achieve
 #' significant speed enhancements by setting the `quick` argument to FALSE.
-#' This process wille extract only a minimum of information about the cells,
+#' This process will extract only a minimum of information about the cells,
 #' namely: `sheet`, `row`, `col`, `value_type` and a `base_value`. The
 #' `base_value` when using the `quick` argument will combine the raw value
 #' stored for float and percentage value types with the `cell_content` (i.e

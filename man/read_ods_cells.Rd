@@ -46,7 +46,7 @@ conforming to the relevant ISO standard.
 
 Processing the ODS XML is a memory intensive process, you can achieve
 significant speed enhancements by setting the \code{quick} argument to FALSE.
-This process wille extract only a minimum of information about the cells,
+This process will extract only a minimum of information about the cells,
 namely: \code{sheet}, \code{row}, \code{col}, \code{value_type} and a \code{base_value}. The
 \code{base_value} when using the \code{quick} argument will combine the raw value
 stored for float and percentage value types with the \code{cell_content} (i.e
