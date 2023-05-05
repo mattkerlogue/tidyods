@@ -57,21 +57,33 @@ check_xml_memory <- function(path, verbose = FALSE) {
   avail_mem <- sys_mem$avail
 
   if (xml2_req > avail_mem) {
+    pretty_file <- prettyunits::pretty_bytes(content_size)
     pretty_need <- prettyunits::pretty_bytes(xml2_req)
     pretty_avail <- prettyunits::pretty_bytes(avail_mem)
     cli::cli_abort(c(
       "ODS file is too large to process",
-      "i" = "ODS XML is estimated to need {pretty_need} of memory",
+      "i" = paste(
+        "ODS XML is estimated to need {pretty_need} of memory,",
+        "uncompressed content.xml file within {.file {path}}",
+        "is {pretty_file} in size."),
       "x" = "Available system memory is estimated at {pretty_avail}"
     ))
   }
 
   if (verbose) {
+    pretty_file <- prettyunits::pretty_bytes(content_size)
     pretty_need <- prettyunits::pretty_bytes(xml2_req)
     pretty_avail <- prettyunits::pretty_bytes(avail_mem)
     cli::cli({
-      cli::cli_alert_info("ODS XML is estimated to need {pretty_need} of memory")
-      cli::cli_alert_success("Available system memory is estimated at {pretty_avail}")
+      cli::cli_alert_info(
+        paste(
+          "ODS XML is estimated to need {pretty_need} of memory,",
+          "uncompressed content.xml file within {.file {path}}",
+          "is {pretty_file} in size.")
+      )
+      cli::cli_alert_success(
+        "Available system memory is estimated at {pretty_avail}"
+      )
     })
   }
 
