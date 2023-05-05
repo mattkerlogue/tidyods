@@ -1,6 +1,5 @@
 # ODS XML file handling
 
-# unzip and ods file and get content xml
 unzip_ods_xml <- function(ods_file) {
 
   temp_dir <- tempdir()
@@ -29,7 +28,6 @@ unzip_ods_xml <- function(ods_file) {
 
 }
 
-# read the extracted XML file
 extract_ods_xml <- function(ods_file) {
 
   check_xml_memory(ods_file)
