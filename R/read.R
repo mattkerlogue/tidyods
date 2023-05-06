@@ -139,18 +139,21 @@ read_ods_cells <- function(path, sheet = 1, quick = FALSE, quiet = FALSE) {
     cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
   }
 
-  if (!quiet) cli::cli_progress_step("Extracting XML")
+  if (!quiet) cli::cli_progress_step("Extracting ODS XML")
   ods_xml <- extract_ods_xml(ods_file = path)
   ns <- xml2::xml_ns(ods_xml)
 
-  if (!quiet) cli::cli_progress_step("Getting sheet")
   if (is.na(sheet)) {
     sheet_path <- NA
   } else {
     sheet_path <- get_sheet_path(ods_xml, sheet, ns)
   }
 
-  if (!quiet) cli::cli_progress_step("Extracting cell and row info")
+  if (!quiet) cli::cli_progress_step(
+    msg = "Extracting cell and row info...",
+    msg_done = "Extracting cell and row info",
+  )
+
   if (quick) {
     ods_cells <- extract_cells_quick(ods_xml, sheet_path, ns)
   } else {
