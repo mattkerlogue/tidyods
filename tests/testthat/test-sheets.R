@@ -6,6 +6,10 @@ excel_file <- system.file("extdata", "basic_example_excel.ods", package = "tidyo
 excel_ods <- extract_ods_xml(excel_file)
 excel_ns <- xml2::xml_ns(excel_ods)
 
+google_file <- system.file("extdata", "basic_example_google.ods", package = "tidyods")
+google_ods <- extract_ods_xml(google_file)
+google_ns <- xml2::xml_ns(google_ods)
+
 sheet_paths <- c(
   "/office:document-content/office:body/office:spreadsheet/table:table[1]",
   "/office:document-content/office:body/office:spreadsheet/table:table[2]"
@@ -16,6 +20,7 @@ names(sheet_paths) <- c("penguins", "types")
 test_that("Sheet names", {
   expect_equal(ods_sheets(example_file), c("penguins", "types"))
   expect_equal(ods_sheets(excel_file), c("penguins", "types"))
+  expect_equal(ods_sheets(google_file), c("penguins", "types"))
 })
 
 test_that("Sheet paths (LibreOffice)", {
@@ -58,6 +63,28 @@ test_that("Sheet paths (Excel)", {
   )
   expect_error(
     get_sheet_path(excel_ods, TRUE, excel_ns),
+    regexp = "`sheet` must be the name of a sheet or index number"
+  )
+})
+
+test_that("Sheet paths (Google)", {
+  expect_equal(ods_sheet_paths(google_ods, google_ns), sheet_paths)
+  expect_equal(get_sheet_path(google_ods, 1, google_ns), sheet_paths[1])
+  expect_equal(get_sheet_path(google_ods, 2, google_ns), sheet_paths[2])
+  expect_equal(get_sheet_path(google_ods, "penguins", google_ns), sheet_paths[1])
+  expect_equal(get_sheet_path(google_ods, "types", google_ns), sheet_paths[2])
+
+  expect_error(get_sheet_path(google_ods, ns = google_ns))
+  expect_error(
+    get_sheet_path(google_ods, 1:2, google_ns),
+    regexp = "`sheet` must a character or numeric vector of length 1"
+  )
+  expect_error(
+    get_sheet_path(google_ods, "hello", google_ns),
+    regexp = "not a valid sheet name"
+  )
+  expect_error(
+    get_sheet_path(google_ods, TRUE, google_ns),
     regexp = "`sheet` must be the name of a sheet or index number"
   )
 })
