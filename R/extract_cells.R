@@ -79,6 +79,11 @@ extract_cells_full <- function(ods_xml, sheet_path, ns = NULL) {
       ),
       numeric_value = suppressWarnings(as.numeric(office_value)),
       boolean_value = suppressWarnings(as.logical(office_boolean_value)),
+      boolean_value = dplyr::case_when(
+        grepl("of:=FALSE()", table_formula) ~ FALSE,
+        grepl("of:=TRUE()", table_formula) ~ TRUE,
+        TRUE ~ boolean_value
+      ),
       has_annotation = !is.na(cell_annotation),
       merge_rowspan = suppressWarnings(as.numeric(table_number_rows_spanned)),
       merge_colspan = suppressWarnings(as.numeric(table_number_columns_spanned)),
