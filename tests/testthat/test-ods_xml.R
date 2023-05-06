@@ -1,6 +1,28 @@
 example_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
 excel_file <- system.file("extdata", "basic_example_excel.ods", package = "tidyods")
 
+test_that("File handling errors", {
+  expect_error(unzip_ods_xml("nonexistent.csv"), regexp = "does not exist")
+  expect_error(unzip_ods_xml("test-ods_xml.R"), regexp = "does not have a valid extension")
+})
+
+test_that("File parsing", {
+  expect_vector(unzip_ods_xml(example_file), ptype = character(), size = 1)
+  expect_match(unzip_ods_xml(example_file), "content.xml$")
+})
+
+test_that("XMl extraction fails", {
+
+  mockery::stub(
+    extract_ods_xml,
+    "unzip_ods_xml",
+    "path/not/here.xml"
+  )
+
+  expect_error(extract_ods_xml(example_file), "Error in unzip procedure")
+
+})
+
 test_that("XML extraction (LibreOffice)", {
   expect_silent(example_ods <- extract_ods_xml(example_file))
   expect_type(example_ods, "list")
