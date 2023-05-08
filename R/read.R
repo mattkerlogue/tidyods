@@ -39,82 +39,8 @@
 #' stored for float and percentage value types with the `cell_content` (i.e
 #' formatted character string) for all other value types.
 #'
-#' #' @details # Cell information
-#' The resulting data.frame has 25 columns:
-#'
-#' - `sheet`: the sheet the cell is from
-#' - `row`: the row number of the cell
-#' - `col`: the column number of the cell
-#' - `cell_type`: the type of cell, either `cell`, `empty`, `merge-hidden` or
-#'   `merge-lead`
-#' - `is_empty`: a logical vector indicating if the cell is empty
-#' - `value_type`: the value type, either `boolean`, `currency`, `date`,
-#'    `float`, `percentage`, `string` or `time`
-#' - `cell_content`: the content as presented to users of a spreadsheet application
-#' - `base_value`: the "base" value of the cell
-#' - `numeric_value`: base values for numeric value types as a numeric vector
-#' - `currency_symbol`: the currency symbol associated with currency value types
-#' - `boolean_value`: base values for boolean value types as a logical vector
-#' - `date_value`: base values for date value types (incl date-time) as a character vector
-#' - `time_value`: base value for time value types as a character vector
-#' - `has_formula`: a logical vector indicating if the cell content are calculated by a formula
-#' - `formula`: the formula used to calculate the cell content
-#' - `has_error`: a logical vector indicating if the cell formula results in an error
-#' - `error_type`: a numeric vector indicating the type of error
-#' - `has_annotation`: a logival vector indicating if the cell has a comment or annotation
-#' - `annotation`: the text of any comment or annotation
-#' - `is_merged`: a logical indicating if the cell is part of a merge group
-#' - `merge_colspan`: for merge leader cells, the number of columns spanned
-#' - `merge_rowspan`: for merge leader cells, the number of rows spanned
-#' - `merge_shape`: for merge leader cells, the shape of the merge group, either `vetical`,
-#'   `horizontal`, or `rectangle`
-#' - `cell_style`: the style code of the cell
-#' - `row_style`: the style code of the row
-#'
-#' ## Cell types and merge groups
-#'
-#' Cells are assigned one of four `cell_type` values:
-#'
-#' - a cell is `empty` if it has no content or no value type,
-#' - a cell is a `merge-lead` if it is the top-left cell of a merge group,
-#'   other cells in the merge group are assigned `merge-hidden`
-#' - everything else is simply a `cell`
-#'
-#' Cells in a merge group will also have `is_merged` set to `TRUE`. The top-left
-#' cell in a merge group has information about the number of columns
-#' (`merge_colspan`) and rows (`merge_rowspan`) in the merge group as well as
-#' an indication of shape (`vertical`, `horizontal` or `rectangle`). Merge
-#' groups are not uniquely identified.
-#'
-#' The ODS specification allows for cells hidden by a merge to have content,
-#' annecdotally this appears to be supported by ODS files created by
-#' LibreOffice but not by ODS files created by Microsoft Excel.
-#'
-#' ## Value types
-#'
-#' The `value_type` of a cell is based on the
-#' ["value-type" attribute](https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949)
-#' defined by the OpenDocument Format specification. There are 7 value types:
-#'
-#' - `boolean`: equivalent to R's [base::logical()] data type
-#' - `currency`: a numeric value, optionally with a currency symbol
-#' - `date`: a date or date-time stored in ISO format
-#' - `float`: a numeric value, the ODS format does not distinguish between
-#'   different numeric types
-#' - `percentage`: a numeric value, formatted for display as a percentage
-#' - `string`: equivalent to R's [base::character()]
-#' - `time`: a duration, stored in ISO format
-#'
-#' For currency value types optionally a currency symbol (e.g. GBP, EUR, USD)
-#' can be set, this is provided separately from the `base_value` as
-#' `currency_symbol`, the formatting of currency symbols is handled by style
-#' information, the value as visible to a spreadsheet user is provided in the
-#' `cell_content` column.
-#'
-#' ## Error types
-#' The values of `error_type` are equivalent to those produced by
-#' [Microsoft Excel](https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa)
-#' and [LibreOffice](https://help.libreoffice.org/7.3/en-GB/text/scalc/01/func_error_type.html?&DbPAR=SHARED&System=MAC).
+#' More details on the types of information extracted by `read_ods_cells`
+#' can be found the vignette, `vignette("read_cells", package = "tidyods")`.
 #'
 #' @examples
 #' example <- system.file("extdata", "basic_example.ods", package = "tidyods")

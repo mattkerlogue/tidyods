@@ -30,7 +30,10 @@ URL: https://github.com/mattkerlogue/tidyods,
 BugReports: https://github.com/mattkerlogue/tidyods/issues
 Suggests: 
     bench,
+    knitr,
     lubridate,
     palmerpenguins,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+VignetteBuilder: knitr

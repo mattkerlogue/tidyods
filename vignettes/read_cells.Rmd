@@ -1,0 +1,507 @@
+---
+title: "Extracting cell information"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Extracting cell information}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tidyods)
+```
+
+The aim of `{tidyods}` is to extract information about cells in OpenDocument
+Spreadsheet (ODS) files into a "tidy" format. In addition to the value
+contained by a cell it extracts a range of addition metadata about the cells.
+
+This vignette explains how to use `tidyods::read_ods_cells()` and the types of
+information about cells it extracts. The
+[*Spreadsheet Munging Strategies*](https://nacnudus.github.io/spreadsheet-munging-strategies/index.html)
+book by Duncan Garmonsway explores in more detail how you can use datasets of
+"tidy cells" to work with non-tabular data stored in (Excel) spreadsheets.
+
+## Reading data from cells
+
+You read in data from an ODS file with the `read_ods_cells()` function. The
+resulting tibble provides 26 columns of information about cells, with each
+row representing an individual cell in the input spreadsheet.
+
+```{r}
+example_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
+types_cells <- read_ods_cells(example_file, 2)
+dplyr::glimpse(types_cells)
+```
+
+There are four arguments to `read_ods_cells()`:
+
+- `path`, the path to the ODS file
+- `sheet`, the sheet you wish to extract
+- `quick`, whether to extract a subset of cell information
+- `quiet`, whether to show console messages or not
+
+The `sheet` argument can either be the index number of a sheet (ranging from 1
+to the total number of sheets in the spreadsheet document) or the name of a
+sheet (e.g. `"types"` instead of `2` in the example above).
+
+The `quick` argument extracts only a small number of columns and is useful if
+you are largely concerned with cell values; see the
+[quick extraction](#quick-extraction) section for more details.
+
+The `quiet` argument turns off console messages, ODS files are written in
+XML which can take significant time to process and so progress messages are
+provided to the console for interactive users. It is advised to set this to
+false if you are doing batch operations.
+
+## Cell information
+
+There are 28 types of information returned by `read_ods_cells()`, these can be
+grouped into three categories: location information, value information, and
+other metadata.
+
+### Location information
+
+The first four columns of information relate to a cell's location in the
+spreadsheet.
+
+- `sheet`, the name of the sheet the cell belongs to
+- `address`, the address of the cell within a sheet using "A1" notation
+- `row`, the row number of the cell
+- `col`, the column number of the cell
+
+The `address` column is derived from the `row` and `col` using the 
+`{cellranger}` package. It displays the address in the "A1" notation commonly
+used in spreadsheet applications where the letter corresponds to a column and
+the number corresponds to a row. The "A1" notation is used by ODS files for 
+calculation formulas.
+
+### Value information
+
+There are 10 columns that provide information about a cell's value.
+
+- `cell_type`, the type of cell
+- `is_empty`, whether the cell has content or not (i.e. `cell_type == "empty"`)
+- `value_type`, the value type as set in the ODS file
+- `cell_content`, the cell's value as formatted for users of 
+  spreadsheet applications
+- `base_value`, the "raw" value of the cell
+- `numeric_value`, for numeric value types the raw value as a `numeric()`
+  vector
+- `currency_symbol`, for currency value types the currency symbol associated
+  with the numeric value
+- `boolean_value`, for boolean value types the raw value as a `logical()`
+  vector
+- `date_value`, for date value types (dates and date-times) the "raw" value as
+  a `character()` vector
+- `time_value`, for time value types, the "raw" value as a `character()` vector
+
+Cells have one of four types, it is `empty` if it has no content or no value
+type, it is a `merge-lead` if it is the top-left cell of a merge group while
+other cells in the merge group are classified as `merge-hidden`, all other
+cells are simply a `cell`.
+
+The `value_type` is derived from the
+[ODS specification](https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949)
+which defines seven value types
+
+- `boolean`: equivalent to R's `logical()` data type
+- `currency`: a numeric value, optionally with a currency symbol
+- `date`: a date or date-time stored in ISO format, the ODS specification does
+  not differentiate between a date (e.g. 15/06/2022) and a date-time (e.g.
+  15/06/2023 13:47)
+- `float`: a numeric value, the ODS format does not distinguish between
+  different numeric types
+- `percentage`: a numeric value, but formatted for display as a percentage
+- `string`: equivalent to R's `character()`
+- `time`: a duration, stored in ISO format
+
+The `cell_content` column provides the value of a cell as displayed and
+formatted to users of a spreadsheet application. Non-string values are stored
+separately in the underlying ODS XML file, and these are extracted as separate
+columns (`numeric_value`, `boolean_value`, `date_value` and `time_value`) by `read_ods_cells()`, for numeric and boolean values these are also coerced into
+a `numeric()` and `logical()` vector. The `base_value` column provides a
+combination of the `cell_content` for cells that are strings and for cells that
+are not string value types the value from the relevant type specific column.
+
+For currency value types optionally a currency symbol (e.g. GBP, EUR, USD, JPY)
+can be set, this is provided in the `currency_symbol` column.
+
+```{r}
+types_cells |> 
+  dplyr::filter(row == 3) |> 
+  dplyr::select(value_type:currency_symbol)
+
+types_cells |> 
+  dplyr::filter(row == 3) |> 
+  dplyr::select(value_type, base_value, boolean_value:time_value)
+```
+
+The [value type examples](#value-types-examples) section below provides more
+details on the different value types and how they are stored and processed.
+
+### Other metadata
+
+Finally, `read_ods_cells()` provides 12 further columns with additional
+metadata about each cell.
+
+- `has_formula`, whether the cell value is calculated by a formula
+- `formula`, the formula used to calculate the cell value
+- `has_error`, whether the cell value or formula results in an error
+- `error_type`, the type of error the cell is experiencing
+- `has_annotation`, whether the cell has a comment/annotation
+- `annotation`, the content of the cell's comment/annotation
+- `is_merged`, whether the cell is part of a merge group
+- `merge_colspan`, for the lead cell in a merge group the number of columns
+  spanned by the merge group
+- `merge_rowspan`, for the lead cell in a merge group the number of rows
+  spanned by the merge group
+- `merge_shape`, for the lead cell in a merge group the shape of the merge group
+- `cell_style`, the style reference for the cell
+- `row_style`, the style reference for the row
+- `col_style`, the style reference for the column
+- `col_deftaul_cell_style`, the default style reference for cells in the column
+
+#### Formulas
+
+For cells whose values are calculated by a formula this is provided in the
+`formula` column.
+
+```{r}
+types_cells |> 
+  dplyr::filter(col == 9 & has_formula) |> 
+  dplyr::select(value_type, cell_content, numeric_value, has_formula, formula) |>
+  head()
+```
+
+For more on the use of formulas in ODS files you can consult the
+[OpenFormula specification](https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part4-formula/OpenDocument-v1.3-os-part4-formula.html)
+
+#### Errors
+
+Formulas in spreadsheets can result in errors. The `has_error` column indicates
+if there the cell results in an error. The `error_type` column is similar to
+the `=ERROR.TYPE()` function in Microsoft Excel and LibreOffice, these provide
+a number to denote the type of error.
+
+`error_type` will have a value from 1 to 7 or 501 to 540:
+
+- `1` for #NULL! errors in Microsoft Excel or Err:511 in LibreOffice,
+  typically this is some sort of error in the formula specification such as a
+  missing operator (Excel) or a missing variable (LibreOffice)
+- `2` for #DIV/0! (division by zero) errors
+- `3` for #VALUE! (value type) errors, e.g. when a formula uses a string rather than a number
+- `4` for #REF! (invalid cell reference) errors
+- `5` for #NAME? errors, e.g. formula specifies a function that doesn't exist
+- `6` for #NUM! (calculation overflow) errors, e.g. the result of `9999^9999`
+- `7` for #N/A (logic) errors, e.g. unable to match values
+- `501` to `540` a LibreOffice error
+
+LibreOffice assigns all errors an error code from 501 to 540, where not
+displayed as an error like `#DIV/0!` these are shown in `cell_content` as
+`"Err:5##"`. For these errors then `error_type` will contain the numeric value
+of these codes, see LibreOffice's documentation on
+[error codes](https://help.libreoffice.org/7.3/en-GB/text/scalc/05/02140000.html)
+for more details.
+
+#### Annotations
+
+Spreadsheet applications allow you to add notes and comments to cells to
+provide addition contextual information. The `has_annotation` column indicates
+whether the cell has an annotation associated with it. The `annotation` column
+provides the text content of the annotation.
+
+```{r}
+types_cells |> 
+    dplyr::filter(has_annotation) |> 
+  dplyr::select(has_annotation, annotation)
+```
+
+**Note:** different spreadsheet applications handle annotations in different
+ways, `read_ods_cells()` does not take account of these differences and
+provides only a basic representation of the text contained in the annotation.
+
+#### Merged cells
+
+Spreadsheets allow you to merge cells, largely this is for presentational
+purposes. Merged cells have a `cell_type` of either `merge-lead` for the
+top-left cell of a merge group or `merge-hidden` for a cell hidden by a merge
+group. The `is_merged` indicates whether the cell is either of these types.
+
+When merging cells in Microsoft Office and Google Sheets then only content in
+the top-left cell is retained, however in LibreOffice merging cells retains
+the content of the cells that are hidden by a merge operation.
+
+```{r}
+types_cells |> 
+    dplyr::filter(is_merged) |> 
+  dplyr::select(address, cell_type, cell_content, is_merged)
+```
+
+For `merge-lead` cells you will also get the number of columns and rows spanned by
+the merge group in `merge_colspan` and `merge_rowspan` respectively. This span
+information is used to define the `merge_shape` column:
+
+- the shape of a merge group is defined as `vertical` when `merge_colspan` is
+  equal to 1 and `merge_rowspan` is greater than 1
+- the shape of a merge group is defined as `horizontal` when `merge_colspan`
+  is greater than 1 and `merge_rowspan` is equal to 1
+- otherwise the shape of the merge group is `rectangular`.
+
+<table style="width:100%">
+  <thead>
+    <tr>
+      <th style="width:4%"></th>
+      <th style="width:24%">A</th>
+      <th style="width:24%">B</th>
+      <th style="width:24%">C</th>
+      <th style="width:24%">D</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td colspan=2>A cell across two columns (a horizontal merge)</td>
+      <td>C1</td>
+      <td>D1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td rowspan=2>A cell across two rows (a vertical merge)</td>
+      <td>B2</td>
+      <td>C2</td>
+      <td>D2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>B3</td>
+      <td>C3</td>
+      <td>D3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>A4</td>
+      <td>B4</td>
+      <td colspan=2 rowspan=2>A cell across two columns and two rows (a rectangular merge)</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>A5</td>
+      <td>B5</td>
+    </tr>
+  </tbody>
+</table>
+
+
+```{r}
+merge_cells <- read_ods_cells(example_file, 3)
+
+merge_cells |>
+  dplyr::select(row, col, cell_type) |>
+  dplyr::mutate(col = paste0("x", col)) |>
+  tidyr::pivot_wider(names_from = col, values_from = cell_type)
+
+merge_cells |> 
+  dplyr::filter(cell_type == "merge-lead") |> 
+  dplyr::select(address, merge_colspan, merge_rowspan, merge_shape)
+
+```
+
+
+### Style information
+
+Style and formatting information is stored separately from cells themselves,
+instead cells, rows and columns are given reference identifiers to look up in
+the style information. There are four style identifiers for each cell:
+
+- `cell_style`, style and formatting specifically applied to that cell
+- `row_style`, style and formatting applied to the row
+- `col_style`, style and formatting applied to column
+- `col_default_cell_style`, the default style and formatting for cells in the
+  column, i.e. when a `cell_style` is not set
+
+However, note that extraction of the style and formatting information from the
+ODS XML is not currently supported by the package.
+
+## Quick extraction
+
+At its core an ODS file is an XML file, extracting this information can be
+processor heavy. If your primary interest is just in cell location and cell
+values then setting the argument `quick = TRUE` can result in a faster extraction
+process as it provides only six columns: `sheet`, `address`,
+`row`, `col`, `value_type` and `base_value`.
+
+The quick extraction process varies in how the `base_value` column is
+constructed. When `quick = TRUE` only float and percentage values are taken in
+their raw numeric form, for all other types the `cell_content` is used. That
+means that for currency, date and time value types the value as formatted for
+spreadsheet application users is returned rather than the "raw" value stored
+in the underlying XML file.
+
+```{r}
+read_ods_cells(example_file, 2, quick = TRUE) |> 
+  dplyr::filter(row == 3)
+```
+
+## Value types examples
+
+### Boolean
+
+Boolean values (`TRUE`/`FALSE`) are equivalent to R's `logical()` data type.
+
+```{r}
+types_cells |> 
+  dplyr::filter(value_type == "boolean") |> 
+  dplyr::select(cell_content, base_value, boolean_value)
+```
+
+**Note:** ODS files produced by Google Sheets output boolean values differently
+from other applications. Google Sheets stores booleans as `float` values of `0`
+for `FALSE` and `1` for `TRUE`, and gives the cells a formula of `=FALSE()`
+and `=TRUE()` instead. `read_ods_cells()` will output the value type, numeric
+value and formula written by Google Sheets, however it uses the formula
+references to input the relevant `TRUE`/`FALSE` value to the `boolean_value`
+column.
+
+### Currency
+
+Currency values are numeric values with a `currency_symbol`, the specific
+formatting of the currency symbol is handled by style formatting rules
+
+```{r}
+types_cells |> 
+  dplyr::filter(value_type == "currency") |> 
+  dplyr::select(cell_content, base_value, numeric_value, currency_symbol)
+```
+
+### Date
+
+The ODS specification does not differentiate between a date (e.g. 15/06/2022)
+and a date-time (e.g. 15/06/2023 13:47). The `cell_content` column will show
+the date as formatted for spreadsheet users, e.g. `Wednesday, 15 June 2022` or
+`15/06/22`. The `date_value` (and thus `base_value`) is stored in ISO 8601
+format (`0000-00-00T00:00:00`).
+
+```{r}
+types_cells |> 
+  dplyr::filter(value_type == "date") |> 
+  dplyr::select(cell_content, base_value, date_value)
+```
+
+As the date value type can contain both date and date-time values the
+`date_value` column is not coerced by `read_ods_cells()` into a base R data
+type. While you can use base R's `as.Date()` to coerce to a date, if processing
+date-times you need to replace the `T` marker stored in `date_value` with a
+space in order for `as.POSIXct()` to coerce date-times correctly.
+Alternatively, you can use `lubridate::as_datetime()` without modifying the
+`date_value`.
+
+```{r}
+types_cells |> 
+  dplyr::filter(value_type == "date") |> 
+  dplyr::select(cell_content, date_value) |>
+  dplyr::filter(!grepl("T", date_value)) |> 
+  dplyr::mutate(date_value2 = as.Date(date_value))
+
+types_cells |> 
+  dplyr::filter(value_type == "date") |> 
+  dplyr::select(cell_content, date_value) |>
+  dplyr::filter(grepl("T", date_value)) |> 
+  # dplyr::mutate(date_value2 = as.POSIXct(gsub("T", " ", y)))
+  dplyr::mutate(date_value2 = lubridate::as_datetime(date_value))
+```
+
+The [W3C XML schema](https://www.w3.org/TR/2004/REC-xmlschema-2-20041028/#isoformats)
+has more details on the specifics of ISO formatting of dates and date-times.
+
+**Note:** ODS files produced by Microsoft Excel output all dates as date-times
+with the time component of the date set to `00:00:00`, this is a further
+reason for `read_ods_cells()` not automatically coercing `date_value` to an
+R data type.
+
+### Float
+
+Numeric values, with the exception of currency and percentage types, are
+defined as a `float` value type.
+
+```{r}
+#| echo: FALSE
+old <- options(
+  pillar.sigfig = 10
+)
+```
+
+```{r}
+types_cells |> 
+  dplyr::filter(value_type == "float") |> 
+  dplyr::select(cell_content, base_value, numeric_value)
+```
+
+### Percentage
+
+Percentages are numeric values with formatting to include a percentage sign. As
+with the currency value type the specifics of formatting are handled by style
+formatting rules.
+
+```{r}
+types_cells |> 
+  dplyr::filter(value_type == "percentage") |> 
+  dplyr::select(cell_content, base_value, numeric_value)
+```
+
+```{r}
+#| echo: FALSE
+options(old)
+```
+
+### String
+
+String values are derived from the `cell_content`, the text representation of
+the cell as seen by a spreadsheet application user.
+
+```{r}
+types_cells |> 
+  dplyr::filter(col == 1 & row > 1 & value_type == "string") |> 
+  dplyr::select(cell_content, base_value)
+```
+
+While the ODS specification allows for a separate `string-value` attribute in
+the XML table-cell tags, in practice this is not implemented by the major
+spreadsheet applications.
+
+### Time
+
+Time values are defined as a duration as specified by ISO 8601, in the format
+`PT00H00M00S`.
+
+```{r}
+types_cells |> 
+  dplyr::filter(value_type == "time") |> 
+  dplyr::select(cell_content, base_value, time_value)
+```
+
+As with date values time values are not automatically coerced to an R data
+type. To use base R's `as.difftime()` you will need to remove or convert the
+letter characters, whereas `lubridate::as.duration()` can coerce without
+modification.
+
+
+```{r}
+types_cells |> 
+  dplyr::filter(value_type == "time") |> 
+  dplyr::select(cell_content, time_value) |>
+  # dplyr::mutate(
+  #   time_value2 = as.difftime(gsub("[PTS]", "", gsub("[HM]", ":", time_value)))
+  # )
+  dplyr::mutate(time_value2 = lubridate::as.duration(time_value))
+```
+
+
+The [W3C XML schema](https://www.w3.org/TR/2004/REC-xmlschema-2-20041028/#isoformats)
+has more details on the specifics of ISO formatting of dates and date-times.

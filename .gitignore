@@ -51,3 +51,6 @@ docs
 
 # Mac system files
 .DS_Store
+inst/doc
+/doc/
+/Meta/
