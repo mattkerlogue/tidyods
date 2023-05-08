@@ -26,16 +26,45 @@ row_components <- function(sheet_xml, ns) {
 
 }
 
-col_components <- function(sheet, ns) {
+col_components <- function(sheet_xml, ns) {
 
   col_xml <- xml2::xml_find_all(sheet_xml, "descendant::table:table-column", ns)
-  col_tbl <- tibble::tibble(
-    col_id = seq_along(col_xml),
-    col_path = xml2::xml_path(row_xml),
-    col_style = xml2::xml_attr(row_xml, "table:style-name", ns)
+  col_tbl_0 <- tibble::tibble(
+    base_col = seq_along(col_xml),
+    col_path = xml2::xml_path(col_xml),
+    col_style = xml2::xml_attr(col_xml, "table:style-name", ns),
+    col_repeats = suppressWarnings(
+      as.numeric(xml2::xml_attr(col_xml, "table:number-columns-repeated", ns))
+    ),
+    col_default_cell_style = xml2::xml_attr(
+      col_xml, "table:default-cell-style-name", ns
+    )
   )
 
-  return(row_tbl)
+  col_tbl_0$col_repeats[is.na(col_tbl_0$col_repeats)] <- 1
+  col_tbl_0$sheet_path <- gsub(
+    "(.*table:table(\\[\\d+\\])?)\\/.*", "\\1", col_tbl_0$col_path
+  )
+
+  if (max(col_tbl_0$col_repeats) > 1) {
+    col_tbl <- col_tbl_0 |>
+      tidyr::uncount(col_repeats, .remove = FALSE, .id = "col_iteration") |>
+      dplyr::arrange(sheet_path, base_col, col_iteration) |>
+        dplyr::group_by(sheet_path, .add = FALSE) |>
+        dplyr::mutate(
+          col = dplyr::row_number(),
+          .before = 1L
+        ) |>
+        dplyr::ungroup()
+  } else {
+    col_tbl <- col_tbl_0
+    col_tbl$col <- col_tbl_0$base_col
+  }
+
+  col_tbl <- col_tbl |>
+    dplyr::select(sheet_path, col, col_style, col_default_cell_style)
+
+  return(col_tbl)
 
 }
 
@@ -234,7 +263,7 @@ extract_text <- function(cell_xml, ns) {
 
 }
 
-combine_cells_rows <- function(cell_tbl, row_tbl) {
+combine_components <- function(cell_tbl, row_tbl, col_tbl = NULL) {
 
   init_tbl <- cell_tbl |>
     dplyr::left_join(row_tbl, by = "row_path")
@@ -287,6 +316,11 @@ combine_cells_rows <- function(cell_tbl, row_tbl) {
 
   } else {
     full_tbl <- full_tbl_0
+  }
+
+  if (!is.null(col_tbl)) {
+    full_tbl <- full_tbl |>
+      dplyr::left_join(col_tbl, by = c("sheet_path", "col"))
   }
 
   full_tbl$address = cellranger::R1C1_to_A1(

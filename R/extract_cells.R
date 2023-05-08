@@ -10,7 +10,7 @@ extract_cells_quick <- function(ods_xml, sheet_path, ns = NULL) {
   row_tbl <- row_components(sheet_xml, ns)
   cell_tbl <- cell_components_basic(sheet_xml, ns)
 
-  full_tbl <- combine_cells_rows(cell_tbl, row_tbl) |>
+  full_tbl <- combine_components(cell_tbl, row_tbl) |>
     dplyr::left_join(sheet_tbl, by = "sheet_path")
 
   out_tbl <- full_tbl |>
@@ -30,9 +30,10 @@ extract_cells_full <- function(ods_xml, sheet_path, ns = NULL) {
   sheet_tbl <- sheet_components(sheet_xml, ns)
 
   row_tbl <- row_components(sheet_xml, ns)
+  col_tbl <- col_components(sheet_xml, ns)
   cell_tbl <- cell_components_extended(sheet_xml, ns)
 
-  full_tbl <- combine_cells_rows(cell_tbl, row_tbl) |>
+  full_tbl <- combine_components(cell_tbl, row_tbl, col_tbl) |>
     dplyr::left_join(sheet_tbl, by = "sheet_path")
 
   out_scaffold <- tidyods_out_scaffold()

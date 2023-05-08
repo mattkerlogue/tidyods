@@ -57,6 +57,8 @@ tidyods_out_scaffold <- function() {
     merge_rowspan = numeric(),
     merge_shape = character(),
     cell_style = character(),
-    row_style = character()
+    row_style = character(),
+    col_style = character(),
+    col_default_cell_style = character()
   )
 }
