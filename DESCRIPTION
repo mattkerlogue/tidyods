@@ -13,6 +13,7 @@ RoxygenNote: 7.2.3
 Depends: 
     R (>= 4.1.0)
 Imports: 
+    cellranger,
     cli,
     dplyr (>= 1.1.0),
     prettyunits,
