@@ -24,7 +24,7 @@ dataset each cell is its own row with columns providing information about
 the cell's position, value types and containing formulas.
 }
 \details{
-The goal of \code{read_ods_cells()} is to extract the constituent value(s) and
+The aim of \code{read_ods_cells()} is to extract the constituent value(s) and
 other information about cells stored in an ODS file and to present that
 in a "tidy" format that allows further programmatic manipulation. It is
 modelled after the functionality of \code{\link[tidyxl:tidy_xlsx]{tidyxl::tidy_xlsx()}} which performs a
@@ -33,15 +33,19 @@ similar role for Microsoft Excel spreadsheets.
 There are between two to four presentations of a cell's value in the
 resulting tibble:
 \itemize{
-\item the \code{base_value}, a character vector providing the "most raw" version of
-a cell's value (see below regarding variation when setting \code{quick=TRUE});
-\item the \code{cell_content}, a character vector providing the version of a cell's
-value as seen by the user of a spreadsheet application;
-\item for float, currency percentage value types, a \code{numeric_value} with the raw
-value of the cell as a base R numeric vector, currency value types also
-have a \code{currency_symbol} providing the 3-character ISO currency symbol;
-\item for date and time value types, a character vector with the raw value
-conforming to the relevant ISO standard.
+\item all cells have a \code{base_value}, a character vector providing the
+"most raw" version of a cell's value;
+\item all cells also have a \code{cell_content}, a character vector providing the
+version of a cell's value as seen by the user of a spreadsheet
+application (i.e. having applied number formatting rules);
+\item for float, currency and percentage value types, cells will have a
+\code{numeric_value} with the raw value of the cell as a base R numeric vector,
+currency value types also have a \code{currency_symbol} providing the
+3-character ISO currency symbol;
+\item for date value types, cells will have a \code{date_value}, a character vector
+with the date or date-time in ISO 8601 format;
+\item for time value types, cells will have a \code{time_value}, a character vector
+with the time duration in ISO 8601 format.
 }
 
 Processing the ODS XML is a memory intensive process, you can achieve
@@ -49,11 +53,13 @@ significant speed enhancements by setting the \code{quick} argument to FALSE.
 This process will extract only a minimum of information about the cells,
 namely: \code{sheet}, \code{row}, \code{col}, \code{value_type} and a \code{base_value}. The
 \code{base_value} when using the \code{quick} argument will combine the raw value
-stored for float and percentage value types with the \code{cell_content} (i.e
-formatted character string) for all other value types.
+stored for float and percentage value types with the \code{cell_content} (i.e.
+the formatted character string) for all other value types.
 
-More details on the types of information extracted by \code{read_ods_cells}
-can be found the vignette, \code{vignette("read_cells", package = "tidyods")}.
+More details on the types of information extracted by \code{read_ods_cells()},
+including examples of how the different value types are stored in the ODS
+file format and extracted by \code{read_ods_cells()} can be found in the
+vignette, \code{vignette("read_cells", package = "tidyods")}.
 }
 \examples{
 example <- system.file("extdata", "basic_example.ods", package = "tidyods")

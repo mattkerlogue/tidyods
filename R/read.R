@@ -13,7 +13,7 @@
 #' A tibble (data.frame) of cells from the ODS sheet(s).
 #'
 #' @details
-#' The goal of `read_ods_cells()` is to extract the constituent value(s) and
+#' The aim of `read_ods_cells()` is to extract the constituent value(s) and
 #' other information about cells stored in an ODS file and to present that
 #' in a "tidy" format that allows further programmatic manipulation. It is
 #' modelled after the functionality of [tidyxl::tidy_xlsx()] which performs a
@@ -21,26 +21,32 @@
 #'
 #' There are between two to four presentations of a cell's value in the
 #' resulting tibble:
-#'  - the `base_value`, a character vector providing the "most raw" version of
-#'    a cell's value (see below regarding variation when setting `quick=TRUE`);
-#'  - the `cell_content`, a character vector providing the version of a cell's
-#'    value as seen by the user of a spreadsheet application;
-#'  - for float, currency percentage value types, a `numeric_value` with the raw
-#'    value of the cell as a base R numeric vector, currency value types also
-#'    have a `currency_symbol` providing the 3-character ISO currency symbol;
-#'  - for date and time value types, a character vector with the raw value
-#'    conforming to the relevant ISO standard.
+#'  - all cells have a `base_value`, a character vector providing the
+#'    "most raw" version of a cell's value;
+#'  - all cells also have a `cell_content`, a character vector providing the
+#'    version of a cell's value as seen by the user of a spreadsheet
+#'    application (i.e. having applied number formatting rules);
+#'  - for float, currency and percentage value types, cells will have a
+#'    `numeric_value` with the raw value of the cell as a base R numeric vector,
+#'    currency value types also have a `currency_symbol` providing the
+#'    3-character ISO currency symbol;
+#'  - for date value types, cells will have a `date_value`, a character vector
+#'    with the date or date-time in ISO 8601 format;
+#'  - for time value types, cells will have a `time_value`, a character vector
+#'    with the time duration in ISO 8601 format.
 #'
 #' Processing the ODS XML is a memory intensive process, you can achieve
 #' significant speed enhancements by setting the `quick` argument to FALSE.
 #' This process will extract only a minimum of information about the cells,
 #' namely: `sheet`, `row`, `col`, `value_type` and a `base_value`. The
 #' `base_value` when using the `quick` argument will combine the raw value
-#' stored for float and percentage value types with the `cell_content` (i.e
-#' formatted character string) for all other value types.
+#' stored for float and percentage value types with the `cell_content` (i.e.
+#' the formatted character string) for all other value types.
 #'
-#' More details on the types of information extracted by `read_ods_cells`
-#' can be found the vignette, `vignette("read_cells", package = "tidyods")`.
+#' More details on the types of information extracted by `read_ods_cells()`,
+#' including examples of how the different value types are stored in the ODS
+#' file format and extracted by `read_ods_cells()` can be found in the
+#' vignette, `vignette("read_cells", package = "tidyods")`.
 #'
 #' @examples
 #' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
