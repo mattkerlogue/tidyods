@@ -1,7 +1,17 @@
 url: https://mattkerlogue.github.io/tidyODS/
 
 template:
+
   bootstrap: 5
+
+  bslib:
+    primary: "#18A303"
+    base_font: {google: "Heebo"}
+    code_font: {google: "JetBrains Mono"}
+
+  navbar:
+    bg: primary
+
   opengraph:
     image:
       src: man/figures/tidyods_hex_banner.png
