@@ -139,6 +139,10 @@ read_ods_cells <- function(path, sheet = 1, quick = FALSE, quiet = FALSE) {
     cli::cli_abort("{.arg sheet} must be a character or numeric vector of length 1")
   }
 
+  if(!interactive()) {
+    quiet <- TRUE
+  }
+
   if (!quiet) cli::cli_progress_step("Extracting ODS XML")
   ods_xml <- extract_ods_xml(ods_file = path)
   ns <- xml2::xml_ns(ods_xml)
@@ -234,6 +238,10 @@ read_ods_sheet <- function(path, sheet = 1, rectify = c("simple", "smart"),
     cli::cli_abort(
       c(x = "{.arg quick} cannot be set to TRUE if {.arg rectify} is set to {.val smart}")
     )
+  }
+
+  if(!interactive()) {
+    quiet <- TRUE
   }
 
   ods_cells <- read_ods_cells(path, sheet, quick = quick, quiet = quiet)
