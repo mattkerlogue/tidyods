@@ -147,9 +147,10 @@ quick_rectify <- function(ods_cells) {
   ) |>
     dplyr::left_join(ods_cells, by = c("row", "col")) |>
     dplyr::mutate(col = paste0("x", col)) |>
-    dplyr::select(row, col, base_value) |>
-    tidyr::pivot_wider(names_from = col, values_from = base_value) |>
-    dplyr::select(-row)
+    dplyr::select(.data$row, .data$col, .data$base_value) |>
+    tidyr::pivot_wider(names_from = .data$col,
+                       values_from = .data$base_value) |>
+    dplyr::select(-.data$row)
 
 }
 

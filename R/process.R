@@ -48,9 +48,9 @@ col_components <- function(sheet_xml, ns) {
 
   if (max(col_tbl_0$col_repeats) > 1) {
     col_tbl <- col_tbl_0 |>
-      tidyr::uncount(col_repeats, .remove = FALSE, .id = "col_iteration") |>
-      dplyr::arrange(sheet_path, base_col, col_iteration) |>
-        dplyr::group_by(sheet_path, .add = FALSE) |>
+      tidyr::uncount(.data$col_repeats, .remove = FALSE, .id = "col_iteration") |>
+      dplyr::arrange(.data$sheet_path, .data$base_col, .data$col_iteration) |>
+        dplyr::group_by(.data$sheet_path, .add = FALSE) |>
         dplyr::mutate(
           col = dplyr::row_number(),
           .before = 1L
@@ -62,7 +62,8 @@ col_components <- function(sheet_xml, ns) {
   }
 
   col_tbl <- col_tbl |>
-    dplyr::select(sheet_path, col, col_style, col_default_cell_style)
+    dplyr::select(.data$sheet_path, .data$col, .data$col_style,
+                  .data$col_default_cell_style)
 
   return(col_tbl)
 
@@ -94,17 +95,17 @@ cell_components_basic <- function(sheet_xml, ns) {
     dplyr::left_join(cell_text, by = "cell_path") |>
     dplyr::mutate(
       cell_content = dplyr::if_else(
-        cell_content == "", NA_character_, cell_content
+        .data$cell_content == "", NA_character_, .data$cell_content
       ),
       base_value = dplyr::case_when(
-        is.na(office_value_type) ~ NA_character_,
-        office_value_type == "currency" ~ cell_content,
-        grepl("^#", cell_content) ~ cell_content,
-        !is.na(cell_numeric) ~ cell_numeric,
-        TRUE ~ cell_content
+        is.na(.data$office_value_type) ~ NA_character_,
+        .data$office_value_type == "currency" ~ .data$cell_content,
+        grepl("^#", .data$cell_content) ~ .data$cell_content,
+        !is.na(.data$cell_numeric) ~ .data$cell_numeric,
+        TRUE ~ .data$cell_content
       )
     ) |>
-    dplyr::group_by(sheet_path, row_path) |>
+    dplyr::group_by(.data$sheet_path, .data$row_path) |>
     dplyr::mutate(base_col = dplyr::row_number(), .after = "base_row")
 
   return(cell_tbl)
@@ -116,8 +117,6 @@ cell_components_extended <- function(sheet_xml, ns) {
   cell_xml <- cell_xml_nodes(sheet_xml, ns)
 
   cell_paths <- xml2::xml_path(cell_xml)
-
-  cell_attrs <- xml2::xml_attrs(cell_xml, ns)
 
   cell_content_tbl <- extract_text(cell_xml, ns)
 
@@ -134,7 +133,7 @@ cell_components_extended <- function(sheet_xml, ns) {
     ),
     cell_el = xml2::xml_name(cell_xml, ns),
   ) |>
-    dplyr::group_by(sheet_path, row_path) |>
+    dplyr::group_by(.data$sheet_path, .data$row_path) |>
     dplyr::mutate(base_col = dplyr::row_number(), .after = "base_row") |>
     dplyr::left_join(
       cell_content_tbl, by = "cell_path"
@@ -208,19 +207,23 @@ extract_annotations <- function(cell_xml, ns) {
       )
   ) |>
     dplyr::mutate(
-      n_rep = tidyr::replace_na(n_rep, 1),
-      text = dplyr::if_else(el == "text:s", " ", text),
-      text_path = gsub("(.*office:annotation/text:p(\\[\\d+\\])?).*", "\\1", xml_path)
+      n_rep = tidyr::replace_na(.data$n_rep, 1),
+      text = dplyr::if_else(.data$el == "text:s", " ", .data$text),
+      text_path = gsub(
+        "(.*office:annotation/text:p(\\[\\d+\\])?).*", "\\1", .data$xml_path
+      )
     ) |>
-    dplyr::arrange(text_path, id) |>
+    dplyr::arrange(.data$text_path, .data$id) |>
     dplyr::reframe(
-      cell_annotation = paste0(rep(text, n_rep), collapse = ""), .by = "text_path"
+      cell_annotation = paste0(rep(.data$text, .data$n_rep), collapse = ""),
+      .by = "text_path"
     ) |>
     dplyr::mutate(
-      cell_path = gsub("(.*table-cell(\\[\\d+\\])?).*", "\\1", text_path)
+      cell_path = gsub("(.*table-cell(\\[\\d+\\])?).*", "\\1", .data$text_path)
     ) |>
     dplyr::reframe(
-      cell_annotation = paste0(cell_annotation, collapse = "\n"), .by = "cell_path"
+      cell_annotation = paste0(.data$cell_annotation, collapse = "\n"),
+      .by = "cell_path"
     )
 
   return(annotation_tbl)
@@ -244,19 +247,24 @@ extract_text <- function(cell_xml, ns) {
     )
   ) |>
     dplyr::mutate(
-      n_rep = tidyr::replace_na(n_rep, 1),
-      text = dplyr::if_else(el == "s", " ", text),
-      text_path = gsub("(.*table-cell(\\[\\d+\\])?\\/text:p(\\[\\d+\\])?).*", "\\1", xml_path)
+      n_rep = tidyr::replace_na(.data$n_rep, 1),
+      text = dplyr::if_else(.data$el == "s", " ", .data$text),
+      text_path = gsub(
+        "(.*table-cell(\\[\\d+\\])?\\/text:p(\\[\\d+\\])?).*", "\\1",
+        .data$xml_path
+      )
     ) |>
-    dplyr::arrange(text_path, id) |>
+    dplyr::arrange(.data$text_path, .data$id) |>
     dplyr::reframe(
-      cell_content = paste0(rep(text, n_rep), collapse = ""), .by = "text_path"
+      cell_content = paste0(rep(.data$text, .data$n_rep), collapse = ""),
+      .by = "text_path"
     ) |>
     dplyr::mutate(
-      cell_path = gsub("(.*table-cell(\\[\\d+\\])?).*", "\\1", text_path)
+      cell_path = gsub("(.*table-cell(\\[\\d+\\])?).*", "\\1", .data$text_path)
     ) |>
     dplyr::reframe(
-      cell_content = paste0(cell_content, collapse = "\n"), .by = "cell_path"
+      cell_content = paste0(.data$cell_content, collapse = "\n"),
+      .by = "cell_path"
     )
 
   return(text_tbl)
@@ -286,10 +294,16 @@ combine_components <- function(cell_tbl, row_tbl, col_tbl = NULL) {
   )
 
   full_tbl_0 <- init_tbl[init_tbl[["keep"]], ] |>
-    tidyr::uncount(row_repeats, .remove = FALSE, .id = "row_iteration") |>
-    tidyr::uncount(col_repeats, .remove = FALSE, .id = "col_iteration") |>
-    dplyr::arrange(sheet_path, base_row, row_iteration, base_col, col_iteration) |>
-    dplyr::group_by(sheet_path, base_row, row_iteration, .add = FALSE) |>
+    tidyr::uncount(.data$row_repeats, .remove = FALSE, .id = "row_iteration") |>
+    tidyr::uncount(.data$col_repeats, .remove = FALSE, .id = "col_iteration") |>
+    dplyr::arrange(
+      .data$sheet_path,
+      .data$base_row, .data$row_iteration,
+      .data$base_col, .data$col_iteration
+    ) |>
+    dplyr::group_by(
+      .data$sheet_path, .data$base_row, .data$row_iteration, .add = FALSE
+    ) |>
     dplyr::mutate(
       row = dplyr::cur_group_id(),
       col = dplyr::row_number(),
@@ -301,18 +315,18 @@ combine_components <- function(cell_tbl, row_tbl, col_tbl = NULL) {
   if (length(unique(full_tbl_0$sheet_path)) > 1) {
 
     sheet_nrows <- full_tbl_0 |>
-      dplyr::distinct(sheet_path, row_path) |>
-      dplyr::count(sheet_path) |>
+      dplyr::distinct(.data$sheet_path, .data$row_path) |>
+      dplyr::count(.data$sheet_path) |>
       dplyr::mutate(
-        row_correction = dplyr::lag(cumsum(n), default = 0)
+        row_correction = dplyr::lag(cumsum(.data$n), default = 0)
       )
 
     full_tbl <- full_tbl_0 |>
       dplyr::left_join(sheet_nrows, by = "sheet_path") |>
       dplyr::mutate(
-        row = row - row_correction
+        row = row - .data$row_correction
       ) |>
-      dplyr::select(-row_correction)
+      dplyr::select(-.data$row_correction)
 
   } else {
     full_tbl <- full_tbl_0
