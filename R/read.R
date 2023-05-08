@@ -173,12 +173,19 @@ read_ods_sheet <- function(path, sheet = 1, rectify = c("simple", "smart"),
   ods_cells <- read_ods_cells(path, sheet, quick = quick, quiet = quiet)
 
   if (!quiet) cli::cli_progress_step("Rectifying cells to sheet layout")
-  if (rectify == "simple" & !quick) {
+
+  if (base_values) {
+    values_from <- "base_value"
+  } else {
+    values_from <- "cell_content"
+  }
+
+  if (quick) {
+    ods_sheet <- quick_rectify(ods_cells)
+  } else if (rectify == "simple") {
     ods_sheet <- simple_rectify(ods_cells, skip = skip,
                                 col_headers = col_headers,
-                                base_values = base_values)
-  } else if (rectify == "simple" & quick) {
-    ods_sheet <- quick_rectify(ods_cells)
+                                values_from = values_from)
   } else if (rectify == "smart") {
     ods_sheet <- smart_rectify(ods_cells)
   }
