@@ -9,7 +9,7 @@
 #' @param col_headers Whether to use the first row (after any skipping) as the
 #'   column header (`TRUE` is the default), alternatively a character vector of
 #'   column names can be provided.
-#' @param value_from The column from `ods_cells` to output values from.
+#' @param values_from The column from `ods_cells` to output values from.
 #'
 #' @details
 #' `simple_rectify()` will perform a basic reshaping of the dataset, by default
@@ -31,7 +31,7 @@
 #' @examples
 #' example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 #' example_cells <- read_ods_cells(example, 1)
-#' simple_rectify(example_cells, base_values = TRUE)
+#' simple_rectify(example_cells)
 #' smart_rectify(example_cells)
 #' @export
 #' @rdname rectify

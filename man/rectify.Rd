@@ -23,7 +23,7 @@ smart_rectify(ods_cells)
 column header (\code{TRUE} is the default), alternatively a character vector of
 column names can be provided.}
 
-\item{value_from}{The column from \code{ods_cells} to output values from.}
+\item{values_from}{The column from \code{ods_cells} to output values from.}
 }
 \value{
 A tibble representing the original spreadsheet format.
@@ -49,6 +49,6 @@ be coerced to a non-string data type (either numeric, logical, date or time).
 \examples{
 example <- system.file("extdata", "basic_example.ods", package = "tidyods")
 example_cells <- read_ods_cells(example, 1)
-simple_rectify(example_cells, base_values = TRUE)
+simple_rectify(example_cells)
 smart_rectify(example_cells)
 }
