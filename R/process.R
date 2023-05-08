@@ -244,8 +244,11 @@ combine_cells_rows <- function(cell_tbl, row_tbl) {
   init_tbl$col_repeats[is.na(init_tbl$col_repeats)] <- 1
   init_tbl$row_repeats[is.na(init_tbl$row_repeats)] <- 1
 
+  base_col_n <- table(init_tbl$row_path)
+
   init_tbl$keep <- dplyr::case_when(
     init_tbl$cell_el == "table:covered-table-cell" ~ TRUE,
+    init_tbl$base_col < base_col_n[init_tbl$row_path] ~ TRUE,
     is.na(init_tbl$cell_content) & is.na(init_tbl$office_value_type) &
       init_tbl$col_repeats > 1 ~ FALSE,
     is.na(init_tbl$cell_content) & is.na(init_tbl$office_value_type) &

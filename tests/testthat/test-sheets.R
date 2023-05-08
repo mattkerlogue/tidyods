@@ -12,15 +12,16 @@ google_ns <- xml2::xml_ns(google_ods)
 
 sheet_paths <- c(
   "/office:document-content/office:body/office:spreadsheet/table:table[1]",
-  "/office:document-content/office:body/office:spreadsheet/table:table[2]"
+  "/office:document-content/office:body/office:spreadsheet/table:table[2]",
+  "/office:document-content/office:body/office:spreadsheet/table:table[3]"
 )
-names(sheet_paths) <- c("penguins", "types")
+names(sheet_paths) <- c("penguins", "types", "merges")
 
 
 test_that("Sheet names", {
-  expect_equal(ods_sheets(example_file), c("penguins", "types"))
-  expect_equal(ods_sheets(excel_file), c("penguins", "types"))
-  expect_equal(ods_sheets(google_file), c("penguins", "types"))
+  expect_equal(ods_sheets(example_file), c("penguins", "types", "merges"))
+  expect_equal(ods_sheets(excel_file), c("penguins", "types", "merges"))
+  expect_equal(ods_sheets(google_file), c("penguins", "types", "merges"))
 })
 
 test_that("Sheet paths (LibreOffice)", {

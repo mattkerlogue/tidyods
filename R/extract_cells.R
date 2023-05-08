@@ -92,7 +92,7 @@ extract_cells_full <- function(ods_xml, sheet_path, ns = NULL) {
       merge_shape = dplyr::case_when(
         merge_colspan == 1 & merge_rowspan > 1 ~ "vertical",
         merge_rowspan == 1 & merge_colspan > 1 ~ "horizontal",
-        merge_rowspan > 1 & merge_colspan > 1  ~ "rectangle",
+        merge_rowspan > 1 & merge_colspan > 1  ~ "rectangular",
         TRUE ~ NA_character_
       )
     ) |>
