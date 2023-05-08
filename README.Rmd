@@ -131,18 +131,18 @@ bench::mark(
     read_ods_sheet(example_file, 2, col_headers = FALSE, quiet = TRUE),
   "readODS" =
     readODS::read_ods(example_file, 2),
-  check = FALSE, filter_gc = FALSE
+  check = FALSE, filter_gc = FALSE, iterations = 20
 ) |> 
   dplyr::select(expression, min, median, mem_alloc, n_itr)
 
-#> # A tibble: 7 × 5
-#>   expression          min   median mem_alloc n_itr
-#>   <bch:expr>     <bch:tm> <bch:tm> <bch:byt> <int>
-#> 1 cells_quick      38.3ms   38.8ms  536.92KB    13
-#> 2 cells_slow       62.4ms   65.8ms    1.01MB     8
-#> 3 sheet_quick      44.5ms   49.1ms  617.89KB    11
-#> 4 sheet_slow       68.2ms   79.6ms     1.1MB     7
-#> 5 readODS          43.9ms   46.1ms  375.06KB    11
+#> # A tibble: 5 × 5
+#>   expression       min   median mem_alloc n_itr
+#>   <bch:expr>  <bch:tm> <bch:tm> <bch:byt> <int>
+#> 1 cells_quick   54.6ms   58.9ms    6.12MB    20
+#> 2 cells_slow    83.7ms   87.7ms    2.96MB    20
+#> 3 sheet_quick   60.5ms   62.2ms    1.32MB    20
+#> 4 sheet_slow    92.5ms   96.4ms    1.97MB    20
+#> 5 readODS         56ms   59.8ms    2.02MB    20
 ```
 
 To test real-world performance we will use an ODS file published by the UK 
@@ -167,24 +167,29 @@ bench::mark(
 ) |> 
   dplyr::select(expression, min, median, mem_alloc, n_itr)
 
-#> # A tibble: 7 × 5
-#>   expression          min   median mem_alloc n_itr
-#>   <bch:expr>     <bch:tm> <bch:tm> <bch:byt> <int>
-#> 1 cells_quick       9.94s   10.44s  171.52MB     5
-#> 2 cells_slow       14.93s   16.51s   289.8MB     5
-#> 3 sheet_quick      10.26s   10.49s  187.64MB     5
-#> 4 sheet_slow       15.47s   16.18s  311.19MB     5
-#> 5 readODS          13.63s   13.83s    2.53GB     5
+#> # A tibble: 5 × 5
+#>   expression       min   median mem_alloc n_itr
+#>   <bch:expr>  <bch:tm> <bch:tm> <bch:byt> <int>
+#> 1 cells_quick    14.3s    14.5s  223.74MB     5
+#> 2 cells_slow     19.5s    19.9s  368.08MB     5
+#> 3 sheet_quick    14.5s    14.7s  232.48MB     5
+#> 4 sheet_slow     19.5s    19.8s  388.35MB     5
+#> 5 readODS        14.1s    14.6s    2.53GB     5
 ```
+
+For this large sheet setting `quick = TRUE` delivers a similar extraction time
+to `readODS::read_ods()`, while the slower default `quick = FALSE` approach is
+somewhat slower. However, despite extracting more information the `{tidyods}` 
+functions use less memory than `{readODS}` (version 1.8.0).
 
 The dependency on `{xml2}` is likely to cause the function to fail/crash when
 working with exceptionally large files. This is a limitation inherited from
 the libxml2 C library that is used to power `{xml2}`, which is
-[documented](https://gitlab.gnome.org/GNOME/libxml2/-/wikis/Memory-management#general-memory-requirements) as requiring available memory equal to around 4 times the size of
-the file being processed. As the XML in an ODS is contained in a zip file the
-system file size of an ODS file can easily hide the true requirements of
-processing the file. Files are now checked for size and operations cancelled
-if its estimated to exceed available memory.
+[documented](https://gitlab.gnome.org/GNOME/libxml2/-/wikis/Memory-management#general-memory-requirements) as requiring available memory equal to around 4 times 
+the size of the file being processed. As the XML in an ODS is contained in a
+zip file the system file size of an ODS file can easily hide the true
+requirements of processing the file. Files are now checked for size and
+operations cancelled if its estimated to exceed available memory.
 
 ## Related projects
 

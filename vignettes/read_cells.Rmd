@@ -31,7 +31,7 @@ book by Duncan Garmonsway explores in more detail how you can use datasets of
 ## Reading data from cells
 
 You read in data from an ODS file with the `read_ods_cells()` function. The
-resulting tibble provides 26 columns of information about cells, with each
+resulting tibble provides 28 columns of information about cells, with each
 row representing an individual cell in the input spreadsheet.
 
 ```{r}
@@ -77,7 +77,7 @@ spreadsheet.
 - `col`, the column number of the cell
 
 The `address` column is derived from the `row` and `col` using the 
-`{cellranger}` package. It displays the address in the "A1" notation commonly
+`{cellranger}` package. It provides the address in the "A1" notation commonly
 used in spreadsheet applications where the letter corresponds to a column and
 the number corresponds to a row. The "A1" notation is used by ODS files for 
 calculation formulas.
@@ -102,25 +102,25 @@ There are 10 columns that provide information about a cell's value.
   a `character()` vector
 - `time_value`, for time value types, the "raw" value as a `character()` vector
 
-Cells have one of four types, it is `empty` if it has no content or no value
+Cells have one of four types, it is `empty` if it has no content and/or no value
 type, it is a `merge-lead` if it is the top-left cell of a merge group while
 other cells in the merge group are classified as `merge-hidden`, all other
 cells are simply a `cell`.
 
 The `value_type` is derived from the
 [ODS specification](https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949)
-which defines seven value types
+which defines seven value types:
 
-- `boolean`: equivalent to R's `logical()` data type
-- `currency`: a numeric value, optionally with a currency symbol
-- `date`: a date or date-time stored in ISO format, the ODS specification does
+- `boolean`, equivalent to R's `logical()` data type
+- `currency`, a numeric value, optionally with a currency symbol
+- `date`, a date or date-time stored in ISO 8601 format, the ODS specification does
   not differentiate between a date (e.g. 15/06/2022) and a date-time (e.g.
   15/06/2023 13:47)
-- `float`: a numeric value, the ODS format does not distinguish between
+- `float`, a numeric value, the ODS format does not distinguish between
   different numeric types
-- `percentage`: a numeric value, but formatted for display as a percentage
-- `string`: equivalent to R's `character()`
-- `time`: a duration, stored in ISO format
+- `percentage`, a numeric value, but formatted for display as a percentage
+- `string`, equivalent to R's `character()`
+- `time`, a duration, stored in ISO 8601 format
 
 The `cell_content` column provides the value of a cell as displayed and
 formatted to users of a spreadsheet application. Non-string values are stored
@@ -170,8 +170,8 @@ metadata about each cell.
 
 #### Formulas
 
-For cells whose values are calculated by a formula this is provided in the
-`formula` column.
+The `has_formula` column indicates if a cell value is calculated by a formula,
+which is itself provided in the `formula` column.
 
 ```{r}
 types_cells |> 
@@ -181,20 +181,20 @@ types_cells |>
 ```
 
 For more on the use of formulas in ODS files you can consult the
-[OpenFormula specification](https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part4-formula/OpenDocument-v1.3-os-part4-formula.html)
+[OpenFormula specification](https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part4-formula/OpenDocument-v1.3-os-part4-formula.html).
 
 #### Errors
 
-Formulas in spreadsheets can result in errors. The `has_error` column indicates
-if there the cell results in an error. The `error_type` column is similar to
-the `=ERROR.TYPE()` function in Microsoft Excel and LibreOffice, these provide
-a number to denote the type of error.
+Formulas in spreadsheets can result in calculation errors. The `has_error`
+column indicates if there the cell results in an error. The `error_type` column
+is similar to the `=ERROR.TYPE()` function in Microsoft Excel, Google Sheets 
+and LibreOffice, these provide a number to denote the type of error.
 
 `error_type` will have a value from 1 to 7 or 501 to 540:
 
-- `1` for #NULL! errors in Microsoft Excel or Err:511 in LibreOffice,
+- `1` for #NULL! errors in Excel/Google Sheets or Err:511 in LibreOffice,
   typically this is some sort of error in the formula specification such as a
-  missing operator (Excel) or a missing variable (LibreOffice)
+  missing operator (Excel/Google Sheets) or a missing variable (LibreOffice)
 - `2` for #DIV/0! (division by zero) errors
 - `3` for #VALUE! (value type) errors, e.g. when a formula uses a string rather than a number
 - `4` for #REF! (invalid cell reference) errors
@@ -205,10 +205,9 @@ a number to denote the type of error.
 
 LibreOffice assigns all errors an error code from 501 to 540, where not
 displayed as an error like `#DIV/0!` these are shown in `cell_content` as
-`"Err:5##"`. For these errors then `error_type` will contain the numeric value
-of these codes, see LibreOffice's documentation on
+`"Err:5##"`. See LibreOffice's documentation on
 [error codes](https://help.libreoffice.org/7.3/en-GB/text/scalc/05/02140000.html)
-for more details.
+for more details on these error codes.
 
 #### Annotations
 
@@ -226,6 +225,14 @@ types_cells |>
 **Note:** different spreadsheet applications handle annotations in different
 ways, `read_ods_cells()` does not take account of these differences and
 provides only a basic representation of the text contained in the annotation.
+LibreOffice only supports a basic "comment" annotation which is called a "note"
+in Microsoft Excel and Google Sheets.
+
+In addition to a "note" Microsoft Excel  and Google Sheets proprietary formats
+allow for threaded comments that allow users to leave comments and reply to
+these comments, when saving into ODS these features are saved as annotations
+like notes. However the coercion of these threads into a note and inclusion of
+comment/reply author details varies.
 
 #### Merged cells
 
@@ -309,7 +316,7 @@ merge_cells |>
 
 merge_cells |> 
   dplyr::filter(cell_type == "merge-lead") |> 
-  dplyr::select(address, merge_colspan, merge_rowspan, merge_shape)
+  dplyr::select(address, cell_content, merge_colspan, merge_rowspan, merge_shape)
 
 ```
 
@@ -326,8 +333,8 @@ the style information. There are four style identifiers for each cell:
 - `col_default_cell_style`, the default style and formatting for cells in the
   column, i.e. when a `cell_style` is not set
 
-However, note that extraction of the style and formatting information from the
-ODS XML is not currently supported by the package.
+**Note:** While these style identifiers are extracted, at present the
+`{tidyods}` package does not currently support the extraction of the style and formatting rules from the ODS XML.
 
 ## Quick extraction
 

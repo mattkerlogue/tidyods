@@ -39,28 +39,29 @@ library(tidyods)
 example_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
 
 ods_sheets(example_file)
-#> [1] "penguins" "types"
+#> [1] "penguins" "types"    "merges"
 
 read_ods_cells(example_file, sheet = "penguins", quiet = TRUE)
-#> # A tibble: 28 × 25
-#>    sheet      row   col cell_type is_empty value_type cell_content   base_value 
-#>    <chr>    <dbl> <dbl> <chr>     <lgl>    <chr>      <chr>          <chr>      
-#>  1 penguins     1     1 cell      FALSE    string     species        species    
-#>  2 penguins     1     2 cell      FALSE    string     female         female     
-#>  3 penguins     1     3 cell      FALSE    string     bill_length_mm bill_lengt…
-#>  4 penguins     1     4 cell      FALSE    string     body_mass_g    body_mass_g
-#>  5 penguins     2     1 cell      FALSE    string     Adelie         Adelie     
-#>  6 penguins     2     2 cell      FALSE    boolean    FALSE          false      
-#>  7 penguins     2     3 cell      FALSE    float      40.4           40.3904109…
-#>  8 penguins     2     4 cell      FALSE    float      4043           4043.49315…
-#>  9 penguins     3     1 cell      FALSE    string     Adelie         Adelie     
-#> 10 penguins     3     2 cell      FALSE    boolean    TRUE           true       
+#> # A tibble: 28 × 28
+#>    sheet    address   row   col cell_type is_empty value_type cell_content  
+#>    <chr>    <chr>   <dbl> <dbl> <chr>     <lgl>    <chr>      <chr>         
+#>  1 penguins A1          1     1 cell      FALSE    string     species       
+#>  2 penguins B1          1     2 cell      FALSE    string     female        
+#>  3 penguins C1          1     3 cell      FALSE    string     bill_length_mm
+#>  4 penguins D1          1     4 cell      FALSE    string     body_mass_g   
+#>  5 penguins A2          2     1 cell      FALSE    string     Adelie        
+#>  6 penguins B2          2     2 cell      FALSE    boolean    FALSE         
+#>  7 penguins C2          2     3 cell      FALSE    float      40.4          
+#>  8 penguins D2          2     4 cell      FALSE    float      4043          
+#>  9 penguins A3          3     1 cell      FALSE    string     Adelie        
+#> 10 penguins B3          3     2 cell      FALSE    boolean    TRUE          
 #> # ℹ 18 more rows
-#> # ℹ 17 more variables: numeric_value <dbl>, currency_symbol <chr>,
-#> #   boolean_value <lgl>, date_value <chr>, time_value <chr>, has_formula <lgl>,
-#> #   formula <chr>, has_error <lgl>, error_type <dbl>, has_annotation <lgl>,
-#> #   annotation <chr>, is_merged <lgl>, merge_colspan <dbl>,
-#> #   merge_rowspan <dbl>, merge_shape <chr>, cell_style <chr>, row_style <chr>
+#> # ℹ 20 more variables: base_value <chr>, numeric_value <dbl>,
+#> #   currency_symbol <chr>, boolean_value <lgl>, date_value <chr>,
+#> #   time_value <chr>, has_formula <lgl>, formula <chr>, has_error <lgl>,
+#> #   error_type <dbl>, has_annotation <lgl>, annotation <chr>, is_merged <lgl>,
+#> #   merge_colspan <dbl>, merge_rowspan <dbl>, merge_shape <chr>,
+#> #   cell_style <chr>, row_style <chr>, col_style <chr>, …
 ```
 
 The `penguins` sheet is a simple 6 rows by 4 columns sheet that stores
@@ -115,69 +116,73 @@ types_cells |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
-#> Rows: 104
-#> Columns: 25
+#> Rows: 150
+#> Columns: 28
 #> Groups: col [10]
-#> $ sheet           <chr> "types", "types", "types", "types", "types", "types", …
-#> $ row             <dbl> 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, …
-#> $ col             <dbl> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8,…
-#> $ cell_type       <chr> "cell", "cell", "cell", "cell", "cell", "cell", "cell"…
-#> $ is_empty        <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
-#> $ value_type      <chr> "string", "boolean", "currency", "date", "time", "date…
-#> $ cell_content    <chr> "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/0…
-#> $ base_value      <chr> "Cell", "true", "1.2", "2022-06-15", "PT13H24M56S", "2…
-#> $ numeric_value   <dbl> NA, NA, 1.2000, NA, NA, NA, 12034.5679, 0.5467, 6579.2…
-#> $ currency_symbol <chr> NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, NA, "GB…
-#> $ boolean_value   <lgl> NA, TRUE, NA, NA, NA, NA, NA, NA, NA, NA, NA, FALSE, N…
-#> $ date_value      <chr> NA, NA, NA, "2022-06-15", NA, "2022-06-15T13:24:56", N…
-#> $ time_value      <chr> NA, NA, NA, NA, "PT13H24M56S", NA, NA, NA, NA, NA, NA,…
-#> $ has_formula     <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
-#> $ formula         <chr> NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", "of…
-#> $ has_error       <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
-#> $ error_type      <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, 7, NA, NA, NA, NA,…
-#> $ has_annotation  <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
-#> $ annotation      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "Test comment"…
-#> $ is_merged       <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
-#> $ merge_colspan   <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
-#> $ merge_rowspan   <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
-#> $ merge_shape     <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
-#> $ cell_style      <chr> NA, NA, "ce4", "ce11", "ce21", "ce31", "ce62", NA, NA,…
-#> $ row_style       <chr> "ro1", "ro1", "ro1", "ro1", "ro1", "ro1", "ro1", "ro1"…
+#> $ sheet                  <chr> "types", "types", "types", "types", "types", "t…
+#> $ address                <chr> "A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2",…
+#> $ row                    <dbl> 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3,…
+#> $ col                    <dbl> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6…
+#> $ cell_type              <chr> "cell", "cell", "cell", "cell", "cell", "cell",…
+#> $ is_empty               <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
+#> $ value_type             <chr> "string", "boolean", "currency", "date", "time"…
+#> $ cell_content           <chr> "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56"…
+#> $ base_value             <chr> "Cell", "true", "1.2", "2022-06-15", "PT13H24M5…
+#> $ numeric_value          <dbl> NA, NA, 1.2000, NA, NA, NA, 12034.5679, 0.5467,…
+#> $ currency_symbol        <chr> NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, …
+#> $ boolean_value          <lgl> NA, TRUE, NA, NA, NA, NA, NA, NA, NA, NA, NA, F…
+#> $ date_value             <chr> NA, NA, NA, "2022-06-15", NA, "2022-06-15T13:24…
+#> $ time_value             <chr> NA, NA, NA, NA, "PT13H24M56S", NA, NA, NA, NA, …
+#> $ has_formula            <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
+#> $ formula                <chr> NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2…
+#> $ has_error              <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
+#> $ error_type             <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, 7, NA, NA, …
+#> $ has_annotation         <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
+#> $ annotation             <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "Test c…
+#> $ is_merged              <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…
+#> $ merge_colspan          <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+#> $ merge_rowspan          <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+#> $ merge_shape            <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+#> $ cell_style             <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+#> $ row_style              <chr> "ro1", "ro1", "ro1", "ro1", "ro1", "ro1", "ro1"…
+#> $ col_style              <chr> "co6", "co7", "co8", "co9", "co10", "co11", "co…
+#> $ col_default_cell_style <chr> "Default", "ce15", "ce4", "ce11", "ce21", "ce31…
 
 types_cells |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::slice_head(n = 2) |>
   dplyr::select(-cell_type)
-#> # A tibble: 20 × 24
+#> # A tibble: 20 × 27
 #> # Groups:   col [10]
-#>    sheet   row   col is_empty value_type cell_content   base_value numeric_value
-#>    <chr> <dbl> <dbl> <lgl>    <chr>      <chr>          <chr>              <dbl>
-#>  1 types     2     1 FALSE    string     Cell           Cell              NA    
-#>  2 types     3     1 FALSE    string     Cell with com… Cell with…        NA    
-#>  3 types     2     2 FALSE    boolean    TRUE           true              NA    
-#>  4 types     3     2 FALSE    boolean    FALSE          false             NA    
-#>  5 types     2     3 FALSE    currency   £1.20          1.2                1.2  
-#>  6 types     3     3 FALSE    currency   £1.20          1.2                1.2  
-#>  7 types     2     4 FALSE    date       15/06/22       2022-06-15        NA    
-#>  8 types     3     4 FALSE    date       06/15/22       2022-06-15        NA    
-#>  9 types     2     5 FALSE    time       13:24:56       PT13H24M5…        NA    
-#> 10 types     3     5 FALSE    time       13:24          PT13H24M5…        NA    
-#> 11 types     2     6 FALSE    date       15/06/2022 13… 2022-06-1…        NA    
-#> 12 types     3     6 FALSE    date       15/06/22 13:24 2022-06-1…        NA    
-#> 13 types     2     7 FALSE    float      12035          12034.567…     12035.   
-#> 14 types     3     7 FALSE    float      12034.57       12034.567…     12035.   
-#> 15 types     2     8 FALSE    float      0.5467         0.5467             0.547
-#> 16 types     3     8 FALSE    percentage 55%            0.5467             0.547
-#> 17 types     2     9 FALSE    float      6579.3         6579.2982…      6579.   
-#> 18 types     3     9 FALSE    float      6579.3         6579.2982…      6579.   
-#> 19 types     2    10 FALSE    string     #N/A           #N/A              NA    
-#> 20 types     3    10 FALSE    string     #DIV/0!        #DIV/0!           NA    
-#> # ℹ 16 more variables: currency_symbol <chr>, boolean_value <lgl>,
-#> #   date_value <chr>, time_value <chr>, has_formula <lgl>, formula <chr>,
-#> #   has_error <lgl>, error_type <dbl>, has_annotation <lgl>, annotation <chr>,
-#> #   is_merged <lgl>, merge_colspan <dbl>, merge_rowspan <dbl>,
-#> #   merge_shape <chr>, cell_style <chr>, row_style <chr>
+#>    sheet address   row   col is_empty value_type cell_content        base_value 
+#>    <chr> <chr>   <dbl> <dbl> <lgl>    <chr>      <chr>               <chr>      
+#>  1 types A2          2     1 FALSE    string     Cell                Cell       
+#>  2 types A3          3     1 FALSE    string     Cell with comment   Cell with …
+#>  3 types B2          2     2 FALSE    boolean    TRUE                true       
+#>  4 types B3          3     2 FALSE    boolean    FALSE               false      
+#>  5 types C2          2     3 FALSE    currency   £1.20               1.2        
+#>  6 types C3          3     3 FALSE    currency   £1.20               1.2        
+#>  7 types D2          2     4 FALSE    date       15/06/22            2022-06-15 
+#>  8 types D3          3     4 FALSE    date       06/15/22            2022-06-15 
+#>  9 types E2          2     5 FALSE    time       13:24:56            PT13H24M56S
+#> 10 types E3          3     5 FALSE    time       13:24               PT13H24M56S
+#> 11 types F2          2     6 FALSE    date       15/06/2022 13:24:56 2022-06-15…
+#> 12 types F3          3     6 FALSE    date       15/06/22 13:24      2022-06-15…
+#> 13 types G2          2     7 FALSE    float      12035               12034.56789
+#> 14 types G3          3     7 FALSE    float      12034.57            12034.56789
+#> 15 types H2          2     8 FALSE    float      0.5467              0.5467     
+#> 16 types H3          3     8 FALSE    percentage 55%                 0.5467     
+#> 17 types I2          2     9 FALSE    float      6579.3              6579.29826…
+#> 18 types I3          3     9 FALSE    float      6579.3              6579.29826…
+#> 19 types J2          2    10 FALSE    string     #N/A                #N/A       
+#> 20 types J3          3    10 FALSE    string     #DIV/0!             #DIV/0!    
+#> # ℹ 19 more variables: numeric_value <dbl>, currency_symbol <chr>,
+#> #   boolean_value <lgl>, date_value <chr>, time_value <chr>, has_formula <lgl>,
+#> #   formula <chr>, has_error <lgl>, error_type <dbl>, has_annotation <lgl>,
+#> #   annotation <chr>, is_merged <lgl>, merge_colspan <dbl>,
+#> #   merge_rowspan <dbl>, merge_shape <chr>, cell_style <chr>, row_style <chr>,
+#> #   col_style <chr>, col_default_cell_style <chr>
 ```
 
 ## Performance
@@ -205,10 +210,11 @@ types_cells_quick |>
   dplyr::filter(row > 1) |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
-#> Rows: 104
-#> Columns: 5
+#> Rows: 150
+#> Columns: 6
 #> Groups: col [10]
 #> $ sheet      <chr> "types", "types", "types", "types", "types", "types", "type…
+#> $ address    <chr> "A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2", "I2", "J2",…
 #> $ row        <int> 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,…
 #> $ col        <int> 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1…
 #> $ value_type <chr> "string", "boolean", "currency", "date", "time", "date", "f…
@@ -227,18 +233,18 @@ bench::mark(
     read_ods_sheet(example_file, 2, col_headers = FALSE, quiet = TRUE),
   "readODS" =
     readODS::read_ods(example_file, 2),
-  check = FALSE, filter_gc = FALSE
+  check = FALSE, filter_gc = FALSE, iterations = 20
 ) |> 
   dplyr::select(expression, min, median, mem_alloc, n_itr)
 
-#> # A tibble: 7 × 5
-#>   expression          min   median mem_alloc n_itr
-#>   <bch:expr>     <bch:tm> <bch:tm> <bch:byt> <int>
-#> 1 cells_quick      38.3ms   38.8ms  536.92KB    13
-#> 2 cells_slow       62.4ms   65.8ms    1.01MB     8
-#> 3 sheet_quick      44.5ms   49.1ms  617.89KB    11
-#> 4 sheet_slow       68.2ms   79.6ms     1.1MB     7
-#> 5 readODS          43.9ms   46.1ms  375.06KB    11
+#> # A tibble: 5 × 5
+#>   expression       min   median mem_alloc n_itr
+#>   <bch:expr>  <bch:tm> <bch:tm> <bch:byt> <int>
+#> 1 cells_quick   54.6ms   58.9ms    6.12MB    20
+#> 2 cells_slow    83.7ms   87.7ms    2.96MB    20
+#> 3 sheet_quick   60.5ms   62.2ms    1.32MB    20
+#> 4 sheet_slow    92.5ms   96.4ms    1.97MB    20
+#> 5 readODS         56ms   59.8ms    2.02MB    20
 ```
 
 To test real-world performance we will use an ODS file published by the
@@ -265,15 +271,21 @@ bench::mark(
 ) |> 
   dplyr::select(expression, min, median, mem_alloc, n_itr)
 
-#> # A tibble: 7 × 5
-#>   expression          min   median mem_alloc n_itr
-#>   <bch:expr>     <bch:tm> <bch:tm> <bch:byt> <int>
-#> 1 cells_quick       9.94s   10.44s  171.52MB     5
-#> 2 cells_slow       14.93s   16.51s   289.8MB     5
-#> 3 sheet_quick      10.26s   10.49s  187.64MB     5
-#> 4 sheet_slow       15.47s   16.18s  311.19MB     5
-#> 5 readODS          13.63s   13.83s    2.53GB     5
+#> # A tibble: 5 × 5
+#>   expression       min   median mem_alloc n_itr
+#>   <bch:expr>  <bch:tm> <bch:tm> <bch:byt> <int>
+#> 1 cells_quick    14.3s    14.5s  223.74MB     5
+#> 2 cells_slow     19.5s    19.9s  368.08MB     5
+#> 3 sheet_quick    14.5s    14.7s  232.48MB     5
+#> 4 sheet_slow     19.5s    19.8s  388.35MB     5
+#> 5 readODS        14.1s    14.6s    2.53GB     5
 ```
+
+For this large sheet setting `quick = TRUE` delivers a similar
+extraction time to `readODS::read_ods()`, while the slower default
+`quick = FALSE` approach is somewhat slower. However, despite extracting
+more information the `{tidyods}` functions use less memory than
+`{readODS}` (version 1.8.0).
 
 The dependency on `{xml2}` is likely to cause the function to fail/crash
 when working with exceptionally large files. This is a limitation
