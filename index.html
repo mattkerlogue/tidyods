@@ -11,7 +11,9 @@
 <title>Read cells from ODS files • tidyods</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><link href="deps/Heebo-0.4.6/font.css" rel="stylesheet">
+<link href="deps/JetBrains_Mono-0.4.6/font.css" rel="stylesheet">
+<!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Read cells from ODS files">
 <meta property="og:description" content="Import cells from ODS files. Identify a cell's postion, value types
@@ -98,28 +100,29 @@
 <span><span class="va">example_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"basic_example.ods"</span>, package <span class="op">=</span> <span class="st">"tidyods"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/ods_sheets.html">ods_sheets</a></span><span class="op">(</span><span class="va">example_file</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "penguins" "types"</span></span>
+<span><span class="co">#&gt; [1] "penguins" "types"    "merges"</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, sheet <span class="op">=</span> <span class="st">"penguins"</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 28 × 25</span></span>
-<span><span class="co">#&gt;    sheet      row   col cell_type is_empty value_type cell_content   base_value </span></span>
-<span><span class="co">#&gt;    &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;          &lt;chr&gt;      </span></span>
-<span><span class="co">#&gt;  1 penguins     1     1 cell      FALSE    string     species        species    </span></span>
-<span><span class="co">#&gt;  2 penguins     1     2 cell      FALSE    string     female         female     </span></span>
-<span><span class="co">#&gt;  3 penguins     1     3 cell      FALSE    string     bill_length_mm bill_lengt…</span></span>
-<span><span class="co">#&gt;  4 penguins     1     4 cell      FALSE    string     body_mass_g    body_mass_g</span></span>
-<span><span class="co">#&gt;  5 penguins     2     1 cell      FALSE    string     Adelie         Adelie     </span></span>
-<span><span class="co">#&gt;  6 penguins     2     2 cell      FALSE    boolean    FALSE          false      </span></span>
-<span><span class="co">#&gt;  7 penguins     2     3 cell      FALSE    float      40.4           40.3904109…</span></span>
-<span><span class="co">#&gt;  8 penguins     2     4 cell      FALSE    float      4043           4043.49315…</span></span>
-<span><span class="co">#&gt;  9 penguins     3     1 cell      FALSE    string     Adelie         Adelie     </span></span>
-<span><span class="co">#&gt; 10 penguins     3     2 cell      FALSE    boolean    TRUE           true       </span></span>
+<span><span class="co">#&gt; # A tibble: 28 × 28</span></span>
+<span><span class="co">#&gt;    sheet    address   row   col cell_type is_empty value_type cell_content  </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;    &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;     &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;         </span></span>
+<span><span class="co">#&gt;  1 penguins A1          1     1 cell      FALSE    string     species       </span></span>
+<span><span class="co">#&gt;  2 penguins B1          1     2 cell      FALSE    string     female        </span></span>
+<span><span class="co">#&gt;  3 penguins C1          1     3 cell      FALSE    string     bill_length_mm</span></span>
+<span><span class="co">#&gt;  4 penguins D1          1     4 cell      FALSE    string     body_mass_g   </span></span>
+<span><span class="co">#&gt;  5 penguins A2          2     1 cell      FALSE    string     Adelie        </span></span>
+<span><span class="co">#&gt;  6 penguins B2          2     2 cell      FALSE    boolean    FALSE         </span></span>
+<span><span class="co">#&gt;  7 penguins C2          2     3 cell      FALSE    float      40.4          </span></span>
+<span><span class="co">#&gt;  8 penguins D2          2     4 cell      FALSE    float      4043          </span></span>
+<span><span class="co">#&gt;  9 penguins A3          3     1 cell      FALSE    string     Adelie        </span></span>
+<span><span class="co">#&gt; 10 penguins B3          3     2 cell      FALSE    boolean    TRUE          </span></span>
 <span><span class="co">#&gt; # ℹ 18 more rows</span></span>
-<span><span class="co">#&gt; # ℹ 17 more variables: numeric_value &lt;dbl&gt;, currency_symbol &lt;chr&gt;,</span></span>
-<span><span class="co">#&gt; #   boolean_value &lt;lgl&gt;, date_value &lt;chr&gt;, time_value &lt;chr&gt;, has_formula &lt;lgl&gt;,</span></span>
-<span><span class="co">#&gt; #   formula &lt;chr&gt;, has_error &lt;lgl&gt;, error_type &lt;dbl&gt;, has_annotation &lt;lgl&gt;,</span></span>
-<span><span class="co">#&gt; #   annotation &lt;chr&gt;, is_merged &lt;lgl&gt;, merge_colspan &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   merge_rowspan &lt;dbl&gt;, merge_shape &lt;chr&gt;, cell_style &lt;chr&gt;, row_style &lt;chr&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; # ℹ 20 more variables: base_value &lt;chr&gt;, numeric_value &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   currency_symbol &lt;chr&gt;, boolean_value &lt;lgl&gt;, date_value &lt;chr&gt;,</span></span>
+<span><span class="co">#&gt; #   time_value &lt;chr&gt;, has_formula &lt;lgl&gt;, formula &lt;chr&gt;, has_error &lt;lgl&gt;,</span></span>
+<span><span class="co">#&gt; #   error_type &lt;dbl&gt;, has_annotation &lt;lgl&gt;, annotation &lt;chr&gt;, is_merged &lt;lgl&gt;,</span></span>
+<span><span class="co">#&gt; #   merge_colspan &lt;dbl&gt;, merge_rowspan &lt;dbl&gt;, merge_shape &lt;chr&gt;,</span></span>
+<span><span class="co">#&gt; #   cell_style &lt;chr&gt;, row_style &lt;chr&gt;, col_style &lt;chr&gt;, …</span></span></code></pre></div>
 <p>The <code>penguins</code> sheet is a simple 6 rows by 4 columns sheet that stores the output of the following code:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">palmerpenguins</span><span class="fu">::</span><span class="va"><a href="https://allisonhorst.github.io/palmerpenguins/reference/penguins.html" class="external-link">penguins</a></span> <span class="op">|&gt;</span></span>
@@ -161,75 +164,80 @@
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rows: 104</span></span>
-<span><span class="co">#&gt; Columns: 25</span></span>
+<span><span class="co">#&gt; Rows: 150</span></span>
+<span><span class="co">#&gt; Columns: 28</span></span>
 <span><span class="co">#&gt; Groups: col [10]</span></span>
-<span><span class="co">#&gt; $ sheet           &lt;chr&gt; "types", "types", "types", "types", "types", "types", …</span></span>
-<span><span class="co">#&gt; $ row             &lt;dbl&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, …</span></span>
-<span><span class="co">#&gt; $ col             &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8,…</span></span>
-<span><span class="co">#&gt; $ cell_type       &lt;chr&gt; "cell", "cell", "cell", "cell", "cell", "cell", "cell"…</span></span>
-<span><span class="co">#&gt; $ is_empty        &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
-<span><span class="co">#&gt; $ value_type      &lt;chr&gt; "string", "boolean", "currency", "date", "time", "date…</span></span>
-<span><span class="co">#&gt; $ cell_content    &lt;chr&gt; "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/0…</span></span>
-<span><span class="co">#&gt; $ base_value      &lt;chr&gt; "Cell", "true", "1.2", "2022-06-15", "PT13H24M56S", "2…</span></span>
-<span><span class="co">#&gt; $ numeric_value   &lt;dbl&gt; NA, NA, 1.2000, NA, NA, NA, 12034.5679, 0.5467, 6579.2…</span></span>
-<span><span class="co">#&gt; $ currency_symbol &lt;chr&gt; NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, NA, "GB…</span></span>
-<span><span class="co">#&gt; $ boolean_value   &lt;lgl&gt; NA, TRUE, NA, NA, NA, NA, NA, NA, NA, NA, NA, FALSE, N…</span></span>
-<span><span class="co">#&gt; $ date_value      &lt;chr&gt; NA, NA, NA, "2022-06-15", NA, "2022-06-15T13:24:56", N…</span></span>
-<span><span class="co">#&gt; $ time_value      &lt;chr&gt; NA, NA, NA, NA, "PT13H24M56S", NA, NA, NA, NA, NA, NA,…</span></span>
-<span><span class="co">#&gt; $ has_formula     &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
-<span><span class="co">#&gt; $ formula         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2]", "of…</span></span>
-<span><span class="co">#&gt; $ has_error       &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
-<span><span class="co">#&gt; $ error_type      &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, 7, NA, NA, NA, NA,…</span></span>
-<span><span class="co">#&gt; $ has_annotation  &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
-<span><span class="co">#&gt; $ annotation      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "Test comment"…</span></span>
-<span><span class="co">#&gt; $ is_merged       &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
-<span><span class="co">#&gt; $ merge_colspan   &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span></span>
-<span><span class="co">#&gt; $ merge_rowspan   &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span></span>
-<span><span class="co">#&gt; $ merge_shape     &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span></span>
-<span><span class="co">#&gt; $ cell_style      &lt;chr&gt; NA, NA, "ce4", "ce11", "ce21", "ce31", "ce62", NA, NA,…</span></span>
-<span><span class="co">#&gt; $ row_style       &lt;chr&gt; "ro1", "ro1", "ro1", "ro1", "ro1", "ro1", "ro1", "ro1"…</span></span>
+<span><span class="co">#&gt; $ sheet                  &lt;chr&gt; "types", "types", "types", "types", "types", "t…</span></span>
+<span><span class="co">#&gt; $ address                &lt;chr&gt; "A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2",…</span></span>
+<span><span class="co">#&gt; $ row                    &lt;dbl&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3,…</span></span>
+<span><span class="co">#&gt; $ col                    &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6…</span></span>
+<span><span class="co">#&gt; $ cell_type              &lt;chr&gt; "cell", "cell", "cell", "cell", "cell", "cell",…</span></span>
+<span><span class="co">#&gt; $ is_empty               &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
+<span><span class="co">#&gt; $ value_type             &lt;chr&gt; "string", "boolean", "currency", "date", "time"…</span></span>
+<span><span class="co">#&gt; $ cell_content           &lt;chr&gt; "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56"…</span></span>
+<span><span class="co">#&gt; $ base_value             &lt;chr&gt; "Cell", "true", "1.2", "2022-06-15", "PT13H24M5…</span></span>
+<span><span class="co">#&gt; $ numeric_value          &lt;dbl&gt; NA, NA, 1.2000, NA, NA, NA, 12034.5679, 0.5467,…</span></span>
+<span><span class="co">#&gt; $ currency_symbol        &lt;chr&gt; NA, NA, "GBP", NA, NA, NA, NA, NA, NA, NA, NA, …</span></span>
+<span><span class="co">#&gt; $ boolean_value          &lt;lgl&gt; NA, TRUE, NA, NA, NA, NA, NA, NA, NA, NA, NA, F…</span></span>
+<span><span class="co">#&gt; $ date_value             &lt;chr&gt; NA, NA, NA, "2022-06-15", NA, "2022-06-15T13:24…</span></span>
+<span><span class="co">#&gt; $ time_value             &lt;chr&gt; NA, NA, NA, NA, "PT13H24M56S", NA, NA, NA, NA, …</span></span>
+<span><span class="co">#&gt; $ has_formula            &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
+<span><span class="co">#&gt; $ formula                &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, "of:=[.G2]*[.H2…</span></span>
+<span><span class="co">#&gt; $ has_error              &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
+<span><span class="co">#&gt; $ error_type             &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, 7, NA, NA, …</span></span>
+<span><span class="co">#&gt; $ has_annotation         &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
+<span><span class="co">#&gt; $ annotation             &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "Test c…</span></span>
+<span><span class="co">#&gt; $ is_merged              &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span></span>
+<span><span class="co">#&gt; $ merge_colspan          &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span></span>
+<span><span class="co">#&gt; $ merge_rowspan          &lt;dbl&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span></span>
+<span><span class="co">#&gt; $ merge_shape            &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span></span>
+<span><span class="co">#&gt; $ cell_style             &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span></span>
+<span><span class="co">#&gt; $ row_style              &lt;chr&gt; "ro1", "ro1", "ro1", "ro1", "ro1", "ro1", "ro1"…</span></span>
+<span><span class="co">#&gt; $ col_style              &lt;chr&gt; "co6", "co7", "co8", "co9", "co10", "co11", "co…</span></span>
+<span><span class="co">#&gt; $ col_default_cell_style &lt;chr&gt; "Default", "ce15", "ce4", "ce11", "ce21", "ce31…</span></span>
 <span></span>
 <span><span class="va">types_cells</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_head</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">cell_type</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 20 × 24</span></span>
+<span><span class="co">#&gt; # A tibble: 20 × 27</span></span>
 <span><span class="co">#&gt; # Groups:   col [10]</span></span>
-<span><span class="co">#&gt;    sheet   row   col is_empty value_type cell_content   base_value numeric_value</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;          &lt;chr&gt;              &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 types     2     1 FALSE    string     Cell           Cell              NA    </span></span>
-<span><span class="co">#&gt;  2 types     3     1 FALSE    string     Cell with com… Cell with…        NA    </span></span>
-<span><span class="co">#&gt;  3 types     2     2 FALSE    boolean    TRUE           true              NA    </span></span>
-<span><span class="co">#&gt;  4 types     3     2 FALSE    boolean    FALSE          false             NA    </span></span>
-<span><span class="co">#&gt;  5 types     2     3 FALSE    currency   £1.20          1.2                1.2  </span></span>
-<span><span class="co">#&gt;  6 types     3     3 FALSE    currency   £1.20          1.2                1.2  </span></span>
-<span><span class="co">#&gt;  7 types     2     4 FALSE    date       15/06/22       2022-06-15        NA    </span></span>
-<span><span class="co">#&gt;  8 types     3     4 FALSE    date       06/15/22       2022-06-15        NA    </span></span>
-<span><span class="co">#&gt;  9 types     2     5 FALSE    time       13:24:56       PT13H24M5…        NA    </span></span>
-<span><span class="co">#&gt; 10 types     3     5 FALSE    time       13:24          PT13H24M5…        NA    </span></span>
-<span><span class="co">#&gt; 11 types     2     6 FALSE    date       15/06/2022 13… 2022-06-1…        NA    </span></span>
-<span><span class="co">#&gt; 12 types     3     6 FALSE    date       15/06/22 13:24 2022-06-1…        NA    </span></span>
-<span><span class="co">#&gt; 13 types     2     7 FALSE    float      12035          12034.567…     12035.   </span></span>
-<span><span class="co">#&gt; 14 types     3     7 FALSE    float      12034.57       12034.567…     12035.   </span></span>
-<span><span class="co">#&gt; 15 types     2     8 FALSE    float      0.5467         0.5467             0.547</span></span>
-<span><span class="co">#&gt; 16 types     3     8 FALSE    percentage 55%            0.5467             0.547</span></span>
-<span><span class="co">#&gt; 17 types     2     9 FALSE    float      6579.3         6579.2982…      6579.   </span></span>
-<span><span class="co">#&gt; 18 types     3     9 FALSE    float      6579.3         6579.2982…      6579.   </span></span>
-<span><span class="co">#&gt; 19 types     2    10 FALSE    string     #N/A           #N/A              NA    </span></span>
-<span><span class="co">#&gt; 20 types     3    10 FALSE    string     #DIV/0!        #DIV/0!           NA    </span></span>
-<span><span class="co">#&gt; # ℹ 16 more variables: currency_symbol &lt;chr&gt;, boolean_value &lt;lgl&gt;,</span></span>
-<span><span class="co">#&gt; #   date_value &lt;chr&gt;, time_value &lt;chr&gt;, has_formula &lt;lgl&gt;, formula &lt;chr&gt;,</span></span>
-<span><span class="co">#&gt; #   has_error &lt;lgl&gt;, error_type &lt;dbl&gt;, has_annotation &lt;lgl&gt;, annotation &lt;chr&gt;,</span></span>
-<span><span class="co">#&gt; #   is_merged &lt;lgl&gt;, merge_colspan &lt;dbl&gt;, merge_rowspan &lt;dbl&gt;,</span></span>
-<span><span class="co">#&gt; #   merge_shape &lt;chr&gt;, cell_style &lt;chr&gt;, row_style &lt;chr&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt;    sheet address   row   col is_empty value_type cell_content        base_value </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;    &lt;chr&gt;      &lt;chr&gt;               &lt;chr&gt;      </span></span>
+<span><span class="co">#&gt;  1 types A2          2     1 FALSE    string     Cell                Cell       </span></span>
+<span><span class="co">#&gt;  2 types A3          3     1 FALSE    string     Cell with comment   Cell with …</span></span>
+<span><span class="co">#&gt;  3 types B2          2     2 FALSE    boolean    TRUE                true       </span></span>
+<span><span class="co">#&gt;  4 types B3          3     2 FALSE    boolean    FALSE               false      </span></span>
+<span><span class="co">#&gt;  5 types C2          2     3 FALSE    currency   £1.20               1.2        </span></span>
+<span><span class="co">#&gt;  6 types C3          3     3 FALSE    currency   £1.20               1.2        </span></span>
+<span><span class="co">#&gt;  7 types D2          2     4 FALSE    date       15/06/22            2022-06-15 </span></span>
+<span><span class="co">#&gt;  8 types D3          3     4 FALSE    date       06/15/22            2022-06-15 </span></span>
+<span><span class="co">#&gt;  9 types E2          2     5 FALSE    time       13:24:56            PT13H24M56S</span></span>
+<span><span class="co">#&gt; 10 types E3          3     5 FALSE    time       13:24               PT13H24M56S</span></span>
+<span><span class="co">#&gt; 11 types F2          2     6 FALSE    date       15/06/2022 13:24:56 2022-06-15…</span></span>
+<span><span class="co">#&gt; 12 types F3          3     6 FALSE    date       15/06/22 13:24      2022-06-15…</span></span>
+<span><span class="co">#&gt; 13 types G2          2     7 FALSE    float      12035               12034.56789</span></span>
+<span><span class="co">#&gt; 14 types G3          3     7 FALSE    float      12034.57            12034.56789</span></span>
+<span><span class="co">#&gt; 15 types H2          2     8 FALSE    float      0.5467              0.5467     </span></span>
+<span><span class="co">#&gt; 16 types H3          3     8 FALSE    percentage 55%                 0.5467     </span></span>
+<span><span class="co">#&gt; 17 types I2          2     9 FALSE    float      6579.3              6579.29826…</span></span>
+<span><span class="co">#&gt; 18 types I3          3     9 FALSE    float      6579.3              6579.29826…</span></span>
+<span><span class="co">#&gt; 19 types J2          2    10 FALSE    string     #N/A                #N/A       </span></span>
+<span><span class="co">#&gt; 20 types J3          3    10 FALSE    string     #DIV/0!             #DIV/0!    </span></span>
+<span><span class="co">#&gt; # ℹ 19 more variables: numeric_value &lt;dbl&gt;, currency_symbol &lt;chr&gt;,</span></span>
+<span><span class="co">#&gt; #   boolean_value &lt;lgl&gt;, date_value &lt;chr&gt;, time_value &lt;chr&gt;, has_formula &lt;lgl&gt;,</span></span>
+<span><span class="co">#&gt; #   formula &lt;chr&gt;, has_error &lt;lgl&gt;, error_type &lt;dbl&gt;, has_annotation &lt;lgl&gt;,</span></span>
+<span><span class="co">#&gt; #   annotation &lt;chr&gt;, is_merged &lt;lgl&gt;, merge_colspan &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   merge_rowspan &lt;dbl&gt;, merge_shape &lt;chr&gt;, cell_style &lt;chr&gt;, row_style &lt;chr&gt;,</span></span>
+<span><span class="co">#&gt; #   col_style &lt;chr&gt;, col_default_cell_style &lt;chr&gt;</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
 </h2>
-<p>An ODS file is a zipped collection of XML files and associated files. <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a>, like the <a href="https://docs.ropensci.org/readODS" class="external-link">readODS</a> package, uses the <a href="https://xml2.r-lib.org" class="external-link"><code>{xml2}</code></a> package to process this file. There are three likely sources of performance issues: downloading of remote files, unzipping the ODS file, processing rows.</p>
-<p>Performance of <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code> and <code><a href="reference/read_ods_sheet.html">read_ods_sheet()</a></code> is largely comparable to that provided by <a href="https://docs.ropensci.org/readODS" class="external-link">readODS</a>. Performance can be improved by setting <code>quick = TRUE</code>, which extracts only a “vital” subset of information about cells: the sheet, row and column position, the value type and a cell value. For “float” and “percentage” value types quick extracts the underlying numeric value but for all other value types it extracts the formatted cell content (e.g. for date 2/5/23 rather than the ISO standard 2023-05-02).</p>
+<p>An ODS file is a zipped collection of XML files and associated files. <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a>, like the <a href="https://docs.ropensci.org/readODS" class="external-link">readODS</a> package, uses the <a href="https://xml2.r-lib.org" class="external-link"><code>{xml2}</code></a> package to process this file.</p>
+<p>The main aim of <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> is to extract a large set of information about cells, not just just their location and value, and while slower than <a href="https://docs.ropensci.org/readODS" class="external-link">readODS</a> for small and medium sized files users are unlikely to see noticeable differences when using <code><a href="reference/read_ods_cells.html">read_ods_cells()</a></code>.</p>
+<p>If your primary interest is just in cell location and cell values then setting the argument <code>quick = TRUE</code> can result in a faster extraction process as it provides only six columns: <code>sheet</code>, <code>address</code>, <code>row</code>, <code>col</code>, <code>value_type</code> and <code>base_value</code>. This <code>quick</code> extraction process varies in how the <code>base_value</code> column is constructed. When <code>quick = TRUE</code> only float and percentage values are taken in their raw numeric form, for all other types the <code>cell_content</code> is used. That means that for currency, date and time value types the value as formatted for spreadsheet application users is returned rather than the “raw” value stored in the underlying XML file.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">types_cells_quick</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_ods_cells.html">read_ods_cells</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="st">"types"</span>,</span>
 <span>                                    quick <span class="op">=</span> <span class="cn">TRUE</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -238,14 +246,16 @@
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">row</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">col</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Rows: 104</span></span>
-<span><span class="co">#&gt; Columns: 5</span></span>
+<span><span class="co">#&gt; Rows: 150</span></span>
+<span><span class="co">#&gt; Columns: 6</span></span>
 <span><span class="co">#&gt; Groups: col [10]</span></span>
 <span><span class="co">#&gt; $ sheet      &lt;chr&gt; "types", "types", "types", "types", "types", "types", "type…</span></span>
+<span><span class="co">#&gt; $ address    &lt;chr&gt; "A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2", "I2", "J2",…</span></span>
 <span><span class="co">#&gt; $ row        &lt;int&gt; 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,…</span></span>
 <span><span class="co">#&gt; $ col        &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1…</span></span>
 <span><span class="co">#&gt; $ value_type &lt;chr&gt; "string", "boolean", "currency", "date", "time", "date", "f…</span></span>
 <span><span class="co">#&gt; $ base_value &lt;chr&gt; "Cell", "TRUE", "£1.20", "15/06/22", "13:24:56", "15/06/202…</span></span></code></pre></div>
+<p>Using the package’s example file we can see how setting <code>quick = TRUE</code> results in performance that is nearly comaprable with that provided by <a href="https://docs.ropensci.org/readODS" class="external-link">readODS</a>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">bench</span><span class="fu">::</span><span class="fu"><a href="http://bench.r-lib.org/reference/mark.html" class="external-link">mark</a></span><span class="op">(</span></span>
 <span>  <span class="st">"cells_quick"</span> <span class="op">=</span></span>
@@ -258,19 +268,19 @@
 <span>    <span class="fu"><a href="reference/read_ods_sheet.html">read_ods_sheet</a></span><span class="op">(</span><span class="va">example_file</span>, <span class="fl">2</span>, col_headers <span class="op">=</span> <span class="cn">FALSE</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>  <span class="st">"readODS"</span> <span class="op">=</span></span>
 <span>    <span class="fu">readODS</span><span class="fu">::</span><span class="fu">read_ods</span><span class="op">(</span><span class="va">example_file</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  check <span class="op">=</span> <span class="cn">FALSE</span>, filter_gc <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  check <span class="op">=</span> <span class="cn">FALSE</span>, filter_gc <span class="op">=</span> <span class="cn">FALSE</span>, iterations <span class="op">=</span> <span class="fl">20</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">expression</span>, <span class="va">min</span>, <span class="va">median</span>, <span class="va">mem_alloc</span>, <span class="va">n_itr</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">#&gt; # A tibble: 7 × 5</span></span>
-<span><span class="co">#&gt;   expression          min   median mem_alloc n_itr</span></span>
-<span><span class="co">#&gt;   &lt;bch:expr&gt;     &lt;bch:tm&gt; &lt;bch:tm&gt; &lt;bch:byt&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1 cells_quick      38.3ms   38.8ms  536.92KB    13</span></span>
-<span><span class="co">#&gt; 2 cells_slow       62.4ms   65.8ms    1.01MB     8</span></span>
-<span><span class="co">#&gt; 3 sheet_quick      44.5ms   49.1ms  617.89KB    11</span></span>
-<span><span class="co">#&gt; 4 sheet_slow       68.2ms   79.6ms     1.1MB     7</span></span>
-<span><span class="co">#&gt; 5 readODS          43.9ms   46.1ms  375.06KB    11</span></span></code></pre></div>
-<p>To test real-world performance we will use an ODS file published by the UK Government on the <a href="https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021" class="external-link">number of civil servants by postcode</a>, a sheet of 5,544 rows by 11 columns.</p>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span><span class="va">expression</span>, <span class="va">min</span>, <span class="va">median</span>, mean <span class="op">=</span> <span class="va">total_time</span><span class="op">/</span><span class="va">n_itr</span>, <span class="va">n_itr</span><span class="op">)</span></span>
+<span>  </span>
+<span><span class="co">#&gt; # A tibble: 5 × 7</span></span>
+<span><span class="co">#&gt;   expression       min   median     mean n_itr</span></span>
+<span><span class="co">#&gt;   &lt;bch:expr&gt;  &lt;bch:tm&gt; &lt;bch:tm&gt; &lt;bch:tm&gt; &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1 cells_quick   55.4ms   61.2ms   61.9ms    20</span></span>
+<span><span class="co">#&gt; 2 cells_slow    83.3ms   90.5ms   91.5ms    20</span></span>
+<span><span class="co">#&gt; 3 sheet_quick   62.8ms   69.7ms   72.4ms    20</span></span>
+<span><span class="co">#&gt; 4 sheet_slow    93.3ms  101.1ms  102.9ms    20</span></span>
+<span><span class="co">#&gt; 5 readODS       50.4ms   53.7ms   55.3ms    20</span></span></code></pre></div>
+<p>To test real-world performance we can use an ODS file published by the UK Government on the <a href="https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021" class="external-link">number of civil servants by postcode</a>, which contains a large sheet of 5,544 rows by 11 columns.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">postcodes_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"civil-service-postcodes-2021.ods"</span>,</span>
 <span>  package <span class="op">=</span> <span class="st">"tidyods"</span><span class="op">)</span></span>
@@ -287,17 +297,18 @@
 <span>  <span class="st">"readODS"</span> <span class="op">=</span></span>
 <span>    <span class="fu">readODS</span><span class="fu">::</span><span class="fu">read_ods</span><span class="op">(</span><span class="va">postcodes_file</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  check <span class="op">=</span> <span class="cn">FALSE</span>, filter_gc <span class="op">=</span> <span class="cn">FALSE</span>, iterations <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">expression</span>, <span class="va">min</span>, <span class="va">median</span>, <span class="va">mem_alloc</span>, <span class="va">n_itr</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/transmute.html" class="external-link">transmute</a></span><span class="op">(</span><span class="va">expression</span>, <span class="va">min</span>, <span class="va">median</span>, mean <span class="op">=</span> <span class="va">total_time</span><span class="op">/</span><span class="va">n_itr</span>, <span class="va">n_itr</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">#&gt; # A tibble: 7 × 5</span></span>
-<span><span class="co">#&gt;   expression          min   median mem_alloc n_itr</span></span>
-<span><span class="co">#&gt;   &lt;bch:expr&gt;     &lt;bch:tm&gt; &lt;bch:tm&gt; &lt;bch:byt&gt; &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1 cells_quick       9.94s   10.44s  171.52MB     5</span></span>
-<span><span class="co">#&gt; 2 cells_slow       14.93s   16.51s   289.8MB     5</span></span>
-<span><span class="co">#&gt; 3 sheet_quick      10.26s   10.49s  187.64MB     5</span></span>
-<span><span class="co">#&gt; 4 sheet_slow       15.47s   16.18s  311.19MB     5</span></span>
-<span><span class="co">#&gt; 5 readODS          13.63s   13.83s    2.53GB     5</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 5 × 7</span></span>
+<span><span class="co">#&gt;   expression       min   median     mean n_itr</span></span>
+<span><span class="co">#&gt;   &lt;bch:expr&gt;  &lt;bch:tm&gt; &lt;bch:tm&gt; &lt;bch:tm&gt; &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1 cells_quick    16.3s    16.7s    16.7s     5</span></span>
+<span><span class="co">#&gt; 2 cells_slow     21.7s      22s    22.8s     5</span></span>
+<span><span class="co">#&gt; 3 sheet_quick    18.3s    19.9s    19.7s     5</span></span>
+<span><span class="co">#&gt; 4 sheet_slow     20.7s    23.3s      23s     5</span></span>
+<span><span class="co">#&gt; 5 readODS        13.7s    14.8s    14.6s     5</span></span></code></pre></div>
+<p>For this large sheet setting <code>quick = TRUE</code> delivers only a couple of seconds slower extraction time compared to that provided by <code>readODS::read_ods()</code>.</p>
 <p>The dependency on <a href="https://xml2.r-lib.org/" class="external-link">xml2</a> is likely to cause the function to fail/crash when working with exceptionally large files. This is a limitation inherited from the libxml2 C library that is used to power <a href="https://xml2.r-lib.org/" class="external-link">xml2</a>, which is <a href="https://gitlab.gnome.org/GNOME/libxml2/-/wikis/Memory-management#general-memory-requirements" class="external-link">documented</a> as requiring available memory equal to around 4 times the size of the file being processed. As the XML in an ODS is contained in a zip file the system file size of an ODS file can easily hide the true requirements of processing the file. Files are now checked for size and operations cancelled if its estimated to exceed available memory.</p>
 </div>
 <div class="section level2">

@@ -9,7 +9,9 @@
 <title>Extracting cell information • tidyods</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><link href="../deps/Heebo-0.4.6/font.css" rel="stylesheet">
+<link href="../deps/JetBrains_Mono-0.4.6/font.css" rel="stylesheet">
+<!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Extracting cell information">
 <meta property="og:description" content="tidyods">
@@ -100,7 +102,7 @@ data stored in (Excel) spreadsheets.</p>
 <h2 id="reading-data-from-cells">Reading data from cells<a class="anchor" aria-label="anchor" href="#reading-data-from-cells"></a>
 </h2>
 <p>You read in data from an ODS file with the
-<code><a href="../reference/read_ods_cells.html">read_ods_cells()</a></code> function. The resulting tibble provides 26
+<code><a href="../reference/read_ods_cells.html">read_ods_cells()</a></code> function. The resulting tibble provides 28
 columns of information about cells, with each row representing an
 individual cell in the input spreadsheet.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -187,7 +189,7 @@ the spreadsheet.</p>
 </ul>
 <p>The <code>address</code> column is derived from the <code>row</code>
 and <code>col</code> using the <a href="https://github.com/rsheets/cellranger" class="external-link">cellranger</a> package. It
-displays the address in the “A1” notation commonly used in spreadsheet
+provides the address in the “A1” notation commonly used in spreadsheet
 applications where the letter corresponds to a column and the number
 corresponds to a row. The “A1” notation is used by ODS files for
 calculation formulas.</p>
@@ -227,34 +229,34 @@ the “raw” value as a <code><a href="https://rdrr.io/r/base/character.html" c
 <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code> vector</li>
 </ul>
 <p>Cells have one of four types, it is <code>empty</code> if it has no
-content or no value type, it is a <code>merge-lead</code> if it is the
-top-left cell of a merge group while other cells in the merge group are
-classified as <code>merge-hidden</code>, all other cells are simply a
-<code>cell</code>.</p>
+content and/or no value type, it is a <code>merge-lead</code> if it is
+the top-left cell of a merge group while other cells in the merge group
+are classified as <code>merge-hidden</code>, all other cells are simply
+a <code>cell</code>.</p>
 <p>The <code>value_type</code> is derived from the <a href="https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949" class="external-link">ODS
-specification</a> which defines seven value types</p>
+specification</a> which defines seven value types:</p>
 <ul>
 <li>
-<code>boolean</code>: equivalent to R’s <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical()</a></code> data
+<code>boolean</code>, equivalent to R’s <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical()</a></code> data
 type</li>
 <li>
-<code>currency</code>: a numeric value, optionally with a currency
+<code>currency</code>, a numeric value, optionally with a currency
 symbol</li>
 <li>
-<code>date</code>: a date or date-time stored in ISO format, the ODS
-specification does not differentiate between a date (e.g. 15/06/2022)
-and a date-time (e.g. 15/06/2023 13:47)</li>
+<code>date</code>, a date or date-time stored in ISO 8601 format,
+the ODS specification does not differentiate between a date
+(e.g. 15/06/2022) and a date-time (e.g. 15/06/2023 13:47)</li>
 <li>
-<code>float</code>: a numeric value, the ODS format does not
+<code>float</code>, a numeric value, the ODS format does not
 distinguish between different numeric types</li>
 <li>
-<code>percentage</code>: a numeric value, but formatted for display
+<code>percentage</code>, a numeric value, but formatted for display
 as a percentage</li>
 <li>
-<code>string</code>: equivalent to R’s <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code>
+<code>string</code>, equivalent to R’s <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code>
 </li>
 <li>
-<code>time</code>: a duration, stored in ISO format</li>
+<code>time</code>, a duration, stored in ISO 8601 format</li>
 </ul>
 <p>The <code>cell_content</code> column provides the value of a cell as
 displayed and formatted to users of a spreadsheet application.
@@ -357,8 +359,9 @@ cells in the column</li>
 <div class="section level4">
 <h4 id="formulas">Formulas<a class="anchor" aria-label="anchor" href="#formulas"></a>
 </h4>
-<p>For cells whose values are calculated by a formula this is provided
-in the <code>formula</code> column.</p>
+<p>The <code>has_formula</code> column indicates if a cell value is
+calculated by a formula, which is itself provided in the
+<code>formula</code> column.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">types_cells</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">col</span> <span class="op">==</span> <span class="fl">9</span> <span class="op">&amp;</span> <span class="va">has_formula</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
@@ -374,24 +377,24 @@ in the <code>formula</code> column.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> float      6579.3               <span style="text-decoration: underline;">6</span>579. TRUE        of:=[.G6]*[.H6]</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> float      6579.3               <span style="text-decoration: underline;">6</span>579. TRUE        of:=[.G7]*[.H7]</span></span></code></pre></div>
 <p>For more on the use of formulas in ODS files you can consult the <a href="https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part4-formula/OpenDocument-v1.3-os-part4-formula.html" class="external-link">OpenFormula
-specification</a></p>
+specification</a>.</p>
 </div>
 <div class="section level4">
 <h4 id="errors">Errors<a class="anchor" aria-label="anchor" href="#errors"></a>
 </h4>
-<p>Formulas in spreadsheets can result in errors. The
+<p>Formulas in spreadsheets can result in calculation errors. The
 <code>has_error</code> column indicates if there the cell results in an
 error. The <code>error_type</code> column is similar to the
-<code>=ERROR.TYPE()</code> function in Microsoft Excel and LibreOffice,
-these provide a number to denote the type of error.</p>
+<code>=ERROR.TYPE()</code> function in Microsoft Excel, Google Sheets
+and LibreOffice, these provide a number to denote the type of error.</p>
 <p><code>error_type</code> will have a value from 1 to 7 or 501 to
 540:</p>
 <ul>
 <li>
-<code>1</code> for #NULL! errors in Microsoft Excel or Err:511 in
-LibreOffice, typically this is some sort of error in the formula
-specification such as a missing operator (Excel) or a missing variable
-(LibreOffice)</li>
+<code>1</code> for #NULL! errors in Excel/Google Sheets or Err:511
+in LibreOffice, typically this is some sort of error in the formula
+specification such as a missing operator (Excel/Google Sheets) or a
+missing variable (LibreOffice)</li>
 <li>
 <code>2</code> for #DIV/0! (division by zero) errors</li>
 <li>
@@ -414,10 +417,9 @@ values</li>
 </ul>
 <p>LibreOffice assigns all errors an error code from 501 to 540, where
 not displayed as an error like <code>#DIV/0!</code> these are shown in
-<code>cell_content</code> as <code>"Err:5##"</code>. For these errors
-then <code>error_type</code> will contain the numeric value of these
-codes, see LibreOffice’s documentation on <a href="https://help.libreoffice.org/7.3/en-GB/text/scalc/05/02140000.html" class="external-link">error
-codes</a> for more details.</p>
+<code>cell_content</code> as <code>"Err:5##"</code>. See LibreOffice’s
+documentation on <a href="https://help.libreoffice.org/7.3/en-GB/text/scalc/05/02140000.html" class="external-link">error
+codes</a> for more details on these error codes.</p>
 </div>
 <div class="section level4">
 <h4 id="annotations">Annotations<a class="anchor" aria-label="anchor" href="#annotations"></a>
@@ -439,7 +441,14 @@ provides the text content of the annotation.</p>
 <p><strong>Note:</strong> different spreadsheet applications handle
 annotations in different ways, <code><a href="../reference/read_ods_cells.html">read_ods_cells()</a></code> does not
 take account of these differences and provides only a basic
-representation of the text contained in the annotation.</p>
+representation of the text contained in the annotation. LibreOffice only
+supports a basic “comment” annotation which is called a “note” in
+Microsoft Excel and Google Sheets.</p>
+<p>In addition to a “note” Microsoft Excel and Google Sheets proprietary
+formats allow for threaded comments that allow users to leave comments
+and reply to these comments, when saving into ODS these features are
+saved as annotations like notes. However the coercion of these threads
+into a note and inclusion of comment/reply author details varies.</p>
 </div>
 <div class="section level4">
 <h4 id="merged-cells">Merged cells<a class="anchor" aria-label="anchor" href="#merged-cells"></a>
@@ -588,13 +597,13 @@ B5
 <span></span>
 <span><span class="va">merge_cells</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">cell_type</span> <span class="op">==</span> <span class="st">"merge-lead"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">address</span>, <span class="va">merge_colspan</span>, <span class="va">merge_rowspan</span>, <span class="va">merge_shape</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 4</span></span></span>
-<span><span class="co">#&gt;   address merge_colspan merge_rowspan merge_shape</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A1                  2             1 horizontal </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> A2                  1             2 vertical   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> C4                  2             2 rectangular</span></span></code></pre></div>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">address</span>, <span class="va">cell_content</span>, <span class="va">merge_colspan</span>, <span class="va">merge_rowspan</span>, <span class="va">merge_shape</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
+<span><span class="co">#&gt;   address cell_content                   merge_colspan merge_rowspan merge_shape</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> A1      <span style="color: #949494;">"</span>A cell across two columns (a…             2             1 horizontal </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> A2      <span style="color: #949494;">"</span>A cell across two rows (a ve…             1             2 vertical   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> C4      <span style="color: #949494;">"</span>A cell across two columns an…             2             2 rectangular</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -617,8 +626,9 @@ to that cell</li>
 formatting for cells in the column, i.e. when a <code>cell_style</code>
 is not set</li>
 </ul>
-<p>However, note that extraction of the style and formatting information
-from the ODS XML is not currently supported by the package.</p>
+<p><strong>Note:</strong> While these style identifiers are extracted,
+at present the <a href="https://github.com/mattkerlogue/tidyods" class="external-link">tidyods</a> package does not currently support
+the extraction of the style and formatting rules from the ODS XML.</p>
 </div>
 </div>
 <div class="section level2">
