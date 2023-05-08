@@ -96,17 +96,23 @@ types_cells |>
 ## Performance
 
 An ODS file is a zipped collection of XML files and associated files. 
-`{tidyods}`, like the `{readODS}` package, uses the [`{xml2}`](https://xml2.r-lib.org) 
-package to process this file. There are three likely sources of performance 
-issues: downloading of remote files, unzipping the ODS file, processing rows.
+`{tidyods}`, like the `{readODS}` package, uses the
+[`{xml2}`](https://xml2.r-lib.org) package to process this file.
 
-Performance of `read_ods_cells()` and `read_ods_sheet()` is largely comparable
-to that provided by `{readODS}`. Performance can be improved by setting 
-`quick = TRUE`, which extracts only a "vital" subset of information about cells:
-the sheet, row and column position, the value type and a cell value. For "float"
-and "percentage" value types quick extracts the underlying numeric value but
-for all other value types it extracts the formatted cell content (e.g. for date
-2/5/23 rather than the ISO standard 2023-05-02).
+The main aim of `{tidyods}` is to extract a large set of information about
+cells, not just just their location and value, and while slower than
+`{readODS}` for small and medium sized files users are unlikely to see
+noticeable differences when using `read_ods_cells()`.
+
+If your primary interest is just in cell location and cell values then setting 
+the argument `quick = TRUE` can result in a faster extraction process as it 
+provides only six columns: `sheet`, `address`, `row`, `col`, `value_type` and 
+`base_value`. This `quick` extraction process varies in how the `base_value`
+column is constructed. When `quick = TRUE` only float and percentage values are
+taken in their raw numeric form, for all other types the `cell_content` is
+used. That means that for currency, date and time value types the value as
+formatted for spreadsheet application users is returned rather than the "raw"
+value stored in the underlying XML file.
 
 ```{r}
 #| message: false
@@ -118,6 +124,9 @@ types_cells_quick |>
   dplyr::group_by(col) |>
   dplyr::glimpse()
 ```
+
+Using the package's example file we can see how setting `quick = TRUE` results
+in performance that is nearly comaprable with that provided by `{readODS}`.
 
 ```r
 bench::mark(
@@ -133,20 +142,22 @@ bench::mark(
     readODS::read_ods(example_file, 2),
   check = FALSE, filter_gc = FALSE, iterations = 20
 ) |> 
-  dplyr::select(expression, min, median, mem_alloc, n_itr)
-
-#> # A tibble: 5 × 5
-#>   expression       min   median mem_alloc n_itr
-#>   <bch:expr>  <bch:tm> <bch:tm> <bch:byt> <int>
-#> 1 cells_quick   54.6ms   58.9ms    6.12MB    20
-#> 2 cells_slow    83.7ms   87.7ms    2.96MB    20
-#> 3 sheet_quick   60.5ms   62.2ms    1.32MB    20
-#> 4 sheet_slow    92.5ms   96.4ms    1.97MB    20
-#> 5 readODS         56ms   59.8ms    2.02MB    20
+  dplyr::transmute(expression, min, median, mean = total_time/n_itr, n_itr)
+  
+#> # A tibble: 5 × 7
+#>   expression       min   median     mean n_itr
+#>   <bch:expr>  <bch:tm> <bch:tm> <bch:tm> <int>
+#> 1 cells_quick   55.4ms   61.2ms   61.9ms    20
+#> 2 cells_slow    83.3ms   90.5ms   91.5ms    20
+#> 3 sheet_quick   62.8ms   69.7ms   72.4ms    20
+#> 4 sheet_slow    93.3ms  101.1ms  102.9ms    20
+#> 5 readODS       50.4ms   53.7ms   55.3ms    20
 ```
 
-To test real-world performance we will use an ODS file published by the UK 
-Government on the [number of civil servants by postcode](https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021), a sheet of 5,544 rows by 11 columns.
+To test real-world performance we can use an ODS file published by the UK
+Government on the
+[number of civil servants by postcode](https://www.gov.uk/government/statistics/number-of-civil-servants-by-postcode-department-responsibility-level-and-leaving-cause-2021),
+which contains a large sheet of 5,544 rows by 11 columns.
 
 ```r
 postcodes_file <- system.file("extdata", "civil-service-postcodes-2021.ods",
@@ -164,32 +175,31 @@ bench::mark(
   "readODS" =
     readODS::read_ods(postcodes_file, 2),
   check = FALSE, filter_gc = FALSE, iterations = 5
-) |> 
-  dplyr::select(expression, min, median, mem_alloc, n_itr)
+) |>
+  dplyr::transmute(expression, min, median, mean = total_time/n_itr, n_itr)
 
-#> # A tibble: 5 × 5
-#>   expression       min   median mem_alloc n_itr
-#>   <bch:expr>  <bch:tm> <bch:tm> <bch:byt> <int>
-#> 1 cells_quick    14.3s    14.5s  223.74MB     5
-#> 2 cells_slow     19.5s    19.9s  368.08MB     5
-#> 3 sheet_quick    14.5s    14.7s  232.48MB     5
-#> 4 sheet_slow     19.5s    19.8s  388.35MB     5
-#> 5 readODS        14.1s    14.6s    2.53GB     5
+#> # A tibble: 5 × 7
+#>   expression       min   median     mean n_itr
+#>   <bch:expr>  <bch:tm> <bch:tm> <bch:tm> <int>
+#> 1 cells_quick    16.3s    16.7s    16.7s     5
+#> 2 cells_slow     21.7s      22s    22.8s     5
+#> 3 sheet_quick    18.3s    19.9s    19.7s     5
+#> 4 sheet_slow     20.7s    23.3s      23s     5
+#> 5 readODS        13.7s    14.8s    14.6s     5
 ```
 
-For this large sheet setting `quick = TRUE` delivers a similar extraction time
-to `readODS::read_ods()`, while the slower default `quick = FALSE` approach is
-somewhat slower. However, despite extracting more information the `{tidyods}` 
-functions use less memory than `{readODS}` (version 1.8.0).
+For this large sheet setting `quick = TRUE` delivers only a couple of seconds
+slower extraction time compared to that provided by `readODS::read_ods()`.
 
 The dependency on `{xml2}` is likely to cause the function to fail/crash when
 working with exceptionally large files. This is a limitation inherited from
 the libxml2 C library that is used to power `{xml2}`, which is
-[documented](https://gitlab.gnome.org/GNOME/libxml2/-/wikis/Memory-management#general-memory-requirements) as requiring available memory equal to around 4 times 
-the size of the file being processed. As the XML in an ODS is contained in a
-zip file the system file size of an ODS file can easily hide the true
-requirements of processing the file. Files are now checked for size and
-operations cancelled if its estimated to exceed available memory.
+[documented](https://gitlab.gnome.org/GNOME/libxml2/-/wikis/Memory-management#general-memory-requirements) 
+as requiring available memory equal to around 4 times the size of the file
+being processed. As the XML in an ODS is contained in a zip file the system 
+file size of an ODS file can easily hide the true requirements of processing 
+the file. Files are now checked for size and operations cancelled if its
+estimated to exceed available memory.
 
 ## Related projects
 

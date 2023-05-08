@@ -5,6 +5,7 @@
 # take significant time, instead run separately and copy to the README.Rmd file.
 
 rstudioapi::restartSession()
+devtools::load_all()
 
 example_file <- system.file("extdata", "basic_example.ods", package = "tidyods")
 
@@ -21,9 +22,7 @@ bench::mark(
     readODS::read_ods(example_file, 2),
   check = FALSE, filter_gc = FALSE, iterations = 20
 ) |>
-  dplyr::select(expression, min, median, mem_alloc, n_itr)
-
-rstudioapi::restartSession()
+  dplyr::transmute(expression, min, median, mean = total_time/n_itr, n_itr)
 
 postcodes_file <- system.file("extdata", "civil-service-postcodes-2021.ods",
                               package = "tidyods")
@@ -41,4 +40,5 @@ bench::mark(
     readODS::read_ods(postcodes_file, 2),
   check = FALSE, filter_gc = FALSE, iterations = 5
 ) |>
-  dplyr::select(expression, min, median, mem_alloc, n_itr)
+  dplyr::transmute(expression, min, median, mean = total_time/n_itr, n_itr)
+
