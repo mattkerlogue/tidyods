@@ -53,13 +53,15 @@ extract_cells_full <- function(ods_xml, sheet_path, ns = NULL) {
       has_formula = !is.na(table_formula),
       error_type = dplyr::case_when(
         cell_content == "#NULL!" ~ 1L,
+        cell_content == "Err:511" ~ 1L,
         cell_content == "#DIV/0!" ~ 2L,
         cell_content == "#VALUE!" ~ 3L,
         cell_content == "#REF!" ~ 4L,
         cell_content == "#NAME?" ~ 5L,
         cell_content == "#NUM!" ~ 6L,
         cell_content == "#N/A" ~ 7L,
-        grepl("^Err:\\d{3}$", cell_content) ~ 7L,
+        grepl("^Err:\\d{3}$", cell_content) ~
+          suppressWarnings(as.numeric(gsub("Err:", "", cell_content))),
         TRUE ~ NA_integer_
       ),
       has_error = !is.na(error_type),
