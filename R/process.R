@@ -286,6 +286,11 @@ combine_cells_rows <- function(cell_tbl, row_tbl) {
     full_tbl <- full_tbl_0
   }
 
+  full_tbl$address = cellranger::R1C1_to_A1(
+    paste0("R", full_tbl$row, "C", full_tbl$col),
+    strict = FALSE
+  )
+
   return(full_tbl)
 
 }

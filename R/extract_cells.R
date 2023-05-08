@@ -14,7 +14,7 @@ extract_cells_quick <- function(ods_xml, sheet_path, ns = NULL) {
     dplyr::left_join(sheet_tbl, by = "sheet_path")
 
   out_tbl <- full_tbl |>
-    dplyr::select(sheet, row, col, value_type = office_value_type, base_value)
+    dplyr::select(sheet, address, row, col, value_type = office_value_type, base_value)
 
   return(out_tbl)
 

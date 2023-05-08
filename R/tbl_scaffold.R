@@ -33,6 +33,7 @@ tidyods_cell_scaffold <- function() {
 tidyods_out_scaffold <- function() {
   tibble::tibble(
     sheet = character(),
+    address = character(),
     row = numeric(),
     col = numeric(),
     cell_type = character(),
