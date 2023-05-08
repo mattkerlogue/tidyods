@@ -23,6 +23,12 @@ rectify functions provided in the package."><meta property="og:image" content="h
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/read_cells.html">Extracting cell information</a>
+  </div>
+</li>
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
@@ -131,15 +137,6 @@ smart rectifier.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"basic_example.ods"</span>, package <span class="op">=</span> <span class="st">"tidyods"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">read_ods_sheet</span><span class="op">(</span><span class="va">example</span>, <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting ODS XML</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting ODS XML <span style="color: #B2B2B2;">[10ms]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting cell and row info...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting cell and row info <span style="color: #B2B2B2;">[147ms]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Rectifying cells to sheet layout</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rectifying cells to sheet layout <span style="color: #B2B2B2;">[28ms]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   species   female bill_length_mm   body_mass_g     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           </span>
@@ -150,16 +147,7 @@ smart rectifier.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Gentoo    false  49.4737704918033 5484.83606557377</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> Gentoo    true   45.5637931034483 4679.74137931035</span>
 <span class="r-in"><span><span class="fu">read_ods_sheet</span><span class="op">(</span><span class="va">example</span>, <span class="fl">2</span>, <span class="st">"smart"</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting ODS XML</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting ODS XML <span style="color: #B2B2B2;">[10ms]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting cell and row info...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting cell and row info <span style="color: #B2B2B2;">[175ms]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Rectifying cells to sheet layout</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Rectifying cells to sheet layout <span style="color: #B2B2B2;">[173ms]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 11 × 10</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 15 × 10</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    String      Boolean Currency Date                Time     DateTime           </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;time&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> <span style="color: #949494;">"</span>Cell<span style="color: #949494;">"</span>      TRUE         1.2 2022-06-15 <span style="color: #949494;">00:00:00</span> 13<span style="color: #949494;">:</span>24<span style="color: #949494;">:</span>56 2022-06-15 <span style="color: #949494;">13:24:56</span></span>
@@ -172,7 +160,11 @@ smart rectifier.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  <span style="color: #BB0000;">NA</span>         FALSE        1.2 2022-06-15 <span style="color: #949494;">00:00:00</span> 13<span style="color: #949494;">:</span>24<span style="color: #949494;">:</span>56 2022-06-15 <span style="color: #949494;">13:24:56</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> <span style="color: #949494;">"</span>Merged ce… FALSE        1.2 2022-06-15 <span style="color: #949494;">00:00:00</span> 13<span style="color: #949494;">:</span>24<span style="color: #949494;">:</span>56 2022-06-15 <span style="color: #949494;">13:24:56</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> <span style="color: #949494;">"</span>Hidden te… TRUE         1.2 2022-06-15 <span style="color: #949494;">00:00:00</span> 13<span style="color: #949494;">:</span>24<span style="color: #949494;">:</span>56 2022-06-15 <span style="color: #949494;">13:24:56</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> <span style="color: #949494;">"</span>une cellu… <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>   <span style="color: #BB0000;">NA</span>                        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> <span style="color: #949494;">"</span>Cell with… FALSE        1.2 2022-06-15 <span style="color: #949494;">00:00:00</span> 13<span style="color: #949494;">:</span>24<span style="color: #949494;">:</span>56 2022-06-15 <span style="color: #949494;">13:24:56</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> <span style="color: #949494;">"</span>Repeated … TRUE         1.2 2022-06-15 <span style="color: #949494;">00:00:00</span> 13<span style="color: #949494;">:</span>24<span style="color: #949494;">:</span>56 2022-06-15 <span style="color: #949494;">13:24:56</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> <span style="color: #949494;">"</span>Repeated … TRUE         1.2 2022-06-15 <span style="color: #949494;">00:00:00</span> 13<span style="color: #949494;">:</span>24<span style="color: #949494;">:</span>56 2022-06-15 <span style="color: #949494;">13:24:56</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> <span style="color: #949494;">"</span>Repeated … TRUE         1.2 2022-06-15 <span style="color: #949494;">00:00:00</span> 13<span style="color: #949494;">:</span>24<span style="color: #949494;">:</span>56 2022-06-15 <span style="color: #949494;">13:24:56</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> <span style="color: #949494;">"</span>une cellu… <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span>   <span style="color: #BB0000;">NA</span>                        <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>                 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 4 more variables: Float &lt;dbl&gt;, Percentage &lt;dbl&gt;, Formula &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   Errors &lt;chr&gt;</span></span>
 </code></pre></div>

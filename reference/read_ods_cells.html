@@ -25,6 +25,12 @@ the cell's position, value types and containing formulas."><meta property="og:im
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/read_cells.html">Extracting cell information</a>
+  </div>
+</li>
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
 </li>
@@ -108,123 +114,45 @@ namely: <code>sheet</code>, <code>row</code>, <code>col</code>, <code>value_type
 <code>base_value</code> when using the <code>quick</code> argument will combine the raw value
 stored for float and percentage value types with the <code>cell_content</code> (i.e
 formatted character string) for all other value types.</p>
-<p>#' @details # Cell information
-The resulting data.frame has 25 columns:</p><ul><li><p><code>sheet</code>: the sheet the cell is from</p></li>
-<li><p><code>row</code>: the row number of the cell</p></li>
-<li><p><code>col</code>: the column number of the cell</p></li>
-<li><p><code>cell_type</code>: the type of cell, either <code>cell</code>, <code>empty</code>, <code>merge-hidden</code> or
-<code>merge-lead</code></p></li>
-<li><p><code>is_empty</code>: a logical vector indicating if the cell is empty</p></li>
-<li><p><code>value_type</code>: the value type, either <code>boolean</code>, <code>currency</code>, <code>date</code>,
-<code>float</code>, <code>percentage</code>, <code>string</code> or <code>time</code></p></li>
-<li><p><code>cell_content</code>: the content as presented to users of a spreadsheet application</p></li>
-<li><p><code>base_value</code>: the "base" value of the cell</p></li>
-<li><p><code>numeric_value</code>: base values for numeric value types as a numeric vector</p></li>
-<li><p><code>currency_symbol</code>: the currency symbol associated with currency value types</p></li>
-<li><p><code>boolean_value</code>: base values for boolean value types as a logical vector</p></li>
-<li><p><code>date_value</code>: base values for date value types (incl date-time) as a character vector</p></li>
-<li><p><code>time_value</code>: base value for time value types as a character vector</p></li>
-<li><p><code>has_formula</code>: a logical vector indicating if the cell content are calculated by a formula</p></li>
-<li><p><code>formula</code>: the formula used to calculate the cell content</p></li>
-<li><p><code>has_error</code>: a logical vector indicating if the cell formula results in an error</p></li>
-<li><p><code>error_type</code>: a numeric vector indicating the type of error</p></li>
-<li><p><code>has_annotation</code>: a logival vector indicating if the cell has a comment or annotation</p></li>
-<li><p><code>annotation</code>: the text of any comment or annotation</p></li>
-<li><p><code>is_merged</code>: a logical indicating if the cell is part of a merge group</p></li>
-<li><p><code>merge_colspan</code>: for merge leader cells, the number of columns spanned</p></li>
-<li><p><code>merge_rowspan</code>: for merge leader cells, the number of rows spanned</p></li>
-<li><p><code>merge_shape</code>: for merge leader cells, the shape of the merge group, either <code>vetical</code>,
-<code>horizontal</code>, or <code>rectangle</code></p></li>
-<li><p><code>cell_style</code>: the style code of the cell</p></li>
-<li><p><code>row_style</code>: the style code of the row</p></li>
-</ul><div class="section">
-<h3 id="cell-types-and-merge-groups">Cell types and merge groups<a class="anchor" aria-label="anchor" href="#cell-types-and-merge-groups"></a></h3>
-
-
-<p>Cells are assigned one of four <code>cell_type</code> values:</p><ul><li><p>a cell is <code>empty</code> if it has no content or no value type,</p></li>
-<li><p>a cell is a <code>merge-lead</code> if it is the top-left cell of a merge group,
-other cells in the merge group are assigned <code>merge-hidden</code></p></li>
-<li><p>everything else is simply a <code>cell</code></p></li>
-</ul><p>Cells in a merge group will also have <code>is_merged</code> set to <code>TRUE</code>. The top-left
-cell in a merge group has information about the number of columns
-(<code>merge_colspan</code>) and rows (<code>merge_rowspan</code>) in the merge group as well as
-an indication of shape (<code>vertical</code>, <code>horizontal</code> or <code>rectangle</code>). Merge
-groups are not uniquely identified.</p>
-<p>The ODS specification allows for cells hidden by a merge to have content,
-annecdotally this appears to be supported by ODS files created by
-LibreOffice but not by ODS files created by Microsoft Excel.</p>
-</div>
-
-<div class="section">
-<h3 id="value-types">Value types<a class="anchor" aria-label="anchor" href="#value-types"></a></h3>
-
-
-<p>The <code>value_type</code> of a cell is based on the
-<a href="https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html#__RefHeading__1417680_253892949" class="external-link">"value-type" attribute</a>
-defined by the OpenDocument Format specification. There are 7 value types:</p><ul><li><p><code>boolean</code>: equivalent to R's <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">base::logical()</a></code> data type</p></li>
-<li><p><code>currency</code>: a numeric value, optionally with a currency symbol</p></li>
-<li><p><code>date</code>: a date or date-time stored in ISO format</p></li>
-<li><p><code>float</code>: a numeric value, the ODS format does not distinguish between
-different numeric types</p></li>
-<li><p><code>percentage</code>: a numeric value, formatted for display as a percentage</p></li>
-<li><p><code>string</code>: equivalent to R's <code><a href="https://rdrr.io/r/base/character.html" class="external-link">base::character()</a></code></p></li>
-<li><p><code>time</code>: a duration, stored in ISO format</p></li>
-</ul><p>For currency value types optionally a currency symbol (e.g. GBP, EUR, USD)
-can be set, this is provided separately from the <code>base_value</code> as
-<code>currency_symbol</code>, the formatting of currency symbols is handled by style
-information, the value as visible to a spreadsheet user is provided in the
-<code>cell_content</code> column.</p>
-</div>
-
-<div class="section">
-<h3 id="error-types">Error types<a class="anchor" aria-label="anchor" href="#error-types"></a></h3>
-
-
-<p>The values of <code>error_type</code> are equivalent to those produced by
-<a href="https://support.microsoft.com/en-us/office/error-type-function-10958677-7c8d-44f7-ae77-b9a9ee6eefaa" class="external-link">Microsoft Excel</a>
-and <a href="https://help.libreoffice.org/7.3/en-GB/text/scalc/01/func_error_type.html?&amp;DbPAR=SHARED&amp;System=MAC" class="external-link">LibreOffice</a>.</p>
-</div>
-
+<p>More details on the types of information extracted by <code>read_ods_cells</code>
+can be found the vignette, <code><a href="../articles/read_cells.html">vignette("read_cells", package = "tidyods")</a></code>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"basic_example.ods"</span>, package <span class="op">=</span> <span class="st">"tidyods"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">example_cells</span> <span class="op">&lt;-</span> <span class="fu">read_ods_cells</span><span class="op">(</span><span class="va">example</span>, <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting ODS XML</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting ODS XML <span style="color: #B2B2B2;">[26ms]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Extracting cell and row info...</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Extracting cell and row info <span style="color: #B2B2B2;">[167ms]</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">example_cells</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rows: 28</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Columns: 25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ sheet           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "penguins", "penguins", "penguins", "penguins", "pengu…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ row             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ col             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ cell_type       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "cell", "cell", "cell", "cell", "cell", "cell", "cell"…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ is_empty        <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ value_type      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "string", "string", "string", "string", "string", "boo…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ cell_content    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "species", "female", "bill_length_mm", "body_mass_g", …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ base_value      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "species", "female", "bill_length_mm", "body_mass_g", …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ numeric_value   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, 40.39041, 4043.49315, NA, NA, …</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ currency_symbol <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ boolean_value   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> NA, NA, NA, NA, NA, FALSE, NA, NA, NA, TRUE, NA, NA, N…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ date_value      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ time_value      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ has_formula     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ formula         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ has_error       <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ error_type      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ has_annotation  <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ annotation      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ is_merged       <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ merge_colspan   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ merge_rowspan   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ merge_shape     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ cell_style      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, "Default", "Default", "Default", NA, NA, NA, NA, N…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ row_style       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ro1", "ro1", "ro1", "ro1", "ro1", "ro1", "ro1", "ro1"…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Columns: 28</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ sheet                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "penguins", "penguins", "penguins", "penguins",…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ address                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "A1", "B1", "C1", "D1", "A2", "B2", "C2", "D2",…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ row                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ col                    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ cell_type              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "cell", "cell", "cell", "cell", "cell", "cell",…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ is_empty               <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ value_type             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "string", "string", "string", "string", "string…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ cell_content           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "species", "female", "bill_length_mm", "body_ma…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ base_value             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "species", "female", "bill_length_mm", "body_ma…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ numeric_value          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, 40.39041, 4043.49315, N…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ currency_symbol        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ boolean_value          <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> NA, NA, NA, NA, NA, FALSE, NA, NA, NA, TRUE, NA…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ date_value             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ time_value             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ has_formula            <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ formula                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ has_error              <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ error_type             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ has_annotation         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ annotation             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ is_merged              <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ merge_colspan          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ merge_rowspan          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ merge_shape            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ cell_style             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> NA, "Default", "Default", "Default", NA, NA, NA…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ row_style              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ro1", "ro1", "ro1", "ro1", "ro1", "ro1", "ro1"…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ col_style              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "co1", "co2", "co3", "co4", "co1", "co2", "co3"…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $ col_default_cell_style <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Default", "ce56", "ce57", "ce58", "Default", "…</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
